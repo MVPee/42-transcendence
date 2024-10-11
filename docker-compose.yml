@@ -15,7 +15,7 @@ services:
     restart: always
 
   nginx:
-    build: ./frontend/nginx
+    build: ./nginx
     container_name: nginx
     ports:
       - "80:80"
