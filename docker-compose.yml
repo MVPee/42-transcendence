@@ -12,6 +12,7 @@ services:
       - app
     volumes:
       - ./backend/app:/app
+      - ./frontend:/frontend
     restart: always
 
   nginx:
