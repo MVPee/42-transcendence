@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  django:
+    build: ./backend/app
+    container_name: django
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    networks:
+      - app
+    volumes:
+      - ./backend/app:/app
+    restart: always
+
+networks:
+  app:
+    driver: bridge
