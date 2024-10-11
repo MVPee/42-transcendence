@@ -7,11 +7,22 @@ services:
     env_file:
       - .env
     ports:
-      - "8000:8000"
+      - "8000"
     networks:
       - app
     volumes:
       - ./backend/app:/app
+    restart: always
+
+  nginx:
+    build: ./frontend/nginx
+    container_name: nginx
+    ports:
+      - "443:443"
+    depends_on:
+      - django
+    networks:
+      - app
     restart: always
 
 networks:
