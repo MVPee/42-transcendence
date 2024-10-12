@@ -13,6 +13,8 @@ services:
     volumes:
       - ./backend/app:/app
       - ./frontend:/frontend
+    depends_on:
+      - postgres
     restart: always
 
   nginx:
@@ -23,6 +25,21 @@ services:
       - "443:443"
     depends_on:
       - django
+    networks:
+      - app
+    restart: always
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_DB: pong
+      POSTGRES_USER: mvpee
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backend/database/data:/var/lib/postgresql/data
     networks:
       - app
     restart: always

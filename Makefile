@@ -1,6 +1,7 @@
 all:	up
 
 up:
+		sudo mkdir -p backend/database/data
 		docker-compose up --build -d
 
 down:
@@ -14,6 +15,7 @@ clean:	down
 
 fclean:	clean
 		docker system prune --all --force
+		sudo rm -rf backend/database/data
 
 re:			fclean all
 
