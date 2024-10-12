@@ -17,6 +17,6 @@ fclean:	clean
 		docker system prune --all --force
 		sudo rm -rf backend/database/data
 
-re:			fclean all
+re:	clean up
 
-.PHONY:		all volume up down clean fclean re
+.PHONY:		all up down clean fclean re
