@@ -1,11 +1,11 @@
 from django.utils import timezone
 from django.db import models
-from srcs.user.models import User
+from django.conf import settings
 
 
 class Message(models.Model):
-    sender_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='message_sender')
-    friend_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='message_reciever')
+    sender_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='message_sender')
+    friend_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='message_reciever')
     context = models.CharField(max_length=100, null=False)
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -13,8 +13,8 @@ class Message(models.Model):
         return f"{self.sender_id.username} sent to {self.friend_id.username}: {self.context}"
 
 class Friend(models.Model):
-    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friendships_initiated')
-    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friendships_received')
+    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='friendships_initiated')
+    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='friendships_received')
     status = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -28,8 +28,8 @@ class Friend(models.Model):
 
 
 class Blocked(models.Model):
-    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blocks_initiated')
-    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blocks_received')
+    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='blocks_initiated')
+    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='blocks_received')
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:

@@ -1,12 +1,12 @@
 from django.utils import timezone
 from django.db import models
-from srcs.user.models import User
 from srcs.game.models import Match
+from django.conf import settings
 
 # Create your models here.
 class Tournaments(models.Model):
     name = models.CharField(max_length=25)
-    winner = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
