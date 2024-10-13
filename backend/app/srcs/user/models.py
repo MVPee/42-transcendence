@@ -3,8 +3,8 @@ from django.db import models
 
 # Create your models here.
 class User(models.Model):
-    username = models.CharField(max_length=50)
-    mail = models.EmailField()
+    username = models.CharField(max_length=50, unique=True)
+    email = models.EmailField(unique=True)
     password = models.CharField(max_length=256, null=True)
     elo = models.IntegerField(default=0)
     win = models.IntegerField(default=0)
@@ -12,4 +12,4 @@ class User(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.username} . . . . {self.mail} . . . . {self.created_at}"
+        return f"{self.username} . . . . {self.email} . . . . {self.created_at}"
