@@ -22,7 +22,7 @@ urlpatterns = [
     path('', include('srcs.home.urls')),
     path('game/', include('srcs.game.urls')),
     path('login/', include('srcs.user.urls')),
-    path('scoreboard/', include('srcs.scoreboard.urls')),
     path('chat/', include('srcs.chat.urls')),
     path('user/', include('srcs.user.urls')),
+    path('tournaments/', include('srcs.tournaments.urls')),
 ]
