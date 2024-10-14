@@ -6,3 +6,7 @@ body {
 .navbar {
     background-color: #343a40;
 }
+
+.align-middle {
+    vertical-align: middle;
+}
