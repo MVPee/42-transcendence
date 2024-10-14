@@ -12,6 +12,7 @@ let ballX = canvas.width / 2;
 let ballY = canvas.height / 2;
 let ballSpeedX = 3;
 let ballSpeedY = 3;
+let ballRadius = 10;
 
 let score1 = 0;
 let score2 = 0;
@@ -22,7 +23,7 @@ let lastAIMoveTime = 0;
 const aiCalculInterval = 1000;
 let futureBallY = ballY;
 
-const iaPaddleSpeed = 1;
+const iaPaddleSpeed = 5;
 const paddleSpeed = 5;
 
 const speedIncreaseInterval = 1000;
@@ -113,24 +114,33 @@ function update() {
     if (ballY <= 0 || ballY >= canvas.height - ballSize)
         ballSpeedY = -ballSpeedY;
 
-    if (ballX <= goalPadding + paddleWidth && 
-        ballY + ballSize >= player1PaddleY && 
-        ballY <= player1PaddleY + paddleHeight) {
-        ballSpeedX = -ballSpeedX;
-        ballX = goalPadding + paddleWidth;
-    }
-    else if (ballX >= canvas.width - paddleWidth - goalPadding - ballSize && 
-        ballY + ballSize >= aiPaddleY && 
-        ballY <= aiPaddleY + paddleHeight) {
-        ballSpeedX = -ballSpeedX;
-        ballX = canvas.width - paddleWidth - goalPadding - ballSize;
+    if (ballSpeedX < 0 && ballX <= goalPadding + paddleWidth) {
+        if (ballY + ballSize >= player1PaddleY && ballY <= player1PaddleY + paddleHeight) {
+            ballSpeedX = -ballSpeedX;
+
+            let deltaY = ballY - (player1PaddleY + paddleHeight / 2);
+            ballSpeedY = deltaY * 0.1; 
+
+            ballX = goalPadding + paddleWidth;
+        }
     }
 
-    if (ballX < 5) {
+    else if (ballSpeedX > 0 && ballX >= canvas.width - paddleWidth - goalPadding - ballSize) {
+        if (ballY + ballSize >= aiPaddleY && ballY <= aiPaddleY + paddleHeight) {
+            ballSpeedX = -ballSpeedX;
+
+            let deltaY = ballY - (aiPaddleY + paddleHeight / 2);
+            ballSpeedY = deltaY * 0.1;
+
+            ballX = canvas.width - paddleWidth - goalPadding - ballSize;
+        }
+    }
+
+    if (ballX - ballRadius <= -ballRadius) {
         score1++;
         resetBall();
     } 
-    else if (ballX > canvas.width - 5) {
+    else if (ballX + ballRadius >= canvas.width) {
         score2++;
         resetBall();
     }

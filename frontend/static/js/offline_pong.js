@@ -6,7 +6,7 @@ const ctx = canvas.getContext('2d');
 const paddleWidth = 10;
 const paddleHeight = 100;
 const ballSize = 10;
-const goalPadding = 40;
+const goalPadding = 50;
 
 let player1PaddleY = (canvas.height - paddleHeight) / 2;
 let player2PaddleY = (canvas.height - paddleHeight) / 2;
@@ -14,6 +14,7 @@ let ballX = canvas.width / 2;
 let ballY = canvas.height / 2;
 let ballSpeedX = 3;
 let ballSpeedY = 3;
+let ballRadius = 10;
 
 let score1 = 0;
 let score2 = 0;
@@ -70,24 +71,33 @@ function update() {
     if (ballY <= 0 || ballY >= canvas.height - ballSize)
         ballSpeedY = -ballSpeedY;
 
-    if (ballX <= goalPadding + paddleWidth && 
-        ballY + ballSize >= player1PaddleY && 
-        ballY <= player1PaddleY + paddleHeight) {
-        ballSpeedX = -ballSpeedX;
-        ballX = goalPadding + paddleWidth;
+    if (ballSpeedX < 0 && ballX <= goalPadding + paddleWidth) {
+        if (ballY + ballSize >= player1PaddleY && ballY <= player1PaddleY + paddleHeight) {
+            ballSpeedX = -ballSpeedX;
+
+            let deltaY = ballY - (player1PaddleY + paddleHeight / 2);
+            ballSpeedY = deltaY * 0.1; 
+
+            ballX = goalPadding + paddleWidth;
+        }
     }
-    else if (ballX >= canvas.width - paddleWidth - goalPadding - ballSize && 
-        ballY + ballSize >= player2PaddleY && 
-        ballY <= player2PaddleY + paddleHeight) {
-        ballSpeedX = -ballSpeedX;
-        ballX = canvas.width - paddleWidth - goalPadding - ballSize;
+
+    else if (ballSpeedX > 0 && ballX >= canvas.width - paddleWidth - goalPadding - ballSize) {
+        if (ballY + ballSize >= player2PaddleY && ballY <= player2PaddleY + paddleHeight) {
+            ballSpeedX = -ballSpeedX;
+
+            let deltaY = ballY - (player2PaddleY + paddleHeight / 2);
+            ballSpeedY = deltaY * 0.1;
+
+            ballX = canvas.width - paddleWidth - goalPadding - ballSize;
+        }
     }
     
-    if (ballX < 5) {
+    if (ballX - ballRadius <= -ballRadius) {
         score1++;
         resetBall();
     } 
-    else if (ballX > canvas.width - 5) {
+    else if (ballX + ballRadius >= canvas.width) {
         score2++;
         resetBall();
     }
