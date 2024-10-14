@@ -16,6 +16,11 @@ clean:	down
 fclean:	clean
 		docker system prune --all --force
 		sudo rm -rf backend/database/data
+		sudo rm -f backend/app/srcs/chat/migrations/000*.py
+		sudo rm -f backend/app/srcs/game/migrations/000*.py
+		sudo rm -f backend/app/srcs/home/migrations/000*.py
+		sudo rm -f backend/app/srcs/tournaments/migrations/000*.py
+		sudo rm -f backend/app/srcs/user/migrations/000*.py
 
 re:	clean up
 
