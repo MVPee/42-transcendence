@@ -5,8 +5,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import CustomUser
 
-
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('profile')
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -27,6 +28,8 @@ def logout_view(request):
 
 
 def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('profile')
     if request.method == "POST":
         username = request.POST.get('username')
         email = request.POST.get('email')

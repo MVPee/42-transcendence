@@ -13,8 +13,9 @@
     <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="{% static 'style.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   </head>
-  <body>
+  <body class="d-flex flex-column min-vh-100">
 
     <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
       <a class="navbar-brand" href="/">
@@ -65,10 +66,42 @@
         </ul>
       </div>
     </nav>
-  
+
+    <div class="wrapper flex-fill">
     {% block content %} 
     
     {% endblock %}
+    </div>
+
+    <footer class="bg-dark text-white mt-5 pt-4 pb-2">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <h5>About Us</h5>
+            <p>
+              We are a team of five developers working on our final project for the common curriculum at 42, called <b>Trascendence</b>.<br>
+              Our goal is to create an engaging platform that enhances user interaction.
+            </p>
+          </div>
+          <div class="col-md-4">
+          </div>
+          <div class="col-md-4">
+            <h5>Follow Us</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://github.com/mvpee" class="text-white" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"> MVPee</i></a></li>
+              <li><a href="https://github.com/dspilleb" class="text-white" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"> dspilleb</i></a></li>
+              <li><a href="https://github.com/llapage" class="text-white" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"> llapage</i></a></li>
+              <li><a href="#" class="text-white" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"> declerbo</i></a></li>
+              <li><a href="#" class="text-white" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"> ...</i></a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="text-center mt-3">
+            <p>&copy; {{ current_year }} Pong. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" ></script>
   </body>
