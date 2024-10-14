@@ -20,15 +20,15 @@
             {% for user in users %}
             <tr>
                 {% if forloop.counter == 1 %}
-                    <td class="text-center align-middle"><img src="{% static 'gold_crown.png' %}" alt="Gold Crown" style="width: 50px; height: 50px;">{{ user.username }}</td>
+                    <td class="align-middle"><img src="{% static 'gold_crown.png' %}" alt="Gold Crown" style="width: 50px; height: 50px;">{{ user.username }}</td>
                 {% elif forloop.counter == 2 %}
-                    <td class="text-center align-middle"><img src="{% static 'argent_crown.png' %}" alt="Argent Crown" style="width: 50px; height: 50px;">{{ user.username }}</td>
+                    <td class="align-middle"><img src="{% static 'argent_crown.png' %}" alt="Argent Crown" style="width: 50px; height: 50px;">{{ user.username }}</td>
                 {% elif forloop.counter == 3 %}
-                    <td class="text-center align-middle"><img src="{% static 'bronze_crown.png' %}" alt="Bronze Crown" style="width: 50px; height: 50px;">{{ user.username }}</td>
+                    <td class="align-middle"><img src="{% static 'bronze_crown.png' %}" alt="Bronze Crown" style="width: 50px; height: 50px;">{{ user.username }}</td>
                 {% else %}
-                    <td class="text-center align-middle">{{ user.username }}</td>
+                    <td class="align-middle">{{ user.username }}</td>
                 {% endif %}
-                <td class="text-center align-middle">{{ user.elo }}<img src="{% static 'elo.png' %}" alt="Elo" style="width: 35px; height: 35px;"></td>
+                <td class="align-middle">{{ user.elo }}<img src="{% static 'elo.png' %}" alt="Elo" style="width: 35px; height: 35px;"></td>
             </tr>
             {% empty %}
             <tr>
