@@ -6,3 +6,7 @@ body {
 .navbar {
     background-color: #343a40;
 }
+
+td {
+    color: white;
+}

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from .models import CustomUser
 
 
@@ -49,10 +50,6 @@ def register_view(request):
             return redirect('login')
     return render(request, 'user/register.html')
 
-
+@login_required
 def profile_view(request):
-    if not request.user.is_authenticated:
-        messages.error(request, "You need to log in to access the profile page.")
-        return redirect('login')
-    
     return render(request, 'user/profile.html', {'user': request.user})
