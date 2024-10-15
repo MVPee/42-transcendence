@@ -18,4 +18,4 @@ RUN apt-get update && \
 
 ENTRYPOINT ["/app/tools/entrypoint.sh"]
 
-CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
+CMD [ "uvicorn", "app.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--reload" ]

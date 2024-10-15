@@ -5,5 +5,42 @@
 {% endblock %}
 
 {% block content %}
-LiveChat
+<h1>Global Chat Room</h1>
+<div id="chat-log"></div>
+<input id="chat-message-input" type="text" size="100" autocomplete="off"/>
+<button id="chat-message-submit">Send</button>
+
+<script>
+    var username = "{{ request.user.username|escapejs }}";
+    var chatSocket = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/chat/');
+    
+    chatSocket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+        var sender = data['username'];
+        document.querySelector('#chat-log').innerHTML += ('<b>' + sender + ':</b> ' + message + '<br/>');
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#chat-message-input').focus();
+    document.querySelector('#chat-message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // Enter key
+            document.querySelector('#chat-message-submit').click();
+        }
+    };
+
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        var messageInputDom = document.querySelector('#chat-message-input');
+        var message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+        messageInputDom.value = '';
+    };
+</script>
 {% endblock %}
