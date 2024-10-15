@@ -1,6 +1,16 @@
 version: '3.8'
 
 services:
+
+  redis:
+    image: redis:6
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app
+    restart: always
+
   django:
     build: ./backend/app
     container_name: django
@@ -15,6 +25,7 @@ services:
       - ./frontend:/frontend
     depends_on:
       - postgres
+      - redis
     restart: always
 
   nginx:
