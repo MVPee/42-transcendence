@@ -18,4 +18,4 @@ RUN apt-get update && \
 
 ENTRYPOINT ["/app/tools/entrypoint.sh"]
 
-CMD [ "uvicorn", "app.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+CMD [ "uvicorn", "app.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "/app", "--reload-include", "*.html", "--reload-include", "*.css", "--reload-include", "*.js" ]

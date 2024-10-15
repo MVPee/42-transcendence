@@ -1,13 +1,17 @@
 # Just Django
 Django==4.2
 
-# Dependences for PostgreSQL
+# Dependencies for PostgreSQL
 psycopg2==2.8.6
 
-# WebSocket + dependences
+# WebSocket + dependencies
 channels==4.1.0
 channels_redis==4.0.0
 uvicorn[standard]==0.23.1
 
-# static for uvicorn
+# Static files for uvicorn
 whitenoise==6.5.0
+watchfiles==0.18.1
+
+# Redis for asynchronous operations
+redis==4.6.0
