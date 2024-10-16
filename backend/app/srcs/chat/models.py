@@ -2,15 +2,29 @@ from django.utils import timezone
 from django.db import models
 from django.conf import settings
 
+# chat/models.py
+
+from django.utils import timezone
+from django.db import models
+from django.conf import settings
 
 class Message(models.Model):
-    sender_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='message_sender')
-    friend_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='message_reciever')
-    context = models.CharField(max_length=100, null=False)
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='messages_sent'
+    )
+    receiver = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='messages_received'
+    )
+    content = models.TextField(null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.sender_id.username} sent to {self.friend_id.username}: {self.context}"
+        return f"{self.sender.username} to {self.receiver.username} at {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
 
 class Friend(models.Model):
     user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='friendships_initiated')

@@ -9,6 +9,7 @@
     <h2 class="text-center mb-5 text-white">Ponssenger</h2>
 
     <!-- Display Messages -->
+
     {% if messages %}
         {% for message in messages %}
             <div class="alert {% if message.tags == 'error' %}
@@ -27,7 +28,8 @@
         {% endfor %}
     {% endif %}
 
-    <!-- Pending Friend Requests You've Received -->
+    <!-- Pending Friend Requests -->
+
     {% if pending_received_requests %}
         <div class="card bg-dark text-white mb-4">
             <div class="card-header">
@@ -57,24 +59,6 @@
         </div>
     {% endif %}
 
-    <!-- Pending Friend Requests You've Sent -->
-    {% if pending_sent_requests %}
-        <div class="card bg-dark text-white mb-4">
-            <div class="card-header">
-                <h2 class="h5 mb-0">Pending Friend Requests You've Sent</h2>
-            </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                    {% for request in pending_sent_requests %}
-                        <li class="list-group-item bg-dark text-white">
-                            {{ request.user2.username }} (Awaiting response)
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    {% endif %}
-
     <!-- Your Friends -->
      
     {% if accepted_friendships %}
@@ -90,6 +74,7 @@
                             <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
                                 {{ friend.username }}
                                 <!-- Unfriend Form -->
+                                <a href="{% url 'chat:private_chat' friend.id %}" class="btn btn-primary btn-sm">Chat</a>
                                 <form method="post" action="{% url 'chat:unfriend' friendship.id %}" style="display: inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-danger btn-sm">Unfriend</button>
@@ -116,6 +101,7 @@
     
 
     <!-- Friend Request Form -->
+
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card bg-dark text-white">
@@ -136,7 +122,7 @@
                               required
                             >
                         </div>
-                        <button type="submit" class="btn btn-danger btn-block">
+                        <button type="submit" class="btn btn-success btn-block">
                             Send Friend Request
                         </button>
                     </form>
@@ -144,5 +130,59 @@
             </div>
         </div>
     </div>
+
+    <!-- Block a User -->
+     
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark text-white">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Block a User</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'chat:block' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input
+                            type="text"
+                            name="username"
+                            id="username"
+                            class="form-control bg-secondary text-white"
+                            placeholder="Enter username to block"
+                            required
+                            >
+                        </div>
+                        <button type="submit" class="btn btn-danger btn-block">
+                            Block This User
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if blocked_users %}
+        <div class="card bg-dark text-white mb-4">
+            <div class="card-header">
+                <h2 class="h5 mb-0">Blocked Users</h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for blocked in blocked_users %}
+                        <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                            {{ blocked.user2.username }}
+                            <!-- Unblock Form -->
+                            <form method="post" action="{% url 'chat:unblock' blocked.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-sm">Unblock</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+    
 </div>
 {% endblock %}
