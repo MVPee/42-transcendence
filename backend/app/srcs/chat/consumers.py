@@ -37,6 +37,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message_content = text_data_json['message']
+
+        # Check if the message is empty or contains only whitespace
+        if not message_content.strip():
+            return
+
         user = self.scope['user']
         username = user.username if user.is_authenticated else 'Anonymous'
 
