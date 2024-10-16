@@ -1,9 +1,148 @@
 {% extends "../base.html" %}
 
 {% block title %}
-- LiveChat
+    LiveChat
 {% endblock %}
 
 {% block content %}
-Index chat
+<div class="container mt-5">
+    <h2 class="text-center mb-5 text-white">Ponssenger</h2>
+
+    <!-- Display Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}
+                alert-danger
+            {% elif message.tags == 'success' %}
+                alert-success
+            {% elif message.tags == 'warning' %}
+                alert-warning
+            {% elif message.tags == 'info' %}
+                alert-info
+            {% else %}
+                alert-secondary
+            {% endif %} text-center" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Pending Friend Requests You've Received -->
+    {% if pending_received_requests %}
+        <div class="card bg-dark text-white mb-4">
+            <div class="card-header">
+                <h2 class="h5 mb-0">Pending Friend Requests</h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for request in pending_received_requests %}
+                        <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                            {{ request.user1.username }}
+                            <div>
+                                <form method="post" action="{% url 'chat:respond_friend_request' request.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="accept">
+                                    <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                                </form>
+                                <form method="post" action="{% url 'chat:respond_friend_request' request.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="decline">
+                                    <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Pending Friend Requests You've Sent -->
+    {% if pending_sent_requests %}
+        <div class="card bg-dark text-white mb-4">
+            <div class="card-header">
+                <h2 class="h5 mb-0">Pending Friend Requests You've Sent</h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for request in pending_sent_requests %}
+                        <li class="list-group-item bg-dark text-white">
+                            {{ request.user2.username }} (Awaiting response)
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Your Friends -->
+     
+    {% if accepted_friendships %}
+    <div class="card bg-dark text-white mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Your Friends</h2>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for friendship in accepted_friendships %}
+                    {% if friendship.user1 == user %}
+                        {% with friend=friendship.user2 %}
+                            <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                                {{ friend.username }}
+                                <!-- Unfriend Form -->
+                                <form method="post" action="{% url 'chat:unfriend' friendship.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Unfriend</button>
+                                </form>
+                            </li>
+                        {% endwith %}
+                    {% else %}
+                        {% with friend=friendship.user1 %}
+                            <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                                {{ friend.username }}
+                                <!-- Unfriend Form -->
+                                <form method="post" action="{% url 'chat:unfriend' friendship.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Unfriend</button>
+                                </form>
+                            </li>
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    
+
+    <!-- Friend Request Form -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark text-white">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Send a Friend Request</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'chat:send_friend_request' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input
+                              type="text"
+                              name="username"
+                              id="username"
+                              class="form-control bg-secondary text-white"
+                              placeholder="Enter username to add"
+                              required
+                            >
+                        </div>
+                        <button type="submit" class="btn btn-danger btn-block">
+                            Send Friend Request
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
