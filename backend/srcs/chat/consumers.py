@@ -2,11 +2,10 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from django.contrib.auth import get_user_model
 import redis.asyncio as redis
-from .models import Friend, Blocked, Message
+from .models import *
 from channels.db import database_sync_to_async
-from django.utils import timezone
-from django.db.models import Q
 from srcs.user.models import CustomUser as User
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -78,15 +77,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message': message,
             'username': username
         }))
-    
-# chat/consumers.py
 
-from channels.generic.websocket import AsyncWebsocketConsumer
-import json
-from django.contrib.auth import get_user_model
-from .models import Message, Friend
-
-User = get_user_model()
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):

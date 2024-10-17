@@ -1,47 +1,70 @@
 {% extends "../base.html" %}
 
+{% load static %}
+
 {% block title %}
-    Chat - {{ friend.username }}
+    Chat with {{ friend.username }}
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-4 text-white">Chat with {{ friend.username }}</h2>
-
-    <!-- Chat Window -->
-    <div id="chat-log" class="mb-4" style="height: 400px; overflow-y: scroll; background-color: #2c2f33; padding: 15px; border-radius: 5px;">
-        {% for message in messages %}
-            <div class="alert {% if message.sender == user %}
-                alert-primary
+    <div class="card shadow-lg">
+        <!-- Header -->
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            {% if friend.profile.avatar %}
+                <img src="{{ friend.profile.avatar.url }}" alt="{{ friend.username }}'s Avatar" class="rounded-circle mr-3" width="50" height="50">
             {% else %}
-                alert-secondary
-            {% endif %}" role="alert">
-                <strong>{{ message.sender.username }}:</strong> {{ message.content }}
-                <br>
-                <small>{{ message.created_at|date:"Y-m-d H:i" }}</small>
-            </div>
-        {% endfor %}
-    </div>
-
-    <!-- Send Message Form -->
-    <div class="card bg-dark text-white">
-        <div class="card-header">
-            <h5 class="mb-0">Send a Message</h5>
+                <img src="{% static 'profile.png' %}" alt="Default Avatar" class="rounded-circle mr-3" width="50" height="50">
+            {% endif %}
+            <h4 class="mb-0">Chat with {{ friend.username }}</h4>
         </div>
-        <div class="card-body">
-            <form id="chat-message-form">
+
+        <!-- Chat Window -->
+        <div id="chat-log" class="card-body overflow-auto" style="height: 500px; background-color: #f8f9fa;">
+            {% for message in messages %}
+                {% if message.sender == user %}
+                    <div class="d-flex justify-content-end mb-3">
+                        <div class="bg-primary text-white p-3 rounded message-sent">
+                            <strong>You:</strong> {{ message.content }}
+                            <div class="text-right">
+                                <small>{{ message.created_at|date:"Y-m-d H:i" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="d-flex justify-content-start mb-3">
+                        {% if friend.profile.avatar %}
+                            <img src="{{ friend.profile.avatar.url }}" alt="{{ friend.username }}'s Avatar" class="rounded-circle mr-2" width="40" height="40">
+                        {% else %}
+                            <img src="{% static 'profile.png' %}" alt="Default Avatar" class="rounded-circle mr-2" width="40" height="40">
+                        {% endif %}
+                        <div class="bg-secondary text-white p-3 rounded message-received">
+                            <strong>{{ friend.username }}:</strong> {{ message.content }}
+                            <div class="text-right">
+                                <small>{{ message.created_at|date:"Y-m-d H:i" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Send Message Form -->
+        <div class="card-footer">
+            <form id="chat-message-form" class="d-flex">
                 {% csrf_token %}
-                <div class="form-group">
-                    <textarea
-                      name="message"
-                      id="message-input"
-                      class="form-control bg-secondary text-white"
-                      placeholder="Type your message here..."
-                      rows="3"
-                      required
-                    ></textarea>
-                </div>
-                <button type="submit" class="btn btn-success mt-2">Send</button>
+                <textarea
+                  name="message"
+                  id="message-input"
+                  class="form-control mr-2"
+                  placeholder="Type your message here..."
+                  rows="1"
+                  required
+                  style="resize: none;"
+                ></textarea>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
             </form>
         </div>
     </div>
@@ -50,8 +73,9 @@
 <script>
     const userUsername = "{{ user.username }}";
     const friendshipId = "{{ friendship.id }}";
+    const chatLog = document.querySelector('#chat-log');
     const chatSocket = new WebSocket(
-        'ws://' + window.location.host + '/ws/chat/private/' + friendshipId + '/'
+        (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/chat/private/' + friendshipId + '/'
     );
 
     chatSocket.onmessage = function(e) {
@@ -60,18 +84,32 @@
         const senderUsername = data.sender_username;
         const timestamp = data.timestamp;
 
-        // Display the message
-        const chatLog = document.querySelector('#chat-log');
+        // Create message element
         const messageElement = document.createElement('div');
-        messageElement.classList.add('alert');
-
         if (senderUsername === userUsername) {
-            messageElement.classList.add('alert-primary');
-        } else {
-            messageElement.classList.add('alert-secondary');
+            messageElement.classList.add('d-flex', 'justify-content-end', 'mb-3');
+            messageElement.innerHTML = `
+                <div class="bg-primary text-white p-3 rounded message-sent">
+                    <strong>You:</strong> ${message}
+                    <div class="text-right">
+                        <small>${timestamp}</small>
+                    </div>
+                </div>
+            `;
+        }
+        else {
+            messageElement.classList.add('d-flex', 'justify-content-start', 'mb-3');
+            messageElement.innerHTML = `
+                <img src="{{ friend.profile.avatar.url|default:'/static/images/default_avatar.png' }}" alt="{{ friend.username }}'s Avatar" class="rounded-circle mr-2" width="40" height="40">
+                <div class="bg-secondary text-white p-3 rounded message-received">
+                    <strong>{{ friend.username }}:</strong> ${message}
+                    <div class="text-right">
+                        <small>${timestamp}</small>
+                    </div>
+                </div>
+            `;
         }
 
-        messageElement.innerHTML = `<strong>${senderUsername}:</strong> ${message}<br><small>${timestamp}</small>`;
         chatLog.appendChild(messageElement);
         chatLog.scrollTop = chatLog.scrollHeight;
     };
@@ -85,14 +123,17 @@
         const messageInput = document.querySelector('#message-input');
         const message = messageInput.value.trim();
 
-        if (message.length === 0) {
+        if (message.length === 0)
             return;
-        }
 
-        chatSocket.send(JSON.stringify({
-            'message': message
-        }));
+        chatSocket.send(JSON.stringify({'message': message}));
         messageInput.value = '';
     };
+
+    // Auto-scroll to the bottom on page load
+    window.onload = function() {
+        chatLog.scrollTop = chatLog.scrollHeight;
+    };
 </script>
+
 {% endblock %}
