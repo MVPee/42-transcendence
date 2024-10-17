@@ -27,10 +27,6 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = []
 
-
-# AUTH_USER_MODEL = 'user.user'
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -63,7 +59,7 @@ ROOT_URLCONF = 'app.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'frontend/templates')],
+        'DIRS': [os.path.join(BASE_DIR, '../../frontend/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -148,5 +144,5 @@ USE_TZ = True
 LOGIN_URL = '/login/'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    "/app/frontend/static",
+    "/frontend/static",
 ]
