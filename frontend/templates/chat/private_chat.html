@@ -16,7 +16,7 @@
             {% else %}
                 <img src="{% static 'profile.png' %}" alt="Default Avatar" class="rounded-circle mr-3" width="50" height="50">
             {% endif %}
-            <h4 class="mb-0">Chat with {{ friend.username }}</h4>
+            <h4 class="mb-0">Chat with <a class="text-white" href="/profile/{{ friend.username }}">{{ friend.username }}</a></h4>
         </div>
 
         <!-- Chat Window -->
