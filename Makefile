@@ -21,6 +21,7 @@ fclean:	clean
 		# sudo rm -f backend/app/srcs/tournaments/migrations/000*.py
 		# sudo rm -f backend/app/srcs/user/migrations/000*.py
 
-re:	clean up
+re:	clean
+	docker-compose up --build -d
 
 .PHONY:		all up down clean fclean re

@@ -74,7 +74,7 @@
                             <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
                                 {{ friend.username }}
                                 <!-- Unfriend Form -->
-                                <a href="{% url 'chat:private_chat' friend.id %}" class="btn btn-primary btn-sm">Chat</a>
+                                <a href="{% url 'chat:private_chat' friendship.id %}" class="btn btn-primary btn-sm">Chat</a>
                                 <form method="post" action="{% url 'chat:unfriend' friendship.id %}" style="display: inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-danger btn-sm">Unfriend</button>

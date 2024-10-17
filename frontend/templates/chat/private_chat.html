@@ -1,13 +1,13 @@
 {% extends "../base.html" %}
 
 {% block title %}
-    Chat with {{ friend.username }}
+    Chat - {{ friend.username }}
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4 text-white">Chat with {{ friend.username }}</h2>
-    
+
     <!-- Chat Window -->
     <div id="chat-log" class="mb-4" style="height: 400px; overflow-y: scroll; background-color: #2c2f33; padding: 15px; border-radius: 5px;">
         {% for message in messages %}
@@ -22,7 +22,7 @@
             </div>
         {% endfor %}
     </div>
-    
+
     <!-- Send Message Form -->
     <div class="card bg-dark text-white">
         <div class="card-header">
@@ -46,4 +46,53 @@
         </div>
     </div>
 </div>
+
+<script>
+    const userUsername = "{{ user.username }}";
+    const friendshipId = "{{ friendship.id }}";
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/private/' + friendshipId + '/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const message = data.message;
+        const senderUsername = data.sender_username;
+        const timestamp = data.timestamp;
+
+        // Display the message
+        const chatLog = document.querySelector('#chat-log');
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('alert');
+
+        if (senderUsername === userUsername) {
+            messageElement.classList.add('alert-primary');
+        } else {
+            messageElement.classList.add('alert-secondary');
+        }
+
+        messageElement.innerHTML = `<strong>${senderUsername}:</strong> ${message}<br><small>${timestamp}</small>`;
+        chatLog.appendChild(messageElement);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#chat-message-form').onsubmit = function(e) {
+        e.preventDefault();
+        const messageInput = document.querySelector('#message-input');
+        const message = messageInput.value.trim();
+
+        if (message.length === 0) {
+            return;
+        }
+
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+        messageInput.value = '';
+    };
+</script>
 {% endblock %}

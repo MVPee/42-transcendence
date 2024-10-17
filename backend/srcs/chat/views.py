@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from srcs.user.models import CustomUser as User
 from django.db.models import Q #OR condition
 from django.contrib import messages
 from .models import Friend, Blocked, Message
+
 
 @login_required
 def index_view(request):
@@ -25,9 +27,11 @@ def index_view(request):
     }
     return render(request, 'chat/index.html', context)
 
+
 @login_required
 def global_chat_view(request):
     return render(request, 'chat/global.html')
+
 
 @login_required
 def send_friend_request(request):
@@ -104,6 +108,7 @@ def unfriend(request, friendship_id):
         messages.error(request, "Invalid request method.")
     return redirect('chat:index')
 
+
 @login_required
 def block(request):
     if request.method == 'POST':
@@ -133,6 +138,7 @@ def block(request):
         messages.error(request, "Invalid request method.")
     return redirect('chat:index')
 
+
 @login_required
 def unblock(request, blocked_id):
     if request.method == 'POST':
@@ -143,35 +149,34 @@ def unblock(request, blocked_id):
         messages.error(request, "Invalid request method.")
     return redirect('chat:index')
 
+
 @login_required
-def private_chat(request, friend_id):
-    # Get the friend user object
-    friend = get_object_or_404(User, id=friend_id)
-    
-    # Check if they are friends
-    friendship = Friend.objects.filter(
-        Q(user1=request.user, user2=friend) | Q(user1=friend, user2=request.user),
-        status=True
-    ).first()
-    
-    if not friendship:
-        messages.error(request, "You can only chat with your friends.")
+def private_chat(request, friendship_id):
+    user = request.user
+    # Get the friendship instance
+    friendship = get_object_or_404(Friend, id=friendship_id)
+
+    # Check if the user is part of this friendship
+    if friendship.user1 != user and friendship.user2 != user:
+        messages.error(request, "You are not part of this chat.")
         return redirect('chat:index')
-    
-    # Check if either user has blocked the other
-    if Blocked.objects.filter(user1=request.user, user2=friend).exists() or \
-       Blocked.objects.filter(user1=friend, user2=request.user).exists():
-        messages.error(request, "You cannot chat with this user.")
-        return redirect('chat:index')
-    
-    # Retrieve messages between the two users
-    messages_qs = Message.objects.filter(
-        Q(sender=request.user, receiver=friend) | Q(sender=friend, receiver=request.user)
+
+    # Determine the friend (the other user)
+    if friendship.user1 == user:
+        friend = friendship.user2
+    else:
+        friend = friendship.user1
+
+    # Get previous chat messages
+    chat_messages = Message.objects.filter(
+        Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)
     ).order_by('created_at')
-    
+
     context = {
+        'user': user,
         'friend': friend,
-        'messages': messages_qs
+        'friendship': friendship,
+        'messages': chat_messages,
     }
-    
+
     return render(request, 'chat/private_chat.html', context)
