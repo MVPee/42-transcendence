@@ -6,7 +6,11 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center">Profile</h2>
+    {% if user.username == request.user.username %}
+        <h2 class="text-center">My Profile</h2>
+    {% else %}
+        <h2 class="text-center">{{ user.username }}'s profile</h2>
+    {% endif %}
     
     <div class="profile-details mt-4">
         <p><strong>Username:</strong> {{ user.username }}</p>

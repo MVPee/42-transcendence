@@ -1,9 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import CustomUser
+from srcs.chat.models import Friend
+from django.db.models import Q 
+from .models import CustomUser as User
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -43,12 +45,12 @@ def register_view(request):
             messages.error(request, "Password is too big")
         elif password != confirm_password:
             messages.error(request, "Passwords do not match.")
-        elif CustomUser.objects.filter(username=username).exists():
+        elif User.objects.filter(username=username).exists():
             messages.error(request, "Username already used.")
-        elif CustomUser.objects.filter(email=email).exists():
+        elif User.objects.filter(email=email).exists():
             messages.error(request, "Email already used.")
         else:
-            user = CustomUser(username=username, email=email, password=make_password(password))
+            user = User(username=username, email=email, password=make_password(password))
             user.save()
             messages.success(request, "Registration successful! You can now log in.")
             return redirect('login')
@@ -56,4 +58,15 @@ def register_view(request):
 
 @login_required
 def profile_view(request):
+    return render(request, 'user/profile.html', {'user': request.user})
+
+@login_required
+def private_profile_view(request, username):
+    userProfile = get_object_or_404(User, username=username)
+    if (Friend.objects.filter(
+        Q(user1=request.user, user2=userProfile) |
+        Q(user2=request.user, user1=userProfile),
+        status = True
+    ).exists()):
+        return render(request, 'user/profile.html', {'user': userProfile})
     return render(request, 'user/profile.html', {'user': request.user})
