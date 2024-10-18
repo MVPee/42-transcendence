@@ -15,8 +15,8 @@
             </div>
             <div class="carousel-caption d-none d-md-block">
                 <h5>AI Mode</h5>
-                <p>Play with a very powerful AI!</p>
-                <a href="/play/ai" class="btn btn-danger mx-2">Play AI</a>
+                <p>Play with a very powerful AI</p>
+                <a href="/ai" class="btn btn-danger mx-2">AI</a>
             </div>
         </div>
         <div class="carousel-item">
@@ -25,8 +25,28 @@
             </div>
             <div class="carousel-caption d-none d-md-block">
                 <h5>Offline Mode</h5>
-                <p>Play 1v1 on the same screen!</p>
-                <a href="/play/offline" class="btn btn-danger mx-2">Play Offline</a>
+                <p>Play 1v1 on the same screen</p>
+                <a href="/offline" class="btn btn-danger mx-2">Offline</a>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="d-flex justify-content-center">
+                <img src="{% static 'favicon.ico' %}" class="d-block w-25" alt="Slide 2">
+            </div>
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Ranked Mode</h5>
+                <p>Play 1v1</p>
+                <a href="" class="btn btn-danger mx-2">Ranked</a>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="d-flex justify-content-center">
+                <img src="{% static 'favicon.ico' %}" class="d-block w-25" alt="Slide 2">
+            </div>
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Tournaments Mode</h5>
+                <p>Play 1v1 Tournaments</p>
+                <a href="" class="btn btn-danger mx-2">Tournaments</a>
             </div>
         </div>
     </div>
@@ -53,13 +73,29 @@
             {% for user in users %}
             <tr>
                 {% if forloop.counter == 1 %}
-                    <td class="align-middle"><img src="{% static 'gold_crown.png' %}" alt="Gold Crown" style="width: 50px; height: 50px;">{{ user.username }}</td>
+                    {% if user == request.user %}
+                        <td class="align-middle"><img src="{% static 'gold_crown.png' %}" alt="Gold Crown" style="width: 50px; height: 50px;"><a class="text-white" href="/profile/{{ user.username }}"><b>{{ user.username }}</b></a></td>
+                    {% else %}
+                        <td class="align-middle"><img src="{% static 'gold_crown.png' %}" alt="Gold Crown" style="width: 50px; height: 50px;"><a class="text-white" href="/profile/{{ user.username }}">{{ user.username }}</a></td>
+                    {% endif %}
                 {% elif forloop.counter == 2 %}
-                    <td class="align-middle"><img src="{% static 'argent_crown.png' %}" alt="Argent Crown" style="width: 50px; height: 50px;">{{ user.username }}</td>
+                    {% if user == request.user %}
+                        <td class="align-middle"><img src="{% static 'argent_crown.png' %}" alt="Argent Crown" style="width: 50px; height: 50px;"><a class="text-white" href="/profile/{{ user.username }}"><b>{{ user.username }}</b></a></td>
+                    {% else %}
+                        <td class="align-middle"><img src="{% static 'argent_crown.png' %}" alt="Argent Crown" style="width: 50px; height: 50px;"><a class="text-white" href="/profile/{{ user.username }}">{{ user.username }}</a></td>
+                    {% endif %}
                 {% elif forloop.counter == 3 %}
-                    <td class="align-middle"><img src="{% static 'bronze_crown.png' %}" alt="Bronze Crown" style="width: 50px; height: 50px;">{{ user.username }}</td>
+                    {% if user == request.user %}
+                        <td class="align-middle"><img src="{% static 'bronze_crown.png' %}" alt="Bronze Crown" style="width: 50px; height: 50px;"><a class="text-white" href="/profile/{{ user.username }}"><b>{{ user.username }}</b></a></td>
+                    {% else %}
+                        <td class="align-middle"><img src="{% static 'bronze_crown.png' %}" alt="Bronze Crown" style="width: 50px; height: 50px;"><a class="text-white" href="/profile/{{ user.username }}">{{ user.username }}</a></td>
+                    {% endif %}
                 {% else %}
-                    <td class="align-middle">{{ user.username }}</td>
+                    {% if user == request.user %}
+                        <td class="align-middle"><a class="text-white" href="/profile/{{ user.username }}"><b>{{ user.username }}</b></a></td>
+                    {% else %}
+                        <td class="align-middle"><a class="text-white" href="/profile/{{ user.username }}">{{ user.username }}</a></td>
+                    {% endif %}
                 {% endif %}
                 <td class="align-middle">{{ user.elo }}<img src="{% static 'elo.png' %}" alt="Elo" style="width: 35px; height: 35px;"></td>
             </tr>
