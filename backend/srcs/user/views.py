@@ -63,10 +63,12 @@ def profile_view(request):
 @login_required
 def private_profile_view(request, username):
     userProfile = get_object_or_404(User, username=username)
-    if (Friend.objects.filter(
-        Q(user1=request.user, user2=userProfile) |
-        Q(user2=request.user, user1=userProfile),
-        status = True
-    ).exists()):
-        return render(request, 'user/profile.html', {'user': userProfile})
-    return render(request, 'user/profile.html', {'user': request.user})
+    # if (Friend.objects.filter(
+    #     Q(user1=request.user, user2=userProfile) |
+    #     Q(user2=request.user, user1=userProfile),
+    #     status = True
+    # ).exists()):
+    #     return render(request, 'user/profile.html', {'user': userProfile})
+    # return render(request, 'user/profile.html', {'user': request.user})
+    return render(request, 'user/profile.html', {'user': userProfile})
+
