@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from srcs.chat.models import Friend, Blocked
 from django.db.models import Q 
+from srcs.game.models import Match
 from .models import CustomUser as User
 
 def login_view(request):
@@ -58,7 +59,14 @@ def register_view(request):
 
 @login_required
 def profile_view(request):
-    return render(request, 'user/profile.html', {'user': request.user})
+    games = Match.objects.filter(
+        Q(user1=request.user) |
+        Q(user2=request.user)
+    )
+    return render(request, 'user/profile.html', {
+        'user': request.user,
+        'games': games
+    })
 
 @login_required
 def private_profile_view(request, username):
@@ -84,10 +92,16 @@ def private_profile_view(request, username):
         Q(user2=request.user, user1=userProfile),
     ).first()
 
+    games = Match.objects.filter(
+        Q(user1=userProfile) |
+        Q(user2=userProfile)
+    )
+
     # Pass the friendship status to the template
     return render(request, 'user/profile.html', {
         'user': userProfile,
         'friendship': friendship,
         'pending_friendship': pending_friendship,
-        'blockship': blockship
+        'blockship': blockship,
+        'games': games
     })

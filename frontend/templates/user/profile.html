@@ -87,5 +87,31 @@
         </div>
     {% endif %}
 
+    <!-- Games Section -->
+    <div class="card mt-4">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0 text-center">Game history</h4>
+        </div>
+        <div class="card-body bg-dark">
+            {% if games %}
+                <ul class="list-group bg-dark">
+                    {% for game in games %}
+                        <li class="list-group-item bg-dark text-center">
+                            <p><strong>{{ game.user1.username }}</strong> ({{ game.user1_score }}) vs <strong>{{ game.user2.username }}</strong> ({{ game.user2_score }})</p>
+                            {% if game.user1_score > game.user2_score %}
+                            <p class="text-warning"><strong>Winner: {{ game.user1.username }}</strong></p>
+                            {% else %}
+                            <p class="text-warning"><strong>Winner: {{ game.user2.username }}</strong></p>
+                            {% endif %}
+                            <p>{{ game.created_at|date:"F j, Y, g:i a" }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-center">No games found.</p>
+            {% endif %}
+        </div>
+    </div>
+
 </div>
 {% endblock %}
