@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'srcs.home',
     'srcs.user',
     'srcs.game',
     'srcs.chat',
