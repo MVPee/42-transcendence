@@ -1,5 +1,7 @@
 {% extends "../base.html" %}
 
+{% load static %}
+
 {% block title %}
     - Community
 {% endblock %}
@@ -72,24 +74,17 @@
                     {% if friendship.user1 == user %}
                         {% with friend=friendship.user2 %}
                             <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                                <img src="{% static 'profile.png' %}" alt="Default Avatar" class="rounded-circle mr-3" width="50" height="50">
                                 <a class="text-white" href="/profile/{{ friend.username }}">{{ friend.username }}</a>
-                                <!-- Unfriend Form -->
                                 <a href="{% url 'chat:private_chat' friendship.id %}" class="btn btn-primary btn-sm">Chat</a>
-                                <form method="post" action="{% url 'chat:unfriend' friendship.id %}" style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm">Unfriend</button>
-                                </form>
                             </li>
                         {% endwith %}
                     {% else %}
                         {% with friend=friendship.user1 %}
                             <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
-                                {{ friend.username }}
-                                <!-- Unfriend Form -->
-                                <form method="post" action="{% url 'chat:unfriend' friendship.id %}" style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm">Unfriend</button>
-                                </form>
+                                <img src="{% static 'profile.png' %}" alt="Default Avatar" class="rounded-circle mr-3" width="50" height="50">
+                                <a class="text-white" href="/profile/{{ friend.username }}">{{ friend.username }}</a>
+                                <a href="{% url 'chat:private_chat' friendship.id %}" class="btn btn-primary btn-sm">Chat</a>
                             </li>
                         {% endwith %}
                     {% endif %}
@@ -147,6 +142,7 @@
                 {% for user in all_users %}
                     <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
                         <a class="text-white" href="/profile/{{ user.username }}">{{ user.username }}</a>
+                        <img src="{% static 'profile.png' %}" alt="Default Avatar" class="rounded-circle mr-3" width="50" height="50">
                     </li>
                 {% endfor %}
             </ul>

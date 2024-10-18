@@ -6,11 +6,16 @@
 
 {% block content %}
 <div class="container mt-5">
-    {% if user.username == request.user.username %}
-        <h2 class="text-center">My Profile</h2>
-    {% else %}
-        <h2 class="text-center">{{ user.username }}'s profile</h2>
-    {% endif %}
+    <div class="card shadow-sm mb-5 bg-dark text-white">
+        <div class="card-body text-center">
+            {% if user.username == request.user.username %}
+                <h2 class="card-title">My Profile</h2>
+            {% else %}
+                <h2 class="card-title">{{ user.username }}'s Profile</h2>
+            {% endif %}
+            <p class="card-text text-muted">Member since {{ user.created_at|date:"F j, Y" }}</p>
+        </div>
+    </div>
     
     <!-- Display Messages -->
 
