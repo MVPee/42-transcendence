@@ -12,6 +12,26 @@
         <h2 class="text-center">{{ user.username }}'s profile</h2>
     {% endif %}
     
+    <!-- Display Messages -->
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}
+                alert-danger
+            {% elif message.tags == 'success' %}
+                alert-success
+            {% elif message.tags == 'warning' %}
+                alert-warning
+            {% elif message.tags == 'info' %}
+                alert-info
+            {% else %}
+                alert-secondary
+            {% endif %} text-center" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="profile-details mt-4">
         <p><strong>Username:</strong> {{ user.username }}</p>
         <p><strong>Email:</strong> {{ user.email }}</p>
@@ -26,5 +46,41 @@
             <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
         </div>
     {% endif %}
+    {% if friendship %}
+        <div class="mt-3 text-center">
+            <a href="/chat/private/{{ friendship.id }}" class="btn btn-primary">Chat</a>
+        </div>
+        <div class="mt-3 text-center">
+            <form method="post" action="{% url 'chat:unfriend' friendship.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning btn-sm">Unfriend</button>
+            </form>
+        </div>
+    {% elif request.user.username != user.username and not blockship %}
+        {% if not pending_friendship %}
+            <div class="mt-3 text-center">
+                <a href="/chat/send_friend_request/{{ user.id }}" class="btn btn-success">Friend request</a>
+            </div>
+        {% else %}
+            <div class="mt-3 text-center">
+                <div class="btn btn-info">Pending</div>
+            </div>
+        {% endif %}
+
+    {% endif %}
+
+    {% if blockship %}
+        <div class="mt-3 text-center">
+            <form method="post" action="{% url 'chat:unblock' blockship.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning">Unblock</button>
+            </form>
+        </div>
+    {% elif user.username != request.user.username %}
+        <div class="mt-3 text-center">
+            <a href="/chat/block/{{ user.id }}" class="btn btn-danger">Block</a>
+        </div>
+    {% endif %}
+
 </div>
 {% endblock %}

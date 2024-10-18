@@ -14,16 +14,26 @@ def index_view(request):
 
     # Accepted friendships
     accepted_friendships = Friend.objects.filter(
-        (Q(user1=request.user) | Q(user2=request.user)),
+        Q(user1=request.user) | Q(user2=request.user),
         status=True
     )
 
+    # Blocked users
     blocked_users = Blocked.objects.filter(user1=request.user)
+
+    # Handle search
+    query = request.GET.get('search', '')  # Get the search query from the URL
+    if query:
+        all_users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
+    else:
+        all_users = User.objects.exclude(id=request.user.id)
 
     context = {
         'pending_received_requests': pending_received_requests,
         'accepted_friendships': accepted_friendships,
-        'blocked_users': blocked_users
+        'blocked_users': blocked_users,
+        'all_users': all_users,
+        'query': query  # Pass the query back to the template
     }
     return render(request, 'chat/index.html', context)
 
@@ -74,6 +84,40 @@ def send_friend_request(request):
             return redirect('chat:index')
     else:
         return redirect('chat:index')
+
+@login_required
+def send_friend_request_by_id(request, user_id):
+    # Fetch the recipient by user_id
+    recipient = get_object_or_404(User, id=user_id)
+    
+    if recipient == request.user:
+        messages.error(request, "You cannot send a friend request to yourself.")
+        return redirect('/profile/')
+
+    # Check if a Friend relationship already exists
+    friendship_exists = Friend.objects.filter(
+        Q(user1=request.user, user2=recipient) | 
+        Q(user1=recipient, user2=request.user)
+    ).exists()
+
+    if friendship_exists:
+        messages.error(request, "You are already friends or a friend request is pending.")
+        return redirect('/profile/' + recipient.username)
+
+    # Check if the recipient has blocked the sender or vice versa
+    if Blocked.objects.filter(user1=request.user, user2=recipient).exists():
+        messages.error(request, "You have blocked this user and cannot send friend requests.")
+        return redirect('/profile/' + recipient.username)
+
+    if Blocked.objects.filter(user1=recipient, user2=request.user).exists():
+        messages.error(request, "You are blocked by this user and cannot send friend requests.")
+        return redirect('/profile/' + recipient.username)
+
+    # Create a new Friend request
+    Friend.objects.create(user1=request.user, user2=recipient, status=False)
+    messages.success(request, f"Friend request sent to {recipient.username}.")
+    
+    return redirect('/profile/' + recipient.username)
 
 
 @login_required
@@ -136,8 +180,31 @@ def block(request):
             messages.error(request, "Please enter a username.")
     else:
         messages.error(request, "Invalid request method.")
-    return redirect('chat:index')
+    return redirect('profile/' + user_to_block.username)
 
+@login_required
+def block_by_id(request, user_id):
+    # Retrieve the user to be blocked
+    user_to_block = get_object_or_404(User, id=user_id)
+    
+    # Prevent blocking oneself
+    if user_to_block == request.user:
+        messages.error(request, "You cannot block yourself.")
+    elif Blocked.objects.filter(user1=request.user, user2=user_to_block).exists():
+        messages.error(request, f"You have already blocked {user_to_block.username}.")
+    else:
+        # Remove any existing Friend relationships
+        Friend.objects.filter(
+            Q(user1=request.user, user2=user_to_block) | 
+            Q(user1=user_to_block, user2=request.user)
+        ).delete()
+        
+        # Create a new Blocked relationship
+        Blocked.objects.create(user1=request.user, user2=user_to_block)
+        messages.success(request, f"You have blocked {user_to_block.username}.")
+
+    # Redirect after the action
+    return redirect('/profile/' + user_to_block.username)
 
 @login_required
 def unblock(request, blocked_id):
@@ -147,7 +214,7 @@ def unblock(request, blocked_id):
         messages.success(request, f"You have unblocked {blocked_relation.user2.username}.")
     else:
         messages.error(request, "Invalid request method.")
-    return redirect('chat:index')
+    return redirect('/profile/' + blocked_relation.user2.username)
 
 
 @login_required
