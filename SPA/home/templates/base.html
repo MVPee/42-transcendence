@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPA with Django</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="">My SPA</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" onclick="loadPage('/home/', true); event.preventDefault();">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="loadPage('/about/', true); event.preventDefault();">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>    
+
+    <div class="container mt-4">
+        <div id="content">
+
+        </div>
+    </div>
+
+    <script>
+        // Load page via Ajax and handle history
+        function loadPage(pageUrl, addToHistory = false) {
+            fetch(pageUrl)
+                .then(response => response.text())
+                .then(html => {
+                    // Create a temporary DOM element to process the loaded HTML
+                    var tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+
+                    // Extract the scripts from the loaded HTML
+                    var scripts = tempDiv.getElementsByTagName('script');
+
+                    // Inject the HTML content (without script tags) into the content div
+                    document.getElementById('content').innerHTML = tempDiv.innerHTML;
+
+                    // Execute the script tags
+                    for (var i = 0; i < scripts.length; i++) {
+                        eval(scripts[i].innerText);  // Executes the inline JavaScript code
+                    }
+
+                    // Add the state to the browser history if required
+                    if (addToHistory) {
+                        history.pushState({ pageUrl: pageUrl }, "", pageUrl);
+                    }
+                })
+                .catch(error => console.error('Error loading page:', error));
+        }
+
+        // Handle back/forward button
+        window.onpopstate = function(event) {
+            if (event.state && event.state.pageUrl) {
+                // Load the page without adding to the history (since we're navigating back/forward)
+                loadPage(event.state.pageUrl, false);
+            }
+        };
+
+        // Load the home page by default on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPage('/home/');
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
