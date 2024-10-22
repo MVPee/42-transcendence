@@ -3,28 +3,110 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Mon SPA Django</title>
-    <!-- Vos liens CSS ici -->
+    <title>42 - Pong</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.9.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!-- Menu de navigation -->
-    <nav>
-        <ul>
-            <li><a href="#home" onclick="navigateTo('home'); return false;">Accueil</a></li>
-            <li><a href="#about" onclick="navigateTo('about'); return false;">À propos</a></li>
-            <li><a href="#contact" onclick="navigateTo('contact'); return false;">Contact</a></li>
-        </ul>
+
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+        <img src="{% static 'favicon.ico' %}" width="40" height="40" alt="Logo">
+        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="btn btn-xl text-white bi bi-controller" style="font-size: 1.5rem;" href="#home" onclick="navigateTo('home'); return false;"> Play</a>
+                </li>
+            </ul>
+        
+            <ul class="navbar-nav ml-auto">
+                <!-- Authenticated User -->
+                <li class="nav-item auth" style="display: none;">
+                    <a class="nav-link" href="#profile" onclick="navigateTo('profile'); return false;">Profile</a>
+                </li>
+                <li class="nav-item auth" style="display: none;">
+                    <a class="nav-link" href="{% url 'logout' %}" onclick="return logoutUser();">Logout</a>
+                </li>
+                
+                <!-- Not Authenticated User -->
+                <li class="nav-item not_auth" style="display: none;">
+                    <a class="nav-link" href="#register" onclick="navigateTo('register'); return false;">Register</a>
+                </li>
+                <li class="nav-item not_auth" style="display: none;">
+                    <a class="nav-link" href="#login" onclick="navigateTo('login'); return false;">Login</a>
+                </li>
+            </ul>
+        </div>
     </nav>
 
-    <!-- Contenu des pages -->
     <div id="content">
         {% include 'home.html' %}
-        {% include 'about.html' %}
-        {% include 'contact.html' %}
+        {% include 'login.html' %}
+        {% include 'register.html' %}
+        {% include 'profile.html' %}
     </div>
 
-    <!-- Vos scripts JavaScript ici -->
+    <footer class="bg-dark text-white mt-5 pt-4 pb-2">
+        <div class="container">
+            <div class="row">
+            <div class="col-md-4">
+                <h5>About Us</h5>
+                <p style="color:#8e8e8d">
+                We are a team of five developers working on our final project of the common curriculum at 42, called <b>Transcendence</b>.<br>
+                Our goal is to create an engaging platform that enhances user interaction.
+                </p>
+            </div>
+            <div class="col-md-4">
+            </div>
+            <div class="col-md-4">
+                <h5>Follow Us</h5>
+                <ul class="list-unstyled">
+                    <li><a href="https://github.com/mvpee" class="text-white" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"> MVPee</i></a></li>
+                    <li><a href="https://github.com/dspilleb" class="text-white" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"> dspilleb</i></a></li>
+                    <li><a href="https://github.com/llapage" class="text-white" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"> llapage</i></a></li>
+                    <li><a href="#" class="text-white" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"> declerbo</i></a></li>
+                    <li><a href="#" class="text-white" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"> ...</i></a></li>
+                </ul>
+            </div>
+            </div>
+            <div class="text-center mt-3">
+                <p>&copy; 2024 Pong. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
     <script src="{% static 'app.js' %}"></script>
+    <script>
+        function isAuthenticated() {
+            var authenticated = {{ user.is_authenticated|yesno:"true,false" }};
+            if (authenticated) {
+                document.querySelectorAll('.auth').forEach(function(element) {
+                    element.style.display = 'block';
+                });
+                document.querySelectorAll('.not_auth').forEach(function(element) {
+                    element.style.display = 'none';
+                });
+            }
+            else {
+                document.querySelectorAll('.not_auth').forEach(function(element) {
+                    element.style.display = 'block';
+                });
+                document.querySelectorAll('.auth').forEach(function(element) {
+                    element.style.display = 'none';
+                });
+            }
+        }
+
+        isAuthenticated();
+    </script>
 </body>
 </html>
