@@ -1,0 +1,29 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %}
+- Game offline
+{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-4">
+    <h1>Pong Game</h1><br>
+    <h2>Score</h2>
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <h2 id="score1">0</h2>
+        </div>
+        <div class="col-6">
+            <h2 id="score2">0</h2>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+        <canvas id="pong" width="800" height="400" class="border border-white"></canvas>
+        <div id="message" style="display: none; color: white; font-size: 24px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+    </div>
+    <button id="startButton" class="btn btn-primary mt-3">Start Game</button>
+    <button id="pauseButton" class="btn btn-secondary mt-3" style="display: none;">Pause Game</button>
+    <button id="replayButton" class="btn btn-success mt-3" style="display: none;">Replay</button>
+</div>
+<script src="{% static script %}"></script>
+{% endblock %}

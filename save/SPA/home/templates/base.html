@@ -1,0 +1,30 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon SPA Django</title>
+    <!-- Vos liens CSS ici -->
+</head>
+<body>
+    <!-- Menu de navigation -->
+    <nav>
+        <ul>
+            <li><a href="#home" onclick="navigateTo('home'); return false;">Accueil</a></li>
+            <li><a href="#about" onclick="navigateTo('about'); return false;">À propos</a></li>
+            <li><a href="#contact" onclick="navigateTo('contact'); return false;">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Contenu des pages -->
+    <div id="content">
+        {% include 'home.html' %}
+        {% include 'about.html' %}
+        {% include 'contact.html' %}
+    </div>
+
+    <!-- Vos scripts JavaScript ici -->
+    <script src="{% static 'app.js' %}"></script>
+</body>
+</html>
