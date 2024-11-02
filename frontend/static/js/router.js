@@ -9,6 +9,16 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 document.getElementById('conten').innerHTML = data.html;
 
+                const errorDiv = document.getElementById('error');
+                if (data.error) {
+                    errorDiv.innerHTML = data.error;
+                    errorDiv.style.display = 'block';
+                }
+                else {
+                    errorDiv.innerHTML = '';
+                    errorDiv.style.display = 'none';
+                }
+
                 // Add the page to history if required
                 if (addHistory)
                     history.pushState({ page: page }, '', `/${page}`);

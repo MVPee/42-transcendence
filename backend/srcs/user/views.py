@@ -27,7 +27,11 @@ def get_html(request, page):
 
     if page_config['auth_required'] and not request.user.is_authenticated:
         login_content = render(request, 'login.html').content.decode("utf-8")
-        return JsonResponse({'html': login_content})
+        return JsonResponse({
+            'html': login_content,
+            'error': "You must be logged in to access this page."
+        })
     
+    # Render the requested page's content
     html_content = render(request, page_config['template']).content.decode("utf-8")
     return JsonResponse({'html': html_content})

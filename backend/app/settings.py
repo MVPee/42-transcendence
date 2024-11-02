@@ -27,6 +27,10 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://pong.mvpee.be',
+]
+
 # Application definition
 
 INSTALLED_APPS = [
