@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     function loadContent(page, addHistory = true) {
-        fetch(`/api/get_html/${page}/`)
+        fetch(`/api/view/${page}/`)
             .then(response => {
                 if (!response.ok)
                     throw new Error('Network response was not ok');

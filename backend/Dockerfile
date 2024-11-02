@@ -18,4 +18,4 @@ RUN apt-get update && \
 
 ENTRYPOINT ["/app/tools/entrypoint.sh"]
 
-CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
+CMD [ "python", "-u", "manage.py", "runserver", "0.0.0.0:8000" ]
