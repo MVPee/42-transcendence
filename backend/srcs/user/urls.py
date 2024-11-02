@@ -1,11 +1,8 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from . import views
 
 urlpatterns = [
-    path("login/", views.login_view, name="login"),
-    path("logout/", views.logout_view, name="logout"),
-    path("register/", views.register_view, name="register"),
-    path("profile/", views.profile_view, name="profile"),
-    path("profile/<str:username>", views.private_profile_view, name="private_profile"),
+    re_path(r'^(?:home|profile|login)?$', views.base_view, name='base'),
+    path('api/get_html/<str:page>/', views.get_html, name='get_html'),
 ]

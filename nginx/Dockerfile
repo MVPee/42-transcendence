@@ -9,6 +9,3 @@ RUN mkdir /etc/nginx/ssl && \
     -subj "/C=US/ST=Belgium/L=Brussels/O=19/OU=42/CN=mvpee"
 
 COPY ./conf/nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 443
-EXPOSE 80

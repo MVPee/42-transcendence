@@ -38,9 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'srcs.user',
-    'srcs.game',
-    'srcs.chat',
-    'srcs.tournaments',
 ]
 
 MIDDLEWARE = [
