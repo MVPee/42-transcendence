@@ -10,9 +10,6 @@ from django.http import JsonResponse
 def base_view(request):
     return render(request, 'base.html')
 
-from django.shortcuts import render
-from django.http import JsonResponse
-
 def get_html(request, page):
     pages_config = {
         'home': {'template': 'home.html', 'auth_required': False},
@@ -32,6 +29,5 @@ def get_html(request, page):
             'error': "You must be logged in to access this page."
         })
     
-    # Render the requested page's content
     html_content = render(request, page_config['template']).content.decode("utf-8")
     return JsonResponse({'html': html_content})
