@@ -26,6 +26,7 @@ class BaseAPIView(View):
     page = None
     error_message = None
     success_message = None
+    context = None
 
     def get(self, request):
         """
@@ -46,7 +47,7 @@ class BaseAPIView(View):
 
         page_config = self.pages_config[self.page]
         
-        context = {
+        self.context = {
             'error_message': self.error_message,
             'success_message': self.success_message
         }
@@ -54,11 +55,11 @@ class BaseAPIView(View):
         # Check if the page requires authentication
         if page_config['auth_required'] and not request.user.is_authenticated:
             page_config = self.pages_config['login']
-            context['error_message'] = 'You need to login to have access to this page.'
-            html_content = render(request, page_config['template'], context).content.decode("utf-8")
+            self.context['error_message'] = 'You need to login to have access to this page.'
+            html_content = render(request, page_config['template'], self.context).content.decode("utf-8")
             return JsonResponse({'html': html_content})
         else:
-            html_content = render(request, page_config['template'], context).content.decode("utf-8")
+            html_content = render(request, page_config['template'], self.context).content.decode("utf-8")
 
         # print(html_content)  #* DEBUG
         return JsonResponse({'html': html_content})
@@ -107,8 +108,11 @@ class LogoutView(BaseAPIView):
     page = 'login'
 
     def get(self, request):
-        logout(request)
-        self.success_message = 'Logout successfull.'
+        if request.user.is_authenticated:
+            logout(request)
+            self.success_message = 'Logout successfull.'
+        else:
+            self.error_message = 'You are not authenticated.'
         return super().get(request)
 
 

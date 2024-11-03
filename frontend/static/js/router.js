@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             updateNavbarLinks();
 
-            // Update the URL and history if login was successful
+            // Update the URL and history if login or register was successful
             if (data.success)
                 history.pushState({ page: 'profile' }, '', '/profile');
         })
