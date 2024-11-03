@@ -1,3 +1,5 @@
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
@@ -70,6 +72,38 @@ class LoginView(BaseAPIView):
     """
 
     page = 'login'
+
+    def post(self, request):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Authenticate user
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            self.page = 'profile'
+            return super().get(request)
+        else:
+            # Render the login page with an error message
+            login_html = render(request, self.pages_config['login']['template'], {
+                'error_message': "Invalid username or password."
+            }).content.decode("utf-8")
+            return JsonResponse({
+                'html': login_html
+            })
+
+
+class LogoutView(BaseAPIView):
+    """
+    A view for 'logout'.
+    Inherits from BaseAPIView and sets the page attribute to 'login'.
+    """
+    
+    page = 'login'
+
+    def get(self, request):
+        logout(request)
+        return super().get(request)
 
 
 class RegisterView(BaseAPIView):
