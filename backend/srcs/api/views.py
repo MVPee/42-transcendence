@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
+from srcs.user.models import CustomUser as User
 
 class BaseAPIView(View):
     """
@@ -118,6 +119,35 @@ class RegisterView(BaseAPIView):
     """
 
     page = 'register'
+
+    def post(self, request):
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if User.objects.filter(username=username).exists():
+            self.error_message = 'Username already exists.'
+            return super().get(request)
+
+        if User.objects.filter(email=email).exists():
+            self.error_message = 'Email already in use.'
+            return super().get(request)
+
+        if password != confirm_password:
+            self.error_message = 'Passwords do not match.'
+            return super().get(request)
+
+        try:
+            user = User.objects.create_user(username=username, email=email, password=password)
+            user.save()
+            login(request, user)
+            self.success_message = 'Registration successful. You are now logged in.'
+            self.page = 'profile'
+            return super().get(request)
+        except Exception as e:
+            self.error_message = f"An error occurred: {str(e)}"
+            return super().get(request)
 
 
 class ProfileView(BaseAPIView):
