@@ -17,9 +17,11 @@
 <body>
 
   <nav>
-    <a href="/home" class="link">Home</a>
-    <a href="/profile" class="link">Profile</a>
-    <a href="/login" class="link">Login</a>
+    <a href="/home" class="link" id="home-link">Home</a>
+    <a href="/profile" class="link" id="profile-link">Profile</a>
+    <a href="/login" class="link" id="login-link">Login</a>
+    <a href="/register" class="link" id="register-link">Register</a>
+    <a href="/logout" class="link" id="logout-link">Logout</a>
   </nav>
 
   <div id="error" class="text-danger"></div>
@@ -29,6 +31,7 @@
   </div>
 
   <script src="{% static 'js/router.js' %}"></script>
+  <script src="{% static 'js/style.js' %}"></script>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" ></script>
 </body>

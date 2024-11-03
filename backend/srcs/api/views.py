@@ -17,6 +17,7 @@ class BaseAPIView(View):
         'home': {'template': 'home.html', 'auth_required': False},
         'profile': {'template': 'profile.html', 'auth_required': True},
         'login': {'template': 'login.html', 'auth_required': False},
+        'register': {'template': 'register.html', 'auth_required': False},
     }
 
     page = None
@@ -64,11 +65,20 @@ class HomeView(BaseAPIView):
 
 class LoginView(BaseAPIView):
     """
-    A view for the 'login' page.\n
+    A view for the 'login' page.
     Inherits from BaseAPIView and sets the page attribute to 'login'.
     """
 
     page = 'login'
+
+
+class RegisterView(BaseAPIView):
+    """
+    A view for the 'register' page.
+    Inherits from BaseAPIView and sets the page attribute to 'register'.
+    """
+
+    page = 'register'
 
 
 class ProfileView(BaseAPIView):
@@ -88,3 +98,8 @@ class ProfileView(BaseAPIView):
         profile = request.GET.get('profile')
         print("profile:", profile)
         return super().get(request)
+    
+
+def is_authenticated(request):
+    is_authenticated = request.user.is_authenticated
+    return JsonResponse({'is_authenticated': is_authenticated})

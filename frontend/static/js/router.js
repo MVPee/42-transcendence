@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (queryString && !queryString.startsWith('?'))
             queryString = '?' + queryString;
-
+    
         fetch(`/api/view/${page}/${queryString}`)
             .then(response => {
                 if (!response.ok)
@@ -11,24 +11,43 @@ document.addEventListener("DOMContentLoaded", function () {
                 return response.json();
             })
             .then(data => {
-                document.getElementById('content').innerHTML = data.html;
-
+                const contentElement = document.getElementById('content');
+                // Insert the HTML content
+                contentElement.innerHTML = data.html;
+    
                 const errorDiv = document.getElementById('error');
                 if (data.error) {
                     errorDiv.innerHTML = data.error;
                     errorDiv.style.display = 'block';
-                }
-                else {
+                } else {
                     errorDiv.innerHTML = '';
                     errorDiv.style.display = 'none';
                 }
+    
+                // Execute any scripts in the loaded content
+                const scripts = contentElement.querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    Array.from(script.attributes).forEach(attr => { newScript.setAttribute(attr.name, attr.value); });
+                    if (script.src) {
+                        newScript.src = script.src;
+                        newScript.async = false;
+                    }
+                    else
+                        newScript.textContent = script.textContent;
+                    script.parentNode.removeChild(script);
+                    document.body.appendChild(newScript);
+                });
+    
+                updateNavbarLinks();
 
-                // Add the page to history if required
+                // Add the page to history
                 if (addHistory)
                     history.pushState({ page: page, query: queryString }, '', `/${page}${queryString}`);                
             })
             .catch(error => console.error('Error loading content:', error));
     }
+    
 
     // Load initial content based on URL path
     const initialPage = location.pathname.replace(/^\/|\/$/g, '') || 'home';
