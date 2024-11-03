@@ -1,6 +1,5 @@
-// static/js/router.js
-
 document.addEventListener("DOMContentLoaded", function () {
+
     function loadContent(page, queryString = '', addHistory = true) {
 
         if (queryString && !queryString.startsWith('?'))
@@ -9,45 +8,64 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch(`/api/view/${page}/${queryString}`, {
             credentials: 'same-origin', // Include cookies for CSRF
         })
-            .then(response => {
-                if (!response.ok)
-                    throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(data => {
+        .then(response => {
+            if (!response.ok)
+                throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
 
-                if (data.redirect_url)
-                    window.location.href = data.redirect_url;
+            if (data.redirect_url)
+                window.location.href = data.redirect_url;
 
-                // Insert the HTML content
-                const contentElement = document.getElementById('content');
-                contentElement.innerHTML = data.html;
+            // Insert the HTML content
+            const contentElement = document.getElementById('content');
+            contentElement.innerHTML = data.html;
 
+            // Execute any scripts in the loaded content
+            const scripts = contentElement.querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                Array.from(script.attributes).forEach(attr => { newScript.setAttribute(attr.name, attr.value); });
+                if (script.src) {
+                    newScript.src = script.src;
+                    newScript.async = false;
+                } else {
+                    newScript.textContent = script.textContent;
+                }
+                script.parentNode.removeChild(script);
+                document.body.appendChild(newScript);
+            });
 
-                // Execute any scripts in the loaded content
-                const scripts = contentElement.querySelectorAll('script');
-                scripts.forEach(script => {
-                    const newScript = document.createElement('script');
-                    Array.from(script.attributes).forEach(attr => { newScript.setAttribute(attr.name, attr.value); });
-                    if (script.src) {
-                        newScript.src = script.src;
-                        newScript.async = false;
-                    }
-                    else
-                        newScript.textContent = script.textContent;
-                    script.parentNode.removeChild(script);
-                    document.body.appendChild(newScript);
-                });
+            // Reattach event listeners to new links
+            attachLinkEventListeners();
 
-                updateNavbarLinks();
+            updateNavbarLinks();
 
-                // Add the page to history
-                if (addHistory)
-                    history.pushState({ page: page, query: queryString }, '', `/${page}${queryString}`);                
-            })
-            .catch(error => console.error('Error loading content:', error));
+            // Add the page to history
+            if (addHistory)
+                history.pushState({ page: page, query: queryString }, '', `/${page}${queryString}`);                
+        })
+        .catch(error => console.error('Error loading content:', error));
     }
 
+    function attachLinkEventListeners() {
+        // Remove previous event listeners to prevent duplication
+        document.querySelectorAll("a.link").forEach(link => {
+            link.removeEventListener("click", linkClickHandler); // Remove existing listener if any
+            link.addEventListener("click", linkClickHandler);
+        });
+    }
+
+    function linkClickHandler(event) {
+        event.preventDefault();
+        const url = new URL(this.href);
+        const page = url.pathname.replace("/", "");
+        const queryString = url.search;
+        console.log('Navigation link clicked:', 'page=', page, 'queryString=', queryString);
+        loadContent(page, queryString);
+    }
+    
     function handleFormSubmission(event) {
         const form = event.target;
         const action = form.getAttribute('action');
@@ -93,12 +111,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (script.src) {
                     newScript.src = script.src;
                     newScript.async = false;
-                }
-                else
+                } else {
                     newScript.textContent = script.textContent;
+                }
                 script.parentNode.removeChild(script);
                 document.body.appendChild(newScript);
             });
+
+            // Reattach event listeners to new links
+            attachLinkEventListeners();
 
             updateNavbarLinks();
 
@@ -111,18 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Set up navigation links to load content without refreshing
-    document.querySelectorAll("nav a.link").forEach(link => {
-        link.addEventListener("click", function (event) {
-            event.preventDefault();
-            const url = new URL(this.href);
-            const page = url.pathname.replace("/", "");
-            const queryString = url.search;
-            console.log('Navigation link clicked:', 'page=', page, 'queryString=', queryString);
-            loadContent(page, queryString);
-        });
-    });
-
+    
     // Handle form submissions within dynamically loaded content
     document.addEventListener('submit', function(event) {
         const form = event.target;
@@ -130,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
             handleFormSubmission(event);
         }
     });
-
+    
     // Handle the back and forward buttons
     window.addEventListener("popstate", function (event) {
         if (event.state && event.state.page) {
@@ -139,8 +149,13 @@ document.addEventListener("DOMContentLoaded", function () {
             loadContent(page, queryString, false);
         }
         else
-            loadContent('home', '', false);
-    });
+        loadContent('home', '', false);
+});
+
+    // Initial attachment of event listeners
+    attachLinkEventListeners();
+
+    updateNavbarLinks();
 
     // Load initial content based on URL path
     const initialPage = location.pathname.replace(/^\/|\/$/g, '') || 'home';
