@@ -111,11 +111,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Load initial content based on URL path
-    const initialPage = location.pathname.replace(/^\/|\/$/g, '') || 'home';
-    const initialQuery = location.search;
-    loadContent(initialPage, initialQuery, false);
-
     // Set up navigation links to load content without refreshing
     document.querySelectorAll("nav a.link").forEach(link => {
         link.addEventListener("click", function (event) {
@@ -146,4 +141,9 @@ document.addEventListener("DOMContentLoaded", function () {
         else
             loadContent('home', '', false);
     });
+
+    // Load initial content based on URL path
+    const initialPage = location.pathname.replace(/^\/|\/$/g, '') || 'home';
+    const initialQuery = location.search;
+    loadContent(initialPage, initialQuery, false);
 });

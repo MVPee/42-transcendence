@@ -1,4 +1,11 @@
-<h1>Profile</h1>
+{% load static %}
+
+
+{% if user.username == request.user.username %}
+<h2>My Profile</h2>
+{% else %}
+<h2>{{ user.username }}'s profile</h2>
+{% endif %}
 
 {% if error_message %}
   <p style="color: red;">{{ error_message }}</p>
@@ -7,3 +14,10 @@
 {% if success_message %}
   <p style="color: green;">{{ success_message }}</p>
 {% endif %}
+
+<p><strong>Username:</strong> {{ user.username }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
+<p><strong>Elo:</strong> {{ user.elo }}</p>
+<p><strong>Wins:</strong> {{ user.win }}</p>
+<p><strong>Defeats:</strong> {{ user.defeat }}</p>
+<p><strong>Joined on:</strong> {{ user.created_at|date:"F j, Y" }}</p>

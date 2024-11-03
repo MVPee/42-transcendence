@@ -27,6 +27,7 @@ class BaseAPIView(View):
     error_message = None
     success_message = None
     context = None
+    user = None
 
     def get(self, request):
         """
@@ -49,7 +50,8 @@ class BaseAPIView(View):
         
         self.context = {
             'error_message': self.error_message,
-            'success_message': self.success_message
+            'success_message': self.success_message,
+            'user': self.user
         }
 
         # Check if the page requires authentication
@@ -92,6 +94,7 @@ class LoginView(BaseAPIView):
             login(request, user)
             self.success_message = 'Login successfull.'
             self.page = 'profile'
+            self.user = request.user
             return super().get(request)
         else:
             self.error_message = 'Invalid username or password.'
@@ -148,6 +151,7 @@ class RegisterView(BaseAPIView):
             login(request, user)
             self.success_message = 'Registration successful. You are now logged in.'
             self.page = 'profile'
+            self.user = request.user
             return super().get(request)
         except Exception as e:
             self.error_message = f"An error occurred: {str(e)}"
@@ -169,7 +173,11 @@ class ProfileView(BaseAPIView):
     def get(self, request):
         #? /profile/?profile=exemple
         profile = request.GET.get('profile')
-        print("profile:", profile)
+        # print("profile:", profile) #* Debug
+        user = User.objects.filter(username=profile).first()
+        if user is None:
+            user = request.user
+        self.user = user
         return super().get(request)
     
 
