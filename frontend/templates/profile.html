@@ -1,9 +1,9 @@
 {% load static %}
 
 {% if user.username == request.user.username %}
-<h2>My Profile</h2>
+  <h2>My Profile</h2>
 {% else %}
-<h2>{{ user.username }}'s profile</h2>
+  <h2>{{ user.username }}'s profile</h2>
 {% endif %}
 
 {% if error_message %}
@@ -21,4 +21,6 @@
 <p><strong>Defeats:</strong> {{ user.defeat }}</p>
 <p><strong>Joined on:</strong> {{ user.created_at|date:"F j, Y" }}</p>
 
-<a href="/logout" class="link btn btn-danger">Logout</a>
+{% if user.username == request.user.username %}
+  <a href="/logout" class="link btn btn-danger">Logout</a>
+{% endif %}
