@@ -23,6 +23,8 @@ class BaseAPIView(View):
     }
 
     page = None
+    error_message = None
+    success_message = None
 
     def get(self, request):
         """
@@ -42,17 +44,22 @@ class BaseAPIView(View):
             return JsonResponse({'html': "<p>404: NOT FOUND</p>"})
 
         page_config = self.pages_config[self.page]
+        
+        context = {
+            'error_message': self.error_message,
+            'success_message': self.success_message
+        }
 
         # Check if the page requires authentication
         if page_config['auth_required'] and not request.user.is_authenticated:
-            login_content = render(request, 'login.html').content.decode("utf-8")
-            return JsonResponse({
-                'html': login_content,
-                'error': "You must be logged in to access this page."
-            })
+            page_config = self.pages_config['login']
+            context['error_message'] = 'You need to login to have access to this page.'
+            html_content = render(request, page_config['template'], context).content.decode("utf-8")
+            return JsonResponse({'html': html_content})
+        else:
+            html_content = render(request, page_config['template'], context).content.decode("utf-8")
 
-        # Render the requested page’s content
-        html_content = render(request, page_config['template']).content.decode("utf-8")
+        # print(html_content)  #* DEBUG
         return JsonResponse({'html': html_content})
 
 
@@ -81,16 +88,13 @@ class LoginView(BaseAPIView):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            self.success_message = 'Login successfull.'
             self.page = 'profile'
             return super().get(request)
         else:
-            # Render the login page with an error message
-            login_html = render(request, self.pages_config['login']['template'], {
-                'error_message': "Invalid username or password."
-            }).content.decode("utf-8")
-            return JsonResponse({
-                'html': login_html
-            })
+            self.error_message = 'Invalid username or password.'
+            self.page = 'login'
+            return super().get(request)
 
 
 class LogoutView(BaseAPIView):
@@ -103,6 +107,7 @@ class LogoutView(BaseAPIView):
 
     def get(self, request):
         logout(request)
+        self.success_message = 'Logout successfull.'
         return super().get(request)
 
 

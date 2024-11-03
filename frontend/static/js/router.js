@@ -15,23 +15,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 return response.json();
             })
             .then(data => {
-                const contentElement = document.getElementById('content');
+
+                if (data.redirect_url)
+                    window.location.href = data.redirect_url;
+
                 // Insert the HTML content
+                const contentElement = document.getElementById('content');
                 contentElement.innerHTML = data.html;
 
-                const errorDiv = document.getElementById('error');
-                if (data.error) {
-                    errorDiv.innerHTML = data.error;
-                    errorDiv.style.display = 'block';
-                }
-                else if (data.success) {
-                    errorDiv.innerHTML = data.success;
-                    errorDiv.style.display = 'block';
-                }
-                else {
-                    errorDiv.innerHTML = '';
-                    errorDiv.style.display = 'none';
-                }
 
                 // Execute any scripts in the loaded content
                 const scripts = contentElement.querySelectorAll('script');
@@ -94,18 +85,6 @@ document.addEventListener("DOMContentLoaded", function () {
             // Insert the new page content
             contentElement.innerHTML = data.html;
 
-            const errorDiv = document.getElementById('error');
-            if (data.error) {
-                errorDiv.innerHTML = data.error;
-                errorDiv.style.display = 'block';
-            } else if (data.success) {
-                errorDiv.innerHTML = data.success;
-                errorDiv.style.display = 'block';
-            } else {
-                errorDiv.innerHTML = '';
-                errorDiv.style.display = 'none';
-            }
-
             // Execute any scripts in the loaded content
             const scripts = contentElement.querySelectorAll('script');
             scripts.forEach(script => {
@@ -129,9 +108,6 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => {
             console.error('Error during form submission:', error);
-            const errorDiv = document.getElementById('error');
-            errorDiv.innerHTML = 'An unexpected error occurred.';
-            errorDiv.style.display = 'block';
         });
     }
 
