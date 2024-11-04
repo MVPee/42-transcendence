@@ -1,0 +1,5 @@
+<h1>Community</h1>
+
+{% for user in all_users %}
+    <p>{{ user.username }} <a class="link" href="/profile?profile={{ user.username }}"> Profile </a></p>
+{% endfor %}

@@ -1,0 +1,5 @@
+<h1>Scoreboard</h1>
+
+{% for user in all_users %}
+    <p>{{ user.username }} | {{ user.elo }}</p>
+{% endfor %}

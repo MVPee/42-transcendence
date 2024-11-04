@@ -18,7 +18,9 @@ class BaseAPIView(View):
 
     pages_config = {
         'home': {'template': 'home.html', 'auth_required': False},
+        'scoreboard': {'template': 'scoreboard.html', 'auth_required': False},
         'profile': {'template': 'profile.html', 'auth_required': True},
+        'community': {'template': 'community.html', 'auth_required': True},
         'login': {'template': 'login.html', 'auth_required': False},
         'register': {'template': 'register.html', 'auth_required': False},
     }
@@ -28,6 +30,7 @@ class BaseAPIView(View):
     success_message = None
     context = None
     user = None
+    all_users = None
 
     def get(self, request):
         """
@@ -51,7 +54,8 @@ class BaseAPIView(View):
         self.context = {
             'error_message': self.error_message,
             'success_message': self.success_message,
-            'user': self.user
+            'user': self.user,
+            'all_users': self.all_users,
         }
 
         # Check if the page requires authentication
@@ -74,6 +78,32 @@ class HomeView(BaseAPIView):
     """
 
     page = 'home'
+
+
+class CommunityView(BaseAPIView):
+    """
+    A view for the 'community' page.
+    Inherits from BaseAPIView and sets the page attribute to 'community'.
+    """
+
+    page = 'community'
+
+    def get(self, request):
+        self.all_users = User.objects.exclude(id=request.user.id)
+        return super().get(request)
+
+
+class ScoreboardView(BaseAPIView):
+    """
+    A view for the 'community' page.
+    Inherits from BaseAPIView and sets the page attribute to 'community'.
+    """
+
+    page = 'scoreboard'
+
+    def get(self, request):
+        self.all_users = User.objects.all().order_by('-elo')
+        return super().get(request)
 
 
 class LoginView(BaseAPIView):
