@@ -44,7 +44,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Add the page to history
             if (addHistory)
-                history.pushState({ page: page, query: queryString }, '', `/${page}${queryString}`);                
+                history.pushState({ page: page, query: queryString }, '', `/${page}${queryString}`);
+            else
+                history.replaceState({ page: page, query: queryString }, '', `/${page}${queryString}`);            
         })
         .catch(error => console.error('Error loading content:', error));
     }
@@ -143,13 +145,15 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Handle the back and forward buttons
     window.addEventListener("popstate", function (event) {
+        console.log('here');
+        console.log(event.state);
+        console.log(event.state.page);
         if (event.state && event.state.page) {
             const page = event.state.page;
             const queryString = event.state.query || '';
             loadContent(page, queryString, false);
         }
-        else
-        loadContent('home', '', false);
+        else loadContent('home', '', false);
 });
 
     // Initial attachment of event listeners
