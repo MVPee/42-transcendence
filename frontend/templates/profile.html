@@ -23,4 +23,9 @@
 
 {% if user.username == request.user.username %}
   <a href="/logout" class="link btn btn-danger">Logout</a>
+{% else %}
+  <a href="/friend?action=add?profile={{ user.username }}" class="link btn btn-success">Friend Request</a>
+  <a href="/friend?action=remove?profile={{ user.username }}" class="link btn btn-danger">Remove Friend</a>
+  <a href="/friend?action=add?profile={{ user.username }}" class="link btn btn-danger">Block Request</a>
+  <a href="/friend?action=remove?profile={{ user.username }}" class="link btn btn-warning">Unblock Request</a>
 {% endif %}

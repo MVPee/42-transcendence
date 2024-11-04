@@ -11,5 +11,7 @@ urlpatterns = [
     path('view/community/', CommunityView.as_view(), name='community_view'),
     path('view/scoreboard/', ScoreboardView.as_view(), name='scoreboard_view'),
 
+    path('view/websocket/', WebSocketView.as_view(), name='websocket_view'),
+
     path('is_authenticated/', views.is_authenticated, name='is_authenticated'),
 ]

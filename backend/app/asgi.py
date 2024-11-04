@@ -13,20 +13,18 @@ import django
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 from channels.auth import AuthMiddlewareStack
-# import srcs.chat.routing
+import srcs.user.routing
 
 # Add the project root directory to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
 
-application = get_asgi_application()
-
-# application = ProtocolTypeRouter({
-#     "http": get_asgi_application(),
-#     "websocket": AuthMiddlewareStack(
-#         URLRouter(
-#             srcs.chat.routing.websocket_urlpatterns
-#         )
-#     ),
-# })
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            srcs.user.routing.websocket_urlpatterns
+        )
+    ),
+})

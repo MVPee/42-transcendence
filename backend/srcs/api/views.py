@@ -23,6 +23,7 @@ class BaseAPIView(View):
         'community': {'template': 'community.html', 'auth_required': True},
         'login': {'template': 'login.html', 'auth_required': False},
         'register': {'template': 'register.html', 'auth_required': False},
+        'websocket': {'template': 'websocket.html', 'auth_required': True},
     }
 
     page = None
@@ -78,6 +79,11 @@ class HomeView(BaseAPIView):
     """
 
     page = 'home'
+
+
+class WebSocketView(BaseAPIView):
+
+    page = 'websocket'
 
 
 class CommunityView(BaseAPIView):
@@ -209,7 +215,15 @@ class ProfileView(BaseAPIView):
             user = request.user
         self.user = user
         return super().get(request)
-    
+
+
+class FriendAPI(BaseAPIView):
+
+    page = 'profile'
+
+    def get(self, request):
+        return super().get(request)
+
 
 def is_authenticated(request):
     """
