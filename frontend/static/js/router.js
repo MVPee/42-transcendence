@@ -20,6 +20,11 @@ function loadContent(page, queryString = '', addHistory = true) {
         const contentElement = document.getElementById('content');
         contentElement.innerHTML = data.html;
 
+        /*
+            WebSocket Connect and Disconnect here
+        */
+        checkWebsocketPage(page);
+
         // Execute any scripts in the loaded content
         const scripts = contentElement.querySelectorAll('script');
         scripts.forEach(script => {
