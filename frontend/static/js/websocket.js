@@ -1,10 +1,10 @@
 let ws;
 
-function connectWebSocket() {
+function connectWebSocket(link) {
     if (ws)
         ws.close();
 
-    ws = new WebSocket("wss://42.mvpee.be/ws/test/");
+    ws = new WebSocket(link);
 
     ws.onopen = () => {
         console.log("WebSocket connection opened.");
@@ -36,9 +36,12 @@ function disconnectWebSocket() {
     }
 }
 
-function checkWebsocketPage(page) {
+function checkWebsocketPage(page, queryString = '') {
+    // console.log(page);
+    // if (queryString)
+    //     console.log(queryString); //* DEBUG
     if (page === 'websocket')
-        connectWebSocket();
+        connectWebSocket("wss://42.mvpee.be/ws/test/");
     else
         disconnectWebSocket();
 }

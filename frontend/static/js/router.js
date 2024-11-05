@@ -23,7 +23,7 @@ function loadContent(page, queryString = '', addHistory = true) {
         /*
             WebSocket Connect and Disconnect here
         */
-        checkWebsocketPage(page);
+        checkWebsocketPage(page, queryString);
 
         // Execute any scripts in the loaded content
         const scripts = contentElement.querySelectorAll('script');
