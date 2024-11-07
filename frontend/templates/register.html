@@ -10,7 +10,7 @@
   <p style="color: green;">{{ success_message }}</p>
 {% endif %}
 
-<form id="register-form" action="/api/view/register/" method="POST">
+<form id="register-form" action="/ssr/view/register/" method="POST">
     {% csrf_token %}
     <div class="form-group">
         <label for="username">Username</label>

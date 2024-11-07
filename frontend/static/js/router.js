@@ -3,7 +3,7 @@ function loadContent(page, queryString = '', addHistory = true) {
     if (queryString && !queryString.startsWith('?'))
         queryString = '?' + queryString;
 
-    fetch(`/api/view/${page}/${queryString}`, {
+    fetch(`/ssr/view/${page}/${queryString}`, {
         credentials: 'same-origin', // Include cookies for CSRF
     })
     .then(response => {
