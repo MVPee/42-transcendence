@@ -43,8 +43,6 @@ function loadContent(page, queryString = '', addHistory = true) {
         // Reattach event listeners to new links
         attachLinkEventListeners();
 
-        updateNavbarLinks();
-
         // Add the page to history
         if (addHistory)
             history.pushState({ page: page, query: queryString }, '', `/${page}${queryString}`);

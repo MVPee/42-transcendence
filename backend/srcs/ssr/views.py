@@ -256,16 +256,16 @@ class FriendRequest(BaseSSRView):
             friend = Friend.objects.filter(Q(user1=request.user.id, user2=user.id) | Q(user1=user.id, user2=request.user.id) ).first()
 
             if type=='add':
-                if friend is None: #* Create a new friend with status pending
+                if friend is None: #? Create a new friend with status pending
                     friend = Friend.objects.create(user1=request.user, user2=user, status=False)
                     friend.save()
                     self.success_message = f"Sucessfuly sent a friend request to {profile}."
                 else:
                     if friend.status is True:
                         self.error_message = f"{profile} is already your friend."
-                    elif friend.user1 == request.user: #* if initial friend request came from me
+                    elif friend.user1 == request.user: #? if initial friend request came from me
                          self.error_message = f"A friend request was already sent to {profile}."
-                    else: #* if initial friend request did not came from me
+                    else: #? if initial friend request did not came from me
                         self.success_message = f"You and {profile} are now friends !"
                         friend.status = True
                         friend.save()
@@ -277,7 +277,7 @@ class FriendRequest(BaseSSRView):
                 if friend is None:
                     self.error_message = f"{profile} is not in your friend list."
                 else:
-                    if friend.user1 == request.user:  #* if initial friend request came from me
+                    if friend.user1 == request.user:  #? if initial friend request came from me
                         if friend.status is False:
                             self.success_message = f"{profile} friend request sucessfuly aborted."
                         else :
@@ -326,7 +326,7 @@ class BlockRequest(BaseSSRView):
                     self.success_message = f"Sucessfuly blocked {profile}."
                 else:
                     self.error_message = f"{profile} is already blocked."
-                #* remove the friend relation in the database if they were friend
+                #? remove the friend relation in the database if they were friend
                 friend = Friend.objects.filter(Q(user1=request.user.id, user2=user.id) | Q(user1=user.id, user2=request.user.id) ).first()
                 if (friend):
                     friend.delete()

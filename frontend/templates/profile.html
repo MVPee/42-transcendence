@@ -1,17 +1,17 @@
 {% load static %}
 
 {% if user.username == request.user.username %}
-  <h2>My Profile</h2>
+	<h2>My Profile</h2>
 {% else %}
-  <h2>{{ user.username }}'s profile</h2>
+	<h2>{{ user.username }}'s profile</h2>
 {% endif %}
 
 {% if error_message %}
-  <p style="color: red;">{{ error_message }}</p>
+	<p style="color: red;">{{ error_message }}</p>
 {% endif %}
 
 {% if success_message %}
-  <p style="color: green;">{{ success_message }}</p>
+	<p style="color: green;">{{ success_message }}</p>
 {% endif %}
 
 <p><strong>Username:</strong> {{ user.username }}</p>
@@ -22,13 +22,14 @@
 <p><strong>Joined on:</strong> {{ user.created_at|date:"F j, Y" }}</p>
 
 {% if user.username == request.user.username %}
-  <form action="/ssr/logout/" method="post" id="logout-link">
-    {% csrf_token %}
-    <button type="submit">logout</button>
-  </form>
+  	<form action="/ssr/logout/" method="post" id="logout-link">
+    	{% csrf_token %}
+    	<button type="submit">logout</button>
+	</form>
+
 {% else %}
 
-  {% if not blocked %}
+	{% if not blocked %}
 		{% if not friend %}
 			<form action="/ssr/friend/" method="post">
 				{% csrf_token %}
@@ -53,12 +54,14 @@
 
 
 	{% if not blocked %}
-		<form action="/ssr/block/" method="post">
-			{% csrf_token %}
-			<input type="hidden" name="type" value="add">
-			<input type="hidden" name="profile" value="{{ user.username }}">
-			<button type="submit" class="btn btn-danger">Block Request</button>
-		</form>
+		{% if not friend %}
+			<form action="/ssr/block/" method="post">
+				{% csrf_token %}
+				<input type="hidden" name="type" value="add">
+				<input type="hidden" name="profile" value="{{ user.username }}">
+				<button type="submit" class="btn btn-danger">Block Request</button>
+			</form>
+		{% endif %}
 	{% else %}
 		<form action="/ssr/block/" method="post">
 			{% csrf_token %}
@@ -66,5 +69,9 @@
 			<input type="hidden" name="profile" value="{{ user.username }}">
 			<button type="submit" class="btn btn-info">Unblock Request</button>
 		</form>
-  {% endif %}
+	{% endif %}
+
 {% endif %}
+
+<h3>Match History</h3>
+<p>loading ...</p>
