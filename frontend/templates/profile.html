@@ -27,31 +27,43 @@
     <button type="submit">logout</button>
   </form>
 {% else %}
-  <form action="/ssr/friend/" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="type" value="add">
-    <input type="hidden" name="profile" value="{{ user.username }}">
-    <button type="submit" class="btn btn-success">Friend Request</button>
-  </form>
 
-  <form action="/ssr/friend/" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="type" value="remove">
-    <input type="hidden" name="profile" value="{{ user.username }}">
-    <button type="submit" class="btn btn-danger">Friend Remove</button>
-  </form>
+  	{% if not blocked %}
+		{% if not friend %}
+			<form action="/ssr/friend/" method="post">
+				{% csrf_token %}
+				<input type="hidden" name="type" value="add">
+				<input type="hidden" name="profile" value="{{ user.username }}">
+				<button type="submit" class="btn btn-success">Friend Request</button>
+			</form>
+		{% else %}
+			<form action="/ssr/friend/" method="post">
+				{% csrf_token %}
+				<input type="hidden" name="type" value="remove">
+				<input type="hidden" name="profile" value="{{ user.username }}">
+				{% if not friend_request %}
+					<button type="submit" class="btn btn-danger">Cancel friend request</button>
+				{% else %}
+					<button type="submit" class="btn btn-danger">Friend Remove</button>
+				{% endif %}
+			</form>
+		{% endif %}
+	{% endif %}
 
-  <form action="/ssr/block/" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="type" value="add">
-    <input type="hidden" name="profile" value="{{ user.username }}">
-    <button type="submit" class="btn btn-danger">Block Request</button>
-  </form>
 
-  <form action="/ssr/block/" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="type" value="remove">
-    <input type="hidden" name="profile" value="{{ user.username }}">
-    <button type="submit" class="btn btn-info">Unblock Request</button>
-  </form>
+	{% if not blocked %}
+		<form action="/ssr/block/" method="post">
+			{% csrf_token %}
+			<input type="hidden" name="type" value="add">
+			<input type="hidden" name="profile" value="{{ user.username }}">
+			<button type="submit" class="btn btn-danger">Block Request</button>
+		</form>
+	{% else %}
+		<form action="/ssr/block/" method="post">
+			{% csrf_token %}
+			<input type="hidden" name="type" value="remove">
+			<input type="hidden" name="profile" value="{{ user.username }}">
+			<button type="submit" class="btn btn-info">Unblock Request</button>
+		</form>
+  {% endif %}
 {% endif %}

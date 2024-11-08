@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 from srcs.user.models import CustomUser as User
+from srcs.community.models import Blocked, Friend
 
 class BaseSSRView(View):
     """
@@ -32,6 +33,9 @@ class BaseSSRView(View):
     context = None
     user = None
     all_users = None
+    friend = None
+    friend_request = None
+    blocked = None
 
     def get(self, request):
         """
@@ -57,6 +61,9 @@ class BaseSSRView(View):
             'success_message': self.success_message,
             'user': self.user,
             'all_users': self.all_users,
+            'friend': self.friend,
+            'friend_request': self.friend_request,
+            'blocked': self.blocked,
         }
 
         # Check if the page requires authentication
@@ -234,9 +241,40 @@ class FriendRequest(BaseSSRView):
         print("FRIEND REQUEST") #* Debug
         print("profile:", profile) #* Debug
         print("type:", type) #* Debug
+
         user = User.objects.filter(username=profile).first()
         if user is None:
             user = request.user
+        else:
+            friend = Friend.objects.filter(user1=request.user.id, user2=user.id).first()
+
+            if type=='add':
+                if friend is None: #* Create a new friend with status pending
+                    new_friend = Friend.objects.create(user1=request.user, user2=user, status=True)
+                    new_friend.save()
+                    self.success_message = f"Sucessfuly sent a friend request to {profile}."
+                else:
+                    if friend.status is False:
+                        self.error_message = f"A friend request was already sent to {profile}."
+                    else :
+                        self.error_message = f"{profile} is already your friend."
+                self.friend = True
+                self.friend_request = True
+
+            elif type=='remove':
+                if friend is None:
+                    self.error_message = f"{profile} is not in your friend list."
+                else:
+                    if friend.status is False:
+                        self.success_message = f"{profile} friend request sucessfuly aborted."
+                    else :
+                        self.success_message = f"{profile} has been removed from your friends."
+                self.friend = False
+                self.friend_request = False
+                friend.delete()
+
+            self.blocked = (request.user != user) and (Blocked.objects.filter(user1=request.user.id, user2=user.id).first() != None)
+
         self.user = user
         return super().get(request)
 
@@ -261,5 +299,31 @@ class BlockRequest(BaseSSRView):
         user = User.objects.filter(username=profile).first()
         if user is None:
             user = request.user
+        else:
+            blocked = Blocked.objects.filter(user1=request.user.id, user2=user.id).first()
+
+            if type=='add':
+                if blocked is None: 
+                    new_blocked = Blocked.objects.create(user1=request.user, user2=user)
+                    new_blocked.save()
+                    self.success_message = f"Sucessfuly blocked {profile}."
+                else:
+                    self.error_message = f"{profile} is already blocked."
+            elif type=='remove':
+                if blocked is None: 
+                    self.error_message = f"{profile} was not blocked."
+                else:
+                    blocked.delete()
+                    self.success_message = f"{profile} is not blocked anymore."
+
+            #* remove the friend relation in the database if they were friend
+            friend = Friend.objects.filter(user1=request.user.id, user2=user.id).first()
+            if (friend != None):
+                friend.delete()
+
+            self.friend = False 
+            self.friend_request = False
+            self.blocked = type=='add'
+        
         self.user = user
         return super().get(request)
