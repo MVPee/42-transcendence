@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'srcs.user',
     'srcs.ssr',
     'srcs.api',
+    'srcs.community',
+    'srcs.game',
 ]
 
 MIDDLEWARE = [
