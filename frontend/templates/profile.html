@@ -28,7 +28,7 @@
   </form>
 {% else %}
 
-  	{% if not blocked %}
+  {% if not blocked %}
 		{% if not friend %}
 			<form action="/ssr/friend/" method="post">
 				{% csrf_token %}
@@ -42,7 +42,7 @@
 				<input type="hidden" name="type" value="remove">
 				<input type="hidden" name="profile" value="{{ user.username }}">
 				{% if not friend_request %}
-					<button type="submit" class="btn btn-danger">Cancel friend request</button>
+					<button type="submit" class="btn btn-warning">Cancel friend request</button>
 				{% else %}
 					<button type="submit" class="btn btn-danger">Friend Remove</button>
 				{% endif %}

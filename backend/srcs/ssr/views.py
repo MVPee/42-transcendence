@@ -250,7 +250,7 @@ class FriendRequest(BaseSSRView):
 
             if type=='add':
                 if friend is None: #* Create a new friend with status pending
-                    new_friend = Friend.objects.create(user1=request.user, user2=user, status=True)
+                    new_friend = Friend.objects.create(user1=request.user, user2=user, status=False)
                     new_friend.save()
                     self.success_message = f"Sucessfuly sent a friend request to {profile}."
                 else:
@@ -259,7 +259,7 @@ class FriendRequest(BaseSSRView):
                     else :
                         self.error_message = f"{profile} is already your friend."
                 self.friend = True
-                self.friend_request = True
+                self.friend_request = friend != None and friend.status
 
             elif type=='remove':
                 if friend is None:
