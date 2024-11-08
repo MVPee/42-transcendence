@@ -215,13 +215,48 @@ class ProfileView(BaseSSRView):
             user = request.user
         self.user = user
         return super().get(request)
+
+
+class FriendRequest(BaseSSRView):
+    """
+    Handling friend requests on the 'profile' page.
+    Inherits from BaseSSRView and sets the page attribute to 'profile'.
+    
+    Methods:
+        post(request): Processes friend requests based on the profile, action, and type parameters in the request body.
+    """
+
+    page = 'profile'
     
     def post(self, request):
         profile = request.POST.get('profile')
-        action = request.POST.get('action')
         type = request.POST.get('type')
+        print("FRIEND REQUEST") #* Debug
         print("profile:", profile) #* Debug
-        print("action:", action) #* Debug
+        print("type:", type) #* Debug
+        user = User.objects.filter(username=profile).first()
+        if user is None:
+            user = request.user
+        self.user = user
+        return super().get(request)
+
+
+class BlockRequest(BaseSSRView):
+    """
+    Handling block requests on the 'profile' page.
+    Inherits from BaseSSRView and sets the page attribute to 'profile'.
+    
+    Methods:
+        post(request): Processes friend requests based on the profile, action, and type parameters in the request body.
+    """
+
+    page = 'profile'
+    
+    def post(self, request):
+        profile = request.POST.get('profile')
+        type = request.POST.get('type')
+        print("BLOCK REQUEST") #* Debug
+        print("profile:", profile) #* Debug
         print("type:", type) #* Debug
         user = User.objects.filter(username=profile).first()
         if user is None:

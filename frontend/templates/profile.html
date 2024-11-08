@@ -24,33 +24,29 @@
 {% if user.username == request.user.username %}
   <a href="/logout" class="link btn btn-danger">Logout</a>
 {% else %}
-  <form action="/ssr/view/profile/" method="post">
+  <form action="/ssr/friend/" method="post">
     {% csrf_token %}
-    <input type="hidden" name="action" value="friend">
     <input type="hidden" name="type" value="add">
     <input type="hidden" name="profile" value="{{ user.username }}">
     <button type="submit" class="btn btn-success">Friend Request</button>
   </form>
 
-  <form action="/ssr/view/profile/" method="post">
+  <form action="/ssr/friend/" method="post">
     {% csrf_token %}
-    <input type="hidden" name="action" value="friend">
     <input type="hidden" name="type" value="remove">
     <input type="hidden" name="profile" value="{{ user.username }}">
     <button type="submit" class="btn btn-danger">Friend Remove</button>
   </form>
 
-  <form action="/ssr/view/profile/" method="post">
+  <form action="/ssr/block/" method="post">
     {% csrf_token %}
-    <input type="hidden" name="action" value="blocked">
     <input type="hidden" name="type" value="add">
     <input type="hidden" name="profile" value="{{ user.username }}">
     <button type="submit" class="btn btn-danger">Block Request</button>
   </form>
 
-  <form action="/ssr/view/profile/" method="post">
+  <form action="/ssr/block/" method="post">
     {% csrf_token %}
-    <input type="hidden" name="action" value="blocked">
     <input type="hidden" name="type" value="remove">
     <input type="hidden" name="profile" value="{{ user.username }}">
     <button type="submit" class="btn btn-info">Unblock Request</button>
