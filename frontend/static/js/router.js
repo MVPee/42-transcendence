@@ -13,8 +13,8 @@ function loadContent(page, queryString = '', addHistory = true) {
     })
     .then(data => {
 
-        if (data.redirect_url)
-            window.location.href = data.redirect_url;
+        // if (data.redirect_url)
+        //     window.location.href = data.redirect_url;
 
         // Insert the HTML content
         const contentElement = document.getElementById('content');

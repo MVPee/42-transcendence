@@ -138,7 +138,7 @@ class LoginView(BaseSSRView):
             return super().get(request)
 
 
-class LogoutView(BaseSSRView):
+class LogoutRequest(BaseSSRView):
     """
     A view for 'logout'.
     Inherits from BaseSSRView and sets the page attribute to 'login'.
@@ -146,7 +146,7 @@ class LogoutView(BaseSSRView):
     
     page = 'login'
 
-    def get(self, request):
+    def post(self, request):
         if request.user.is_authenticated:
             logout(request)
             self.success_message = 'Logout successfull.'
