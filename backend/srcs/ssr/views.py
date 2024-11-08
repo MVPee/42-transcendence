@@ -7,7 +7,7 @@ from srcs.user.models import CustomUser as User
 
 class BaseSSRView(View):
     """
-    A base SSR view that serves different pages as JSON responses,
+    A base Server Side Rendering view that serves different pages as JSON responses,
     with optional authentication requirements.
 
     Attributes:
@@ -210,6 +210,19 @@ class ProfileView(BaseSSRView):
         #? /profile/?profile=exemple
         profile = request.GET.get('profile')
         # print("profile:", profile) #* Debug
+        user = User.objects.filter(username=profile).first()
+        if user is None:
+            user = request.user
+        self.user = user
+        return super().get(request)
+    
+    def post(self, request):
+        profile = request.POST.get('profile')
+        action = request.POST.get('action')
+        type = request.POST.get('type')
+        print("profile:", profile) #* Debug
+        print("action:", action) #* Debug
+        print("type:", type) #* Debug
         user = User.objects.filter(username=profile).first()
         if user is None:
             user = request.user
