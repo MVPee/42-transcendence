@@ -311,7 +311,22 @@ class SettingsRequest(BaseSSRView):
         action = request.POST.get('action')
         value = request.POST.get('value')
 
-        if (action == 'username' and value):
+        if action == 'avatar' and 'avatar' in request.FILES:
+            new_avatar = request.FILES['avatar']
+            valid_extensions = ['png', 'jpeg', 'jpg']
+            if not new_avatar.name.split('.')[-1].lower() in valid_extensions:
+                self.error_message = 'Invalid file format. Only PNG, JPEG, and JPG are allowed.'
+                return super().get(request)
+
+            if not new_avatar.content_type in ['image/png', 'image/jpeg']:
+                self.error_message = 'Invalid file format. Only PNG, JPEG, and JPG are allowed.'
+                return super().get(request)
+
+            self.user.avatar = new_avatar
+            self.user.save()
+            self.success_message = 'Avatar updated successfully.'
+        
+        elif (action == 'username' and value):
             new_username = value
             if User.objects.filter(username=new_username).exclude(id=self.user.id).exists():
                 self.error_message = 'Username already taken.'

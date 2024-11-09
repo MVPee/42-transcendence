@@ -18,6 +18,14 @@
     <button type="submit" class="btn btn-success">Change Username</button>
 </form>
 
+<form action="/ssr/settings/" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="avatar">
+    <label for="avatar">Change Avatar:</label>
+    <input type="file" id="avatar" name="avatar" required>
+    <button type="submit">Change Avatar</button>
+</form>
+
 <form action="/ssr/settings/" method="post">
     {% csrf_token %}
     <label for="email">Change Email:</label>

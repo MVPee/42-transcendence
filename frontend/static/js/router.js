@@ -65,19 +65,15 @@ function handleFormSubmission(event) {
 
     event.preventDefault();
 
-    const formData = new FormData(form);
-    const csrfToken = formData.get('csrfmiddlewaretoken');
-    const data = new URLSearchParams();
-    for (const pair of formData) data.append(pair[0], pair[1]);
+    const formData = new FormData(form);  // Use FormData directly for file uploads
 
     fetch(action, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrfToken,
-        },
-        body: data.toString(),
+        body: formData,  // Pass FormData directly
         credentials: 'same-origin',
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),  // CSRF token, if needed
+        }
     })
     .then(response => {
         if (!response.ok) throw new Error('Network response was not ok');
@@ -109,9 +105,6 @@ function handleFormSubmission(event) {
 
         attachLinkEventListeners();
         updateNavbarLinks();
-
-        if (data.success)
-            history.pushState({ page: 'profile' }, '', '/profile');
     })
     .catch(error => console.error('Error during form submission:', error));
 }
