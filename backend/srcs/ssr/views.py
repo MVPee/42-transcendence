@@ -284,23 +284,29 @@ class SettingsRequest(BaseSSRView):
             new_username = value
             if User.objects.filter(username=new_username).exclude(id=self.user.id).exists():
                 self.error_message = 'Username already taken.'
+            elif self.user.username == new_username:
+                self.error_message = 'You need to use your keyboard to change your username.'
             else:
                 self.user.username = new_username
                 self.user.save()
-                self.success_message = 'Username updated successfully.'
+                self.success_message = f'Username updated successfully to {new_username}'
 
         elif (action == 'email' and value):
             new_email = value
             if User.objects.filter(email=new_email).exclude(id=self.user.id).exists():
                 self.error_message = 'Email already taken.'
+            elif self.user.email == new_email:
+                self.error_message = 'You need to use your keyboard to change your email.'
             else:
                 self.user.email = new_email
                 self.user.save()
-                self.success_message = 'Email updated successfully.'
+                self.success_message = f'Email updated successfully to {new_email}'
 
         elif (action == 'language' and value):
             new_language = value
-            if new_language in ['EN', 'FR', 'DE']:
+            if self.user.language == new_language:
+                self.error_message = 'You need to use your mouse to change your language.'
+            elif new_language in ['EN', 'FR', 'DE']:
                 self.user.language = new_language
                 self.user.save()
                 self.success_message = 'Language updated successfully.'
