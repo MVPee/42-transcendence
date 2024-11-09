@@ -14,6 +14,10 @@
 	<p style="color: green;">{{ success_message }}</p>
 {% endif %}
 
+{% if friend %}
+	<a href="/chat/{{ friend.id }}" class="link btn btn-info">Chat</a>
+{% endif %}
+
 <p><strong>Username:</strong> {{ user.username }}</p>
 <p><strong>Email:</strong> {{ user.email }}</p>
 <p><strong>Elo:</strong> {{ user.elo }}</p>

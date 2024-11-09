@@ -25,7 +25,7 @@ class BaseSSRView(View):
         'community': {'template': 'community.html', 'auth_required': True},
         'login': {'template': 'login.html', 'auth_required': False},
         'register': {'template': 'register.html', 'auth_required': False},
-        'websocket': {'template': 'websocket.html', 'auth_required': True},
+        'chat': {'template': 'chat.html', 'auth_required': True},
     }
 
     page = None
@@ -38,7 +38,7 @@ class BaseSSRView(View):
     friend_request = None
     blocked = None
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         """
         Handles GET requests and returns the content of the requested page
         as a JSON response. If the page requires authentication, checks the
@@ -117,6 +117,25 @@ class ScoreboardView(BaseSSRView):
 
     def get(self, request):
         self.all_users = User.objects.all().order_by('-elo')
+        return super().get(request)
+
+
+class ChatView(BaseSSRView):
+    """
+    A view for the 'chat' page.
+    Inherits from BaseSSRView and sets the page attribute to 'chat'.
+    """
+
+    page = 'chat'
+
+    def get(self, request, *args, **kwargs):
+
+        id = kwargs.get('id')
+        friend = Friend.objects.filter((Q(user1=request.user.id) | Q(user2=request.user.id)), status=True).first()
+        if (friend is None or friend.id != id):
+            self.page = 'community'
+            self.error_message = 'You can\'t access to this page'
+            self.all_users = User.objects.exclude(id=request.user.id)
         return super().get(request)
 
 
@@ -224,7 +243,7 @@ class ProfileView(BaseSSRView):
         else:
             friend = Friend.objects.filter(Q(user1=request.user.id, user2=user.id) | Q(user1=user.id, user2=request.user.id)).first()
             blocked = Blocked.objects.filter(user1=request.user.id, user2=user.id).first()
-            self.friend = friend and friend.status
+            self.friend = friend if friend and friend.status else None
             self.friend_request = friend and (friend.user1 == request.user or friend.status)
             self.blocked = blocked
         self.user = user

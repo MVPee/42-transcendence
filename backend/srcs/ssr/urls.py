@@ -9,6 +9,7 @@ urlpatterns = [
     path('view/register/', RegisterView.as_view(), name='register_view'),
     path('view/community/', CommunityView.as_view(), name='community_view'),
     path('view/scoreboard/', ScoreboardView.as_view(), name='scoreboard_view'),
+    path('view/chat/<int:id>/', ChatView.as_view(), name='Chat_view'),
 
     path('logout/', LogoutRequest.as_view(), name='logout_request'),
     path('friend/', FriendRequest.as_view(), name='friend_request'),

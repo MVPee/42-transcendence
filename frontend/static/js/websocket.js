@@ -12,12 +12,7 @@ function connectWebSocket(link) {
     };
 
     ws.onmessage = (event) => {
-        const messagesDiv = document.getElementById("messages");
-        if (messagesDiv) {
-            const message = document.createElement("p");
-            message.textContent = event.data;
-            messagesDiv.appendChild(message);
-        }
+        console.log(event.data);
     };
 
     ws.onclose = () => {
@@ -37,11 +32,12 @@ function disconnectWebSocket() {
 }
 
 function checkWebsocketPage(page, queryString = '') {
-    // console.log(page);
-    // if (queryString)
-    //     console.log(queryString); //* DEBUG
-    if (page === 'websocket')
-        connectWebSocket("wss://42.mvpee.be/ws/test/");
+    // console.log("Page:", page);
+    const urls = page.split('/');
+    if (urls[0] === 'chat' && urls[1]) {
+        const id = urls[1];
+        connectWebSocket(`wss://42.mvpee.be/ws/${urls[0]}/${id}/`);
+    }
     else
         disconnectWebSocket();
 }

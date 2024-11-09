@@ -13,7 +13,7 @@ import django
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 from channels.auth import AuthMiddlewareStack
-import srcs.user.routing
+import srcs.community.routing
 
 # Add the project root directory to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -24,7 +24,7 @@ application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            srcs.user.routing.websocket_urlpatterns
+            srcs.community.routing.websocket_urlpatterns
         )
     ),
 })
