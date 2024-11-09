@@ -33,6 +33,8 @@ class BaseSSRView(View):
     context = None
     page = None
 
+    language = 'EN'
+
     error_message = None
     success_message = None
 
@@ -66,7 +68,12 @@ class BaseSSRView(View):
 
         page_config = self.pages_config[self.page]
         
+        if (request.user.is_authenticated):
+            user = User.objects.filter(id=request.user.id).first()
+            self.language = user.language
+
         self.context = {
+            'language': self.language,
             'error_message': self.error_message,
             'success_message': self.success_message,
             'user': self.user,
@@ -224,6 +231,9 @@ class ProfileView(BaseSSRView):
     page = 'profile'
 
     def get(self, request):
+
+        if not request.user.is_authenticated: return super().get(request)
+
         #? /profile/?profile=exemple
         profile = request.GET.get('profile')
         # print("profile:", profile) #* Debug

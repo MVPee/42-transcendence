@@ -1,1 +1,7 @@
-<h1>Home</h1>
+{% if language == 'FR' %}
+    <h1>Maison</h1>
+{% elif language == 'DE' %}
+    <h1>Haus</h1>
+{% else %}
+    <h1>Home</h1>
+{% endif %}
