@@ -6,6 +6,8 @@ from django.views import View
 from srcs.user.models import CustomUser as User
 from srcs.community.models import Blocked, Friend
 from srcs.game.models import Match
+from django.utils import timezone
+from datetime import timedelta
 from django.db.models import Q
 
 class BaseSSRView(View):
@@ -45,6 +47,8 @@ class BaseSSRView(View):
     friend_request = None
     blocked = None
 
+    #? Online / Offline / Absent
+    user_status = None 
     matchs = None
     winrate = None
     average_score = None
@@ -70,7 +74,10 @@ class BaseSSRView(View):
         
         if (request.user.is_authenticated):
             user = User.objects.filter(id=request.user.id).first()
-            self.language = user.language
+            if user:
+                user.last_connection = timezone.now()
+                user.save()
+                self.language = user.language
 
         self.context = {
             'language': self.language,
@@ -84,6 +91,7 @@ class BaseSSRView(View):
             'matchs': self.matchs,
             'winrate': self.winrate,
             'average_score': self.average_score,
+            'user_status': self.user_status,
         }
 
         # Check if the page requires authentication
@@ -172,6 +180,16 @@ class LoginView(BaseSSRView):
             self.success_message = 'Login successfull.'
             self.page = 'profile'
             self.user = request.user
+
+            self.matchs = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
+
+            total_matches = self.matchs.count()
+            wins = sum(1 for match in self.matchs if (match.user1 == user and match.user1_score > match.user2_score) or 
+                (match.user2 == user and match.user2_score > match.user1_score))
+            self.average_score = round((sum(match.user1_score for match in self.matchs if match.user1 == user) + 
+                sum(match.user2_score for match in self.matchs if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
+            self.winrate = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
+
             return super().get(request)
         else:
             self.error_message = 'Invalid username or password.'
@@ -256,6 +274,13 @@ class ProfileView(BaseSSRView):
         self.average_score = round((sum(match.user1_score for match in self.matchs if match.user1 == user) + 
                             sum(match.user2_score for match in self.matchs if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
         self.winrate = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
+
+        if (friend and friend.status):
+            time_diff = timezone.now() - user.last_connection
+
+            if time_diff < timedelta(minutes=2): self.user_status = "Online"
+            elif time_diff < timedelta(minutes=5): self.user_status = "Away"
+            else: self.user_status = "Offline"
 
         return super().get(request)
 
@@ -433,6 +458,13 @@ class FriendRequest(BaseSSRView):
         self.average_score = round((sum(match.user1_score for match in self.matchs if match.user1 == user) + 
                             sum(match.user2_score for match in self.matchs if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
         self.winrate = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
+
+        if (friend and friend.status):
+            time_diff = timezone.now() - user.last_connection
+
+            if time_diff < timedelta(minutes=2): self.user_status = "Online"
+            elif time_diff < timedelta(minutes=5): self.user_status = "Away"
+            else: self.user_status = "Offline"
 
         return super().get(request)
 

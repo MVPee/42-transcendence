@@ -8,6 +8,7 @@ class CustomUser(AbstractUser):
     win = models.IntegerField(default=0)
     defeat = models.IntegerField(default=0)
     language = models.CharField(default="EN")
+    last_connection = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):

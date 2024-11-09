@@ -3,15 +3,19 @@
 {% if user.avatar %}
 	{% if user.username == request.user.username %}
 		<h2><img src="{{ user.avatar.url }}" alt="User Avatar" width="50" height="50"/>My Profile</h2>
-	{% else %}
+		{% else %}
 		<h2><img src="{{ user.avatar.url }}" alt="User Avatar" width="50" height="50"/>{{ user.username }}'s profile</h2>
 	{% endif %}
 {% else %}
 	{% if user.username == request.user.username %}
-	<h2><img src="/media/avatars/profile.png" alt="User Avatar" width="50" height="50"/>My Profile</h2>
+		<h2><img src="/media/avatars/profile.png" alt="User Avatar" width="50" height="50"/>My Profile</h2>
 	{% else %}
-	<h2><img src="/media/avatars/profile.png" alt="User Avatar" width="50" height="50"/>{{ user.username }}'s profile</h2>
+		<h2><img src="/media/avatars/profile.png" alt="User Avatar" width="50" height="50"/>{{ user.username }}'s profile</h2>
 	{% endif %}
+{% endif %}
+
+{% if user_status %}
+	<p>{{ user_status }}</p>
 {% endif %}
 
 {% if error_message %}
