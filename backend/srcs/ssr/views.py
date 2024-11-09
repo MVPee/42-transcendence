@@ -22,6 +22,7 @@ class BaseSSRView(View):
         'home': {'template': 'home.html', 'auth_required': False},
         'scoreboard': {'template': 'scoreboard.html', 'auth_required': False},
         'profile': {'template': 'profile.html', 'auth_required': True},
+        'settings': {'template': 'settings.html', 'auth_required': True},
         'community': {'template': 'community.html', 'auth_required': True},
         'login': {'template': 'login.html', 'auth_required': False},
         'register': {'template': 'register.html', 'auth_required': False},
@@ -87,11 +88,6 @@ class HomeView(BaseSSRView):
     """
 
     page = 'home'
-
-
-class WebSocketView(BaseSSRView):
-
-    page = 'websocket'
 
 
 class CommunityView(BaseSSRView):
@@ -165,23 +161,6 @@ class LoginView(BaseSSRView):
             return super().get(request)
 
 
-class LogoutRequest(BaseSSRView):
-    """
-    A view for 'logout'.
-    Inherits from BaseSSRView and sets the page attribute to 'login'.
-    """
-    
-    page = 'login'
-
-    def post(self, request):
-        if request.user.is_authenticated:
-            logout(request)
-            self.success_message = 'Logout successfull.'
-        else:
-            self.error_message = 'You are not authenticated.'
-        return super().get(request)
-
-
 class RegisterView(BaseSSRView):
     """
     A view for the 'register' page.
@@ -247,6 +226,87 @@ class ProfileView(BaseSSRView):
             self.friend_request = friend and (friend.user1 == request.user or friend.status)
             self.blocked = blocked
         self.user = user
+        return super().get(request)
+
+
+class SettingsView(BaseSSRView):
+    """
+    A view for the 'settings' page.
+    Inherits from BaseSSRView and sets the page attribute to 'settings'.
+    
+    Methods:
+        get(request): Overrides the base get method to allow retrieving
+            a profile parameter from the request's query string.
+    """
+    
+    page = 'settings'
+
+    def get(self, request):
+        self.user = request.user
+        return super().get(request)
+
+
+class LogoutRequest(BaseSSRView):
+    """
+    A view for 'logout'.
+    Inherits from BaseSSRView and sets the page attribute to 'login'.
+    """
+    
+    page = 'login'
+
+    def post(self, request):
+        if request.user.is_authenticated:
+            logout(request)
+            self.success_message = 'Logout successfull.'
+        else:
+            self.error_message = 'You are not authenticated.'
+        return super().get(request)
+
+
+class SettingsRequest(BaseSSRView):
+    """
+    A view for the 'settings' page.
+    Inherits from BaseSSRView and sets the page attribute to 'settings'.
+    
+    Methods:
+        get(request): Overrides the base get method to allow retrieving
+            a profile parameter from the request's query string.
+    """
+    
+    page = 'settings'
+
+    def post(self, request):
+        self.user = request.user
+        action = request.POST.get('action')
+        value = request.POST.get('value')
+
+        if (action == 'username' and value):
+            new_username = value
+            if User.objects.filter(username=new_username).exclude(id=self.user.id).exists():
+                self.error_message = 'Username already taken.'
+            else:
+                self.user.username = new_username
+                self.user.save()
+                self.success_message = 'Username updated successfully.'
+
+        elif (action == 'email' and value):
+            new_email = value
+            if User.objects.filter(email=new_email).exclude(id=self.user.id).exists():
+                self.error_message = 'Email already taken.'
+            else:
+                self.user.email = new_email
+                self.user.save()
+                self.success_message = 'Email updated successfully.'
+
+        elif (action == 'language' and value):
+            new_language = value
+            if new_language in ['EN', 'FR', 'DE']:
+                self.user.language = new_language
+                self.user.save()
+                self.success_message = 'Language updated successfully.'
+            else:
+                self.error_message = 'Invalid language selection.'
+
         return super().get(request)
 
 

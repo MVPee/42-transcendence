@@ -1,0 +1,39 @@
+{% load static %}
+
+<h2>Settings</h2>
+
+{% if error_message %}
+	<p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+{% if success_message %}
+	<p style="color: green;">{{ success_message }}</p>
+{% endif %}
+
+<form action="/ssr/settings/" method="post">
+    {% csrf_token %}
+    <label for="username">Change Username:</label>
+    <input type="hidden" name="action" value="username">
+    <input type="text" id="username" name="value" value="{{ user.username }}" minlength="5" maxlength="20" required>
+    <button type="submit" class="btn btn-success">Change Username</button>
+</form>
+
+<form action="/ssr/settings/" method="post">
+    {% csrf_token %}
+    <label for="email">Change Email:</label>
+    <input type="hidden" name="action" value="email">
+    <input type="email" id="email" name="value" value="{{ user.email }}" required>
+    <button type="submit" class="btn btn-success">Change Email</button>
+</form>
+
+<form action="/ssr/settings/" method="post">
+    {% csrf_token %}
+    <label for="language">Select Language:</label>
+    <input type="hidden" name="action" value="language">
+    <select id="language" name="value" required>
+        <option value="EN" {% if user.language == "EN" %}selected{% endif %}>English (EN)</option>
+        <option value="FR" {% if user.language == "FR" %}selected{% endif %}>French (FR)</option>
+        <option value="DE" {% if user.language == "DE" %}selected{% endif %}>German (DE)</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Change Language</button>
+</form>

@@ -6,6 +6,7 @@ class CustomUser(AbstractUser):
     elo = models.IntegerField(default=0)
     win = models.IntegerField(default=0)
     defeat = models.IntegerField(default=0)
+    language = models.CharField(default="EN")
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):

@@ -6,12 +6,14 @@ function updateNavbarLinks() {
           // User is authenticated
           document.getElementById("community-link").style.display = "inline";
           document.getElementById("profile-link").style.display = "inline";
+          document.getElementById("settings-link").style.display = "inline";
           document.getElementById("login-link").style.display = "none";
           document.getElementById("register-link").style.display = "none";
         } else {
           // User is not authenticated
           document.getElementById("community-link").style.display = "none";
           document.getElementById("profile-link").style.display = "none";
+          document.getElementById("settings-link").style.display = "none";
           document.getElementById("login-link").style.display = "inline";
           document.getElementById("register-link").style.display = "inline";
         }
