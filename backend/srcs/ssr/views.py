@@ -242,9 +242,9 @@ class ProfileView(BaseSSRView):
         total_matches = self.matchs.count()
         wins = sum(1 for match in self.matchs if (match.user1 == user and match.user1_score > match.user2_score) or 
                    (match.user2 == user and match.user2_score > match.user1_score))
-        self.average_score = (sum(match.user1_score for match in self.matchs if match.user1 == user) + 
-                         sum(match.user2_score for match in self.matchs if match.user2 == user)) / total_matches if total_matches > 0 else 0
-        self.winrate = (wins / total_matches * 100) if total_matches > 0 else 0
+        self.average_score = round((sum(match.user1_score for match in self.matchs if match.user1 == user) + 
+                            sum(match.user2_score for match in self.matchs if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
+        self.winrate = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
 
         return super().get(request)
 
