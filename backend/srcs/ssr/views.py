@@ -237,6 +237,7 @@ class ProfileView(BaseSSRView):
         self.friend_request = friend and (friend.user1 == request.user or friend.status)
         self.blocked = blocked
         self.user = user
+
         self.matchs = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
 
         total_matches = self.matchs.count()
@@ -398,6 +399,16 @@ class FriendRequest(BaseSSRView):
             self.blocked = Blocked.objects.filter(user1=request.user.id, user2=user.id).first()
 
         self.user = user
+
+        self.matchs = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
+
+        total_matches = self.matchs.count()
+        wins = sum(1 for match in self.matchs if (match.user1 == user and match.user1_score > match.user2_score) or 
+                   (match.user2 == user and match.user2_score > match.user1_score))
+        self.average_score = round((sum(match.user1_score for match in self.matchs if match.user1 == user) + 
+                            sum(match.user2_score for match in self.matchs if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
+        self.winrate = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
+
         return super().get(request)
 
 
@@ -447,4 +458,14 @@ class BlockRequest(BaseSSRView):
             self.blocked = type=='add'
         
         self.user = user
+
+        self.matchs = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
+
+        total_matches = self.matchs.count()
+        wins = sum(1 for match in self.matchs if (match.user1 == user and match.user1_score > match.user2_score) or 
+                   (match.user2 == user and match.user2_score > match.user1_score))
+        self.average_score = round((sum(match.user1_score for match in self.matchs if match.user1 == user) + 
+                            sum(match.user2_score for match in self.matchs if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
+        self.winrate = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
+        
         return super().get(request)
