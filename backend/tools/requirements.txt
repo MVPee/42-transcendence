@@ -8,5 +8,8 @@ psycopg2==2.9.10
 channels==3.0.4
 channels_redis==4.2.0
 
+# Image field (models)
+Pillow
+
 # Redis for asynchronous operations
 redis==5.1.1

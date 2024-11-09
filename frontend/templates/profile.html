@@ -1,9 +1,9 @@
 {% load static %}
 
 {% if user.username == request.user.username %}
-	<h2>My Profile</h2>
+	<h2><img src="{{ user.avatar.url }}" alt="User Avatar" width="50" height="50"/>My Profile</h2>
 {% else %}
-	<h2>{{ user.username }}'s profile</h2>
+	<h2><img src="{{ user.avatar.url }}" alt="User Avatar" width="50" height="50"/>{{ user.username }}'s profile</h2>
 {% endif %}
 
 {% if error_message %}
@@ -79,6 +79,9 @@
 
 <h3>Player Statistics</h3>
 <div>
+	<p><strong>Elo:</strong> {{ user.elo }}</p>
+	<p><strong>Win:</strong> {{ user.win }}</p>
+	<p><strong>Defeat:</strong> {{ user.defeat }}</p>
     <p><strong>Winrate:</strong> {{ winrate }}%</p>
     <p><strong>Average Score:</strong> {{ average_score }}</p>
 </div>

@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.db import models
 
 class CustomUser(AbstractUser):
+    avatar = models.ImageField(upload_to='avatars/', default='/frontend/media/avatars/profile.png', blank=True)
     elo = models.IntegerField(default=0)
     win = models.IntegerField(default=0)
     defeat = models.IntegerField(default=0)
