@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views import View
 from srcs.user.models import CustomUser as User
 from srcs.community.models import Blocked, Friend
+from srcs.game.models import Match
 from django.db.models import Q
 
 class BaseSSRView(View):
@@ -29,15 +30,22 @@ class BaseSSRView(View):
         'chat': {'template': 'chat.html', 'auth_required': True},
     }
 
+    context = None
     page = None
+
     error_message = None
     success_message = None
-    context = None
+
     user = None
     all_users = None
+
     friend = None
     friend_request = None
     blocked = None
+
+    matchs = None
+    winrate = None
+    average_score = None
 
     def get(self, request, *args, **kwargs):
         """
@@ -66,6 +74,9 @@ class BaseSSRView(View):
             'friend': self.friend,
             'friend_request': self.friend_request,
             'blocked': self.blocked,
+            'matchs': self.matchs,
+            'winrate': self.winrate,
+            'average_score': self.average_score,
         }
 
         # Check if the page requires authentication
@@ -219,13 +230,22 @@ class ProfileView(BaseSSRView):
         user = User.objects.filter(username=profile).first()
         if user is None:
             user = request.user
-        else:
-            friend = Friend.objects.filter(Q(user1=request.user.id, user2=user.id) | Q(user1=user.id, user2=request.user.id)).first()
-            blocked = Blocked.objects.filter(user1=request.user.id, user2=user.id).first()
-            self.friend = friend if friend and friend.status else None
-            self.friend_request = friend and (friend.user1 == request.user or friend.status)
-            self.blocked = blocked
+
+        friend = Friend.objects.filter(Q(user1=request.user.id, user2=user.id) | Q(user1=user.id, user2=request.user.id)).first()
+        blocked = Blocked.objects.filter(user1=request.user.id, user2=user.id).first()
+        self.friend = friend if friend and friend.status else None
+        self.friend_request = friend and (friend.user1 == request.user or friend.status)
+        self.blocked = blocked
         self.user = user
+        self.matchs = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
+
+        total_matches = self.matchs.count()
+        wins = sum(1 for match in self.matchs if (match.user1 == user and match.user1_score > match.user2_score) or 
+                   (match.user2 == user and match.user2_score > match.user1_score))
+        self.average_score = (sum(match.user1_score for match in self.matchs if match.user1 == user) + 
+                         sum(match.user2_score for match in self.matchs if match.user2 == user)) / total_matches if total_matches > 0 else 0
+        self.winrate = (wins / total_matches * 100) if total_matches > 0 else 0
+
         return super().get(request)
 
 
