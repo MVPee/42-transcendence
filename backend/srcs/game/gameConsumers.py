@@ -9,27 +9,26 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class GameConsumer(AsyncWebsocketConsumer):
-    
+
+    player1Choose = None
+    player2Choose = None
+
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
         self.user = self.scope['user']
         self.room_group_name = f"game_{self.game_id}"
 
-        # Vérifiez si le joueur se reconnecte après une déconnexion
         disconnect_key = f"player_disconnected_{self.game_id}"
         was_disconnected = cache.get(disconnect_key) == self.user.username
 
-        # Supprimez la clé de déconnexion pour indiquer que le joueur est maintenant reconnecté
         cache.delete(disconnect_key)
 
-        # Ajouter le joueur au groupe
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
 
         if was_disconnected:
-            # Si le joueur se reconnecte, notifiez l'autre joueur
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -41,14 +40,11 @@ class GameConsumer(AsyncWebsocketConsumer):
         try:
             self.match = await sync_to_async(Match.objects.get)(id=self.game_id)
         
-            # Récupérer les noms des joueurs
             self.player1 = await sync_to_async(lambda: self.match.user1 if self.match.user1 else "Player1")()
             self.player2 = await sync_to_async(lambda: self.match.user2 if self.match.user2 else "Player2")()
             
-            # Accepter la connexion WebSocket
             await self.accept()
             
-            # Envoyer les informations des joueurs au client
             await self.send(text_data=json.dumps({
                 "type": "player_info",
                 "player1": self.player1.username,
@@ -67,9 +63,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         if not points_awarded and hasattr(self, 'match'):
             disconnect_key = f"player_disconnected_{self.game_id}"
-            cache.set(disconnect_key, self.user.username, timeout=15)
+            cache.set(disconnect_key, self.user.username, timeout=20)
 
-            # Notifier le joueur restant de la déconnexion
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -78,7 +73,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-            # Démarrer une tâche asynchrone pour attendre la reconnexion
             asyncio.create_task(self.wait_for_reconnection(disconnect_key, points_awarded_key))
 
         await self.channel_layer.group_discard(
@@ -89,7 +83,6 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def wait_for_reconnection(self, disconnect_key, points_awarded_key):
         await asyncio.sleep(15)
 
-        # Vérifiez si le joueur ne s'est pas reconnecté
         if cache.get(disconnect_key) == self.user.username:
             if self.match.user1 == self.user:
                 await self.set_points_to(2, 5)
@@ -100,7 +93,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
             cache.set(points_awarded_key, True, timeout=None)
 
-            # Notifier le joueur restant de la redirection
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -133,14 +125,12 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.match.user2.save()
 
     async def redirect_remaining_player(self, event):
-        # Vérifier que seul le joueur restant est redirigé
         if event["remaining_player"] == self.user.username:
             await self.send(text_data=json.dumps({
                 "type": "redirect"
             }))
 
     async def send_info(self, event):
-        # Envoyer un message pour notifier le joueur restant
         await self.send(text_data=json.dumps({
             "type": "info",
             "info": event["message"]
