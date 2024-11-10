@@ -77,7 +77,9 @@ function gameWebsocket(link) {
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
 
-        if (data.type === "player_info") {
+        if (data.type === "player_movement")
+            console.log(`Player ${data.player} moved: ${data.direction}`);
+        else if (data.type === "player_info") {
             // Display "Player1 vs Player2"
             const playerDisplay = document.getElementById("player-display");
             playerDisplay.textContent = `${data.player1} vs ${data.player2}`;
@@ -99,6 +101,19 @@ function gameWebsocket(link) {
     ws.onerror = (error) => {
         console.error("WebSocket error:", error);
     };
+
+    document.addEventListener("keydown", (event) => {
+        let direction = null;
+        if (event.key === "ArrowUp") direction = "up";
+        if (event.key === "ArrowDown") direction = "down";
+
+        if (direction) {
+            ws.send(JSON.stringify({
+                type: "movement",
+                direction: direction,
+            }));
+        }
+    });
 }
 
 function disconnectWebSocket() {

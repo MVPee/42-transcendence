@@ -54,8 +54,33 @@ class GameConsumer(AsyncWebsocketConsumer):
         except Match.DoesNotExist:
             await self.close()
 
-    async def receive(self, text_data):
+        await self.gameProcess()
+
+    async def gameProcess(self):
         pass
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        if data["type"] == "movement":
+            direction = data["direction"]
+
+            # Broadcast the movement to other players
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "player_movement",
+                    "player": self.user.username,
+                    "direction": direction
+                }
+            )
+
+    async def player_movement(self, event):
+        # Send the movement data to WebSocket
+        await self.send(text_data=json.dumps({
+            "type": "player_movement",
+            "player": event["player"],
+            "direction": event["direction"]
+        }))
 
     async def disconnect(self, close_code):
         points_awarded_key = f"points_awarded_{self.game_id}"
