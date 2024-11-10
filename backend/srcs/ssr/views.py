@@ -9,6 +9,8 @@ from srcs.game.models import Match
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
+from django.conf import settings
+import os
 
 class BaseSSRView(View):
     """
@@ -346,6 +348,12 @@ class SettingsRequest(BaseSSRView):
             if not new_avatar.content_type in ['image/png', 'image/jpeg']:
                 self.error_message = 'Invalid file format. Only PNG, JPEG, and JPG are allowed.'
                 return super().get(request)
+
+            # Delete the old avatar if it exists and isn't the default avatar
+            if self.user.avatar and self.user.avatar.url != '/frontend/media/avatars/profile.png':
+                old_avatar_path = os.path.join(settings.MEDIA_ROOT, self.user.avatar.path)
+                if os.path.isfile(old_avatar_path):
+                    os.remove(old_avatar_path)
 
             self.user.avatar = new_avatar
             self.user.save()
