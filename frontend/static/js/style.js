@@ -4,7 +4,6 @@ function updateNavbarLinks() {
       .then(data => {
         if (data.is_authenticated) {
           // User is authenticated
-          document.getElementById("game-link").style.display = "inline";
           document.getElementById("community-link").style.display = "inline";
           document.getElementById("profile-link").style.display = "inline";
           document.getElementById("settings-link").style.display = "inline";
@@ -12,7 +11,6 @@ function updateNavbarLinks() {
           document.getElementById("register-link").style.display = "none";
         } else {
           // User is not authenticated
-          document.getElementById("game-link").style.display = "none";
           document.getElementById("community-link").style.display = "none";
           document.getElementById("profile-link").style.display = "none";
           document.getElementById("settings-link").style.display = "none";
