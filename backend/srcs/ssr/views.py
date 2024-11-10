@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.files.images import get_image_dimensions
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
@@ -349,9 +350,14 @@ class SettingsRequest(BaseSSRView):
                 self.error_message = 'Invalid file format. Only PNG, JPEG, and JPG are allowed.'
                 return super().get(request)
 
+            width, height = get_image_dimensions(new_avatar)
+            if width < 50 or height < 50 or width > 256 or height > 256:
+                self.error_message = 'Avatar dimensions should be between 50x50 pixels and 256x256 pixels.'
+                return super().get(request)
+
             # Delete the old avatar if it exists and isn't the default avatar
-            if self.user.avatar and self.user.avatar.url != '/frontend/media/avatars/profile.png':
-                old_avatar_path = os.path.join(settings.MEDIA_ROOT, self.user.avatar.path)
+            if self.user.avatar.name != 'avatars/profile.png':
+                old_avatar_path = os.path.join(settings.MEDIA_ROOT, self.user.avatar.name)
                 if os.path.isfile(old_avatar_path):
                     os.remove(old_avatar_path)
 
