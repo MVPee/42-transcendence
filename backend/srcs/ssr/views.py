@@ -25,7 +25,7 @@ class BaseSSRView(View):
     """
 
     pages_config = {
-        'home': {'template': 'home.html', 'auth_required': False},
+        'play': {'template': 'play.html', 'auth_required': True},
         'scoreboard': {'template': 'scoreboard.html', 'auth_required': False},
         'profile': {'template': 'profile.html', 'auth_required': True},
         'settings': {'template': 'settings.html', 'auth_required': True},
@@ -33,6 +33,8 @@ class BaseSSRView(View):
         'login': {'template': 'login.html', 'auth_required': False},
         'register': {'template': 'register.html', 'auth_required': False},
         'chat': {'template': 'chat.html', 'auth_required': True},
+        'waiting': {'template': 'waiting.html', 'auth_required': True},
+        'game': {'template': 'game.html', 'auth_required': True},
     }
 
     context = None
@@ -110,13 +112,13 @@ class BaseSSRView(View):
         return JsonResponse({'html': html_content})
 
 
-class HomeView(BaseSSRView):
+class PlayView(BaseSSRView):
     """
-    A view for the 'home' page.
-    Inherits from BaseSSRView and sets the page attribute to 'home'.
+    A view for the index page.
+    Inherits from BaseSSRView and sets the page attribute to 'play'.
     """
 
-    page = 'home'
+    page = 'play'
 
 
 class CommunityView(BaseSSRView):
@@ -142,6 +144,40 @@ class ScoreboardView(BaseSSRView):
 
     def get(self, request):
         self.all_users = User.objects.all().order_by('-elo')
+        return super().get(request)
+
+
+class WaitingView(BaseSSRView):
+    """
+    A view for the 'waiting' page.
+    Inherits from BaseSSRView and sets the page attribute to 'waiting'.
+    """
+
+    page = 'waiting'
+
+    def get(self, request):
+        return super().get(request)
+
+
+class GameView(BaseSSRView):
+    """
+    A view for the 'waiting' page.
+    Inherits from BaseSSRView and sets the page attribute to 'waiting'.
+    """
+
+    page = 'game'
+
+    def get(self, request, *args, **kwargs):
+        matchId = kwargs.get('id')
+        match = Match.objects.filter(id=matchId).first()
+
+        if match is None \
+            or (match.user1.id != request.user.id and match.user2.id != request.user.id) \
+            or (match.user1_score >= 5 or match.user2_score >= 5):
+            self.page = 'play'
+            self.error_message = 'You can\'t have access to this party.'
+            return super().get(request)
+
         return super().get(request)
 
 

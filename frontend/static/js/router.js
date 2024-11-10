@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updateNavbarLinks();
 
     const initialPath = location.pathname;
-    const initialPage = initialPath.replace(/^\/|\/$/g, '') || 'home';
+    const initialPage = initialPath.replace(/^\/|\/$/g, '') || 'play';
     const initialQuery = location.search;
     loadContent(initialPage, initialQuery, false);
 });

@@ -1,0 +1,11 @@
+<h1>Play</h1>
+
+{% if error_message %}
+  <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+{% if success_message %}
+  <p style="color: green;">{{ success_message }}</p>
+{% endif %}
+
+<a href="/waiting" class="link btn btn-success">Join Queue</a>
