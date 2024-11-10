@@ -82,6 +82,10 @@ function gameWebsocket(link) {
             const playerDisplay = document.getElementById("player-display");
             playerDisplay.textContent = `${data.player1} vs ${data.player2}`;
         }
+        else if (data.type === "info") {
+            const infoDisplay = document.getElementById("info");
+            infoDisplay.textContent = data.info;
+        }
         else if (data.type === "redirect") {
             loadContent(`profile`);
             disconnectWebSocket();
