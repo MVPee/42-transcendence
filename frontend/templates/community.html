@@ -24,13 +24,18 @@
 
 {% if all_pendings %}
   {% for pending in all_pendings %}
-    <p>{{ pending.user1.username }} <a class="link" href="/profile?profile={{ pending.user1.username }}"> Profile </a></p>
-      <form action="/ssr/friend/" method="post">
+    <div class="d-flex align-items-center mb-2">
+      <p class="mb-0 me-2">
+          {{ pending.user1.username }}
+          <a class="link" href="/profile?profile={{ pending.user1.username }}">Profile</a>
+      </p>
+      <form action="/ssr/friend/" method="post" class="d-inline">
         {% csrf_token %}
         <input type="hidden" name="profile" value="{{ pending.user1.username }}">
         <input type="hidden" name="type" value="add">
-        <button type="submit" class="btn btn-success">Accept</button>
+        <button type="submit" class="btn btn-success btn-sm ms-2">Accept</button>
       </form>
+    </div>
   {% endfor %}
 {% else %}
   <p>No pending friend requests</p>
