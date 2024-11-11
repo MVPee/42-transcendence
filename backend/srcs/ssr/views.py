@@ -464,9 +464,9 @@ class FriendRequest(BaseSSRView):
     def post(self, request):
         profile = request.POST.get('profile')
         type = request.POST.get('type')
-        print("FRIEND REQUEST") #* Debug
-        print("profile:", profile) #* Debug
-        print("type:", type) #* Debug
+        # print("FRIEND REQUEST") #* Debug
+        # print("profile:", profile) #* Debug
+        # print("type:", type) #* Debug
 
         user = User.objects.filter(username=profile).first()
         if user is None:
@@ -550,9 +550,10 @@ class BlockRequest(BaseSSRView):
     def post(self, request):
         profile = request.POST.get('profile')
         type = request.POST.get('type')
-        print("BLOCK REQUEST") #* Debug
-        print("profile:", profile) #* Debug
-        print("type:", type) #* Debug
+        # print("BLOCK REQUEST") #* Debug
+        # print("profile:", profile) #* Debug
+        # print("type:", type) #* Debug
+
         user = User.objects.filter(username=profile).first()
         if user is None:
             user = request.user
