@@ -9,6 +9,7 @@ from srcs.community.models import Blocked, Friend
 from srcs.game.models import Match
 from django.utils import timezone
 from datetime import timedelta
+from urllib.parse import urlparse
 from django.db.models import Q
 from django.conf import settings
 import os
@@ -230,7 +231,8 @@ class LoginView(BaseSSRView):
         if user is not None:
             login(request, user)
             self.success_message = 'Login successfull.'
-            self.page = 'profile'
+            self.page = urlparse(request.META.get('HTTP_REFERER')).path[1:]
+            if self.page == 'login': self.page = 'profile'
             self.user = request.user
 
             self.matchs = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
