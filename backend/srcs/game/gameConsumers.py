@@ -64,7 +64,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                     "type": "send_info",
                     "message": f"Player {self.user.username} has reconnected."
                 }
-                
             )
 
             # Resume the game
@@ -151,6 +150,9 @@ class GameConsumer(AsyncWebsocketConsumer):
             if not collision:
                 if ball_x <= 0:
                     await self.add_point_to(2)
+
+                    await self.send_score_update()
+
                     winner = await self.check_win()
                     if winner:
                         await self.set_win_to(winner)
@@ -169,6 +171,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 
                 elif ball_x + self.BALL_WIDTH >= self.WIDTH:
                     await self.add_point_to(1)
+
+                    await self.send_score_update()
+
                     winner = await self.check_win()
                     if winner:
                         await self.set_win_to(winner)
@@ -359,4 +364,21 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "info",
             "info": event["message"]
+        }))
+
+    async def send_score_update(self):
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "update_score",
+                "player1_score": self.match.user1_score,
+                "player2_score": self.match.user2_score,
+            }
+        )
+
+    async def update_score(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "update_score",
+            "player1_score": event["player1_score"],
+            "player2_score": event["player2_score"],
         }))

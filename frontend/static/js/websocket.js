@@ -91,6 +91,10 @@ function gameWebsocket(link) {
             ball.style.left = `${data.ball_x}px`;
             ball.style.top = `${data.ball_y}px`;
         }
+        else if (data.type === "update_score") {
+            const scoreDisplay = document.getElementById("player-score");
+            scoreDisplay.textContent = `${data.player1_score} - ${data.player2_score}`;
+        }
         else if (data.type === "player_info") {
             // Afficher "Player1 vs Player2"
             const playerDisplay = document.getElementById("player-display");
