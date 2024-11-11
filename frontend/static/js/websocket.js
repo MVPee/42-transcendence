@@ -1,4 +1,6 @@
 let ws;
+let moveInterval;
+let currentDirection = null;
 
 function chatWebSocket(link) {
     if (ws)
@@ -79,9 +81,6 @@ function gameWebsocket(link) {
         const data = JSON.parse(event.data);
 
         if (data.type === "player_movement") {
-            console.log(`Player ${data.player} moved: ${data.direction}`);
-            console.log(`player1PaddleY ${data.player1PaddleY}\nplayer2PaddleY: ${data.player2PaddleY}`);
-
             const paddle1 = document.getElementById("paddle1");
             const paddle2 = document.getElementById("paddle2");
             paddle1.style.top = `${data.player1PaddleY}px`;
@@ -93,7 +92,7 @@ function gameWebsocket(link) {
             ball.style.top = `${data.ball_y}px`;
         }
         else if (data.type === "player_info") {
-            // Display "Player1 vs Player2"
+            // Afficher "Player1 vs Player2"
             const playerDisplay = document.getElementById("player-display");
             playerDisplay.textContent = `${data.player1} vs ${data.player2}`;
         }
@@ -116,21 +115,42 @@ function gameWebsocket(link) {
     };
 
     document.removeEventListener("keydown", handleKeydown);
+    document.removeEventListener("keyup", handleKeyup);
     document.addEventListener("keydown", handleKeydown);
+    document.addEventListener("keyup", handleKeyup);
 }
 
 function handleKeydown(event) {
+    let direction = null;
     if (event.key === "w" || event.key === "W") direction = "up";
     else if (event.key === "s" || event.key === "S") direction = "down";
     else return;
 
-    if (direction && ws) {
-        ws.send(
-            JSON.stringify({
-                type: "movement",
-                direction: direction,
-            })
-        );
+    if (currentDirection === direction) return;
+
+    currentDirection = direction;
+
+    if (moveInterval) clearInterval(moveInterval);
+
+    moveInterval = setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(
+                JSON.stringify({
+                    type: "movement",
+                    direction: currentDirection,
+                })
+            );
+        }
+    }, 10);
+}
+
+function handleKeyup(event) {
+    let keyReleased = event.key.toLowerCase();
+    if ((keyReleased === "w" && currentDirection === "up") ||
+        (keyReleased === "s" && currentDirection === "down")) {
+        clearInterval(moveInterval);
+        moveInterval = null;
+        currentDirection = null;
     }
 }
 

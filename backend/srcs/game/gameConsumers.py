@@ -10,9 +10,9 @@ User = get_user_model()
 
 class GameConsumer(AsyncWebsocketConsumer):
 
-    PADDLE_SPEED = 4
+    PADDLE_SPEED = 5
 
-    BALL_SPEED = 1
+    BALL_SPEED = 4
 
     HEIGHT = 400
     WIDTH = 600
@@ -108,6 +108,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             ball_dx = game_state['ball_dx']
             ball_dy = game_state['ball_dy']
 
+            # Update ball position
             ball_x += ball_dx
             ball_y += ball_dy
 
@@ -115,12 +116,60 @@ class GameConsumer(AsyncWebsocketConsumer):
             if ball_y <= 0 or ball_y >= self.HEIGHT - self.BALL_HEIGHT:
                 ball_dy *= -1
 
-            # Handle collision with side walls (goals)
-            if ball_x <= 0 or ball_x >= self.WIDTH - self.BALL_WIDTH:  # Assuming game width is 600
-                # Ball went out of bounds, reset position
-                ball_x = self.BALL_X
-                ball_y = self.BALL_Y
-                ball_dx *= -1  # Reverse X direction
+            # Get paddle positions
+            paddle1_x = 30  # Fixed x-position for paddle1 from CSS
+            paddle2_x = self.WIDTH - 30 - self.PADDLE_WIDTH  # Fixed x-position for paddle2 from CSS
+            paddle1_y = game_state['player1PaddleY']
+            paddle2_y = game_state['player2PaddleY']
+
+            # Initialize collision flag
+            collision = False
+
+            # Handle collision with paddles
+            if ball_dx < 0:
+                if ball_x <= paddle1_x + self.PADDLE_WIDTH:
+                    if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT:
+                        # Collision detected with Player 1's paddle
+                        ball_dx *= -1
+                        collision = True
+            elif ball_dx > 0:
+                if ball_x + self.BALL_WIDTH >= paddle2_x:
+                    if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT:
+                        # Collision detected with Player 2's paddle
+                        ball_dx *= -1
+                        collision = True
+
+            # Handle goal if no collision occurred
+            if not collision:
+                if ball_x <= 0:
+                    await self.add_point_to(2)
+                    winner = await self.check_win()
+                    if winner:
+                        await self.set_win_to(winner)
+                        await self.channel_layer.group_send(
+                            self.room_group_name,
+                            {
+                                "type": "redirect_remaining_player",
+                            }
+                        )
+                        break
+                    ball_x = self.BALL_X
+                    ball_y = self.BALL_Y
+
+                elif ball_x + self.BALL_WIDTH >= self.WIDTH:
+                    await self.add_point_to(1)
+                    winner = await self.check_win()
+                    if winner:
+                        await self.set_win_to(winner)
+                        await self.channel_layer.group_send(
+                            self.room_group_name,
+                            {
+                                "type": "redirect_remaining_player",
+                            }
+                        )
+                        break
+                    ball_x = self.BALL_X
+                    ball_y = self.BALL_Y
 
             # Update game state
             game_state['ball_x'] = ball_x
@@ -140,7 +189,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-            # Sleep for 0.02 seconds (adjust as needed for smooth animation)
             await asyncio.sleep(0.02)
 
     async def update_ball_position(self, event):
@@ -152,31 +200,43 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        if data["type"] == "movement" and (data["direction"] == 'up' or data["direction"] == 'down'):
+        if data["type"] == "movement" and data["direction"] in ('up', 'down'):
             direction = data["direction"]
 
             game_state = cache.get(f"game_{self.game_id}_state")
 
-            if self.user == self.player1:
-                game_state['player1PaddleY'] += self.PADDLE_SPEED if direction == "down" else -self.PADDLE_SPEED
-                game_state['player1PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player1PaddleY']))
-            elif self.user == self.player2:
-                game_state['player2PaddleY'] += self.PADDLE_SPEED if direction == "down" else -self.PADDLE_SPEED
-                game_state['player2PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player2PaddleY']))
-            
-            cache.set(f"game_{self.game_id}_state", game_state)
+            now = asyncio.get_event_loop().time()
+            last_move_time = game_state.get(f'last_move_time_{self.user.username}', 0)
+            time_since_last_move = now - last_move_time
 
-            # Broadcast the movement to other players
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "player_movement",
-                    "player": self.user.username,
-                    "direction": direction,
-                    "player1PaddleY": game_state['player1PaddleY'],
-                    "player2PaddleY": game_state['player2PaddleY'],
-                }
-            )
+            min_time_between_moves = 0.01  # 20 ms like in js
+
+            if time_since_last_move >= min_time_between_moves:
+                move_distance = self.PADDLE_SPEED
+
+                if self.user == self.player1:
+                    game_state['player1PaddleY'] += move_distance if direction == "down" else -move_distance
+                    game_state['player1PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player1PaddleY']))
+                elif self.user == self.player2:
+                    game_state['player2PaddleY'] += move_distance if direction == "down" else -move_distance
+                    game_state['player2PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player2PaddleY']))
+
+                game_state[f'last_move_time_{self.user.username}'] = now
+
+                cache.set(f"game_{self.game_id}_state", game_state)
+
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "player_movement",
+                        "player": self.user.username,
+                        "direction": direction,
+                        "player1PaddleY": game_state['player1PaddleY'],
+                        "player2PaddleY": game_state['player2PaddleY'],
+                    }
+                )
+            else:
+                pass
 
     async def player_movement(self, event):
         # Send the movement data to WebSocket
@@ -234,15 +294,30 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 {
                     "type": "redirect_remaining_player",
-                    "remaining_player": self.player2.username if self.match.user1 == self.user else self.player1.username
                 }
             )
+
+    @sync_to_async
+    def add_point_to(self, player):
+        if player == 1:
+            self.match.user1_score += 1
+        elif player == 2:
+            self.match.user2_score += 1
+        self.match.save()
 
     @sync_to_async
     def set_points_to(self, player, points):
         if player == 1: self.match.user1_score = points
         elif player == 2: self.match.user2_score = points
         self.match.save()
+
+    @sync_to_async
+    def check_win(self):
+        if self.match.user1_score >= 5:
+            return 1
+        elif self.match.user2_score >= 5:
+            return 2
+        return 0
 
     @sync_to_async
     def set_win_to(self, player):
@@ -262,10 +337,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.match.user2.save()
 
     async def redirect_remaining_player(self, event):
-        if event["remaining_player"] == self.user.username:
-            await self.send(text_data=json.dumps({
-                "type": "redirect"
-            }))
+        await self.send(text_data=json.dumps({
+            "type": "redirect"
+        }))
 
     async def send_info(self, event):
         await self.send(text_data=json.dumps({
