@@ -473,24 +473,28 @@ class FriendRequest(BaseSSRView):
             user = request.user
         else:
             friend = Friend.objects.filter(Q(user1=request.user.id, user2=user.id) | Q(user1=user.id, user2=request.user.id) ).first()
-
+            block = Blocked.objects.filter(Q(user1=request.user.id, user2=user.id) | Q(user1=user.id, user2=request.user.id) ).first()
             if type=='add':
-                if friend is None: #? Create a new friend with status pending
-                    friend = Friend.objects.create(user1=request.user, user2=user, status=False)
-                    friend.save()
-                    self.success_message = f"Sucessfuly sent a friend request to {profile}."
-                else:
-                    if friend.status is True:
-                        self.error_message = f"{profile} is already your friend."
-                    elif friend.user1 == request.user: #? if initial friend request came from me
-                         self.error_message = f"A friend request was already sent to {profile}."
-                    else: #? if initial friend request did not came from me
-                        self.success_message = f"You and {profile} are now friends !"
-                        friend.status = True
+                if block is None:
+                    if friend is None: #? Create a new friend with status pending
+                        friend = Friend.objects.create(user1=request.user, user2=user, status=False)
                         friend.save()
+                        self.success_message = f"Sucessfuly sent a friend request to {profile}."
+                    else:
+                        if friend.status is True:
+                            self.error_message = f"{profile} is already your friend."
+                        elif friend.user1 == request.user: #? if initial friend request came from me
+                            self.error_message = f"A friend request was already sent to {profile}."
+                        else: #? if initial friend request did not came from me
+                            self.success_message = f"You and {profile} are now friends !"
+                            friend.status = True
+                            friend.save()
 
-                self.friend = friend.status
-                self.friend_request = friend.user1 == request.user or friend.status
+                    self.friend = friend.status
+                    self.friend_request = friend.user1 == request.user or friend.status
+
+                else:
+                    self.error_message = f"You can't send a friend request to {profile}."
 
             elif type=='remove':
                 if friend is None:
