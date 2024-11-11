@@ -183,11 +183,11 @@ class GameView(BaseSSRView):
 
     def get(self, request, *args, **kwargs):
         matchId = kwargs.get('id')
-        match = Match.objects.filter(id=matchId).first()
+        self.matchs = Match.objects.filter(id=matchId).first()
 
-        if match is None \
-            or (match.user1.id != request.user.id and match.user2.id != request.user.id) \
-            or (match.user1_score >= 5 or match.user2_score >= 5):
+        if self.matchs is None \
+            or (self.matchs.user1.id != request.user.id and self.matchs.user2.id != request.user.id) \
+            or (self.matchs.user1_score >= 5 or self.matchs.user2_score >= 5):
             self.page = 'play'
             self.error_message = 'You can\'t have access to this party.'
             return super().get(request)
