@@ -10,6 +10,8 @@ User = get_user_model()
 
 class GameConsumer(AsyncWebsocketConsumer):
 
+    ACCELERATION_FACTOR = 1.1
+
     PADDLE_SPEED = 5
 
     BALL_SPEED = 4
@@ -127,17 +129,23 @@ class GameConsumer(AsyncWebsocketConsumer):
 
             # Handle collision with paddles
             if ball_dx < 0:
+                # Ball moving left towards Player 1's paddle
                 if ball_x <= paddle1_x + self.PADDLE_WIDTH:
                     if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT:
                         # Collision detected with Player 1's paddle
-                        ball_dx *= -1
                         collision = True
+                        # Augment ball speed
+                        ball_dx = -ball_dx * self.ACCELERATION_FACTOR
+                        ball_dy *= self.ACCELERATION_FACTOR
             elif ball_dx > 0:
+                # Ball moving right towards Player 2's paddle
                 if ball_x + self.BALL_WIDTH >= paddle2_x:
                     if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT:
                         # Collision detected with Player 2's paddle
-                        ball_dx *= -1
                         collision = True
+                        # Augment ball speed
+                        ball_dx = -ball_dx * self.ACCELERATION_FACTOR
+                        ball_dy *= self.ACCELERATION_FACTOR
 
             # Handle goal if no collision occurred
             if not collision:
@@ -156,6 +164,9 @@ class GameConsumer(AsyncWebsocketConsumer):
                     ball_x = self.BALL_X
                     ball_y = self.BALL_Y
 
+                    ball_dx = self.BALL_SPEED
+                    ball_dy = self.BALL_SPEED
+
                 elif ball_x + self.BALL_WIDTH >= self.WIDTH:
                     await self.add_point_to(1)
                     winner = await self.check_win()
@@ -170,6 +181,9 @@ class GameConsumer(AsyncWebsocketConsumer):
                         break
                     ball_x = self.BALL_X
                     ball_y = self.BALL_Y
+
+                    ball_dx = self.BALL_SPEED
+                    ball_dy = self.BALL_SPEED
 
             # Update game state
             game_state['ball_x'] = ball_x
