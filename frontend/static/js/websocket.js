@@ -104,6 +104,10 @@ function gameWebsocket(link) {
             const infoDisplay = document.getElementById("info");
             infoDisplay.textContent = data.info;
         }
+        else if (data.type === "countdown") {
+            const infoDisplay = document.getElementById("countdown");
+            infoDisplay.textContent = data.message;
+        }
         else if (data.type === "redirect") {
             loadContent(`profile`);
             disconnectWebSocket();

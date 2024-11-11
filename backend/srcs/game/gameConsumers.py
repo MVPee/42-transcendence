@@ -94,7 +94,49 @@ class GameConsumer(AsyncWebsocketConsumer):
             cache.set(game_process_key, True)
             asyncio.create_task(self.gameProcess())
 
+    async def countdown(self):
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_countdown",
+                "message": f"Party start in 3"
+            }
+        )
+        await asyncio.sleep(1)
+        await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "send_countdown",
+                    "message": f"Party start in 2"
+                }
+            )
+        await asyncio.sleep(1)
+        await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "send_countdown",
+                    "message": f"Party start in 1"
+                }
+            )
+        await asyncio.sleep(1)
+        await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "send_countdown",
+                    "message": f"GOOOOO!!"
+                }
+            )
+        await asyncio.sleep(0.4)
+        await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "send_countdown",
+                    "message": ""
+                }
+            )
+
     async def gameProcess(self):
+        await self.countdown()
         while True:
             game_state = cache.get(f"game_{self.game_id}_state")
             if not game_state:
@@ -364,6 +406,12 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "info",
             "info": event["message"]
+        }))
+
+    async def send_countdown(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "countdown",
+            "message": event["message"]
         }))
 
     async def send_score_update(self):
