@@ -99,41 +99,49 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 "type": "send_countdown",
-                "message": f"Party start in 3"
+                "message": "First at 5 win the game"
             }
         )
         await asyncio.sleep(1)
         await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "send_countdown",
-                    "message": f"Party start in 2"
-                }
-            )
+            self.room_group_name,
+            {
+                "type": "send_countdown",
+                "message": "Party start in 3"
+            }
+        )
         await asyncio.sleep(1)
         await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "send_countdown",
-                    "message": f"Party start in 1"
-                }
-            )
+            self.room_group_name,
+            {
+                "type": "send_countdown",
+                "message": "Party start in 2"
+            }
+        )
         await asyncio.sleep(1)
         await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "send_countdown",
-                    "message": f"GOOOOO!!"
-                }
-            )
+            self.room_group_name,
+            {
+                "type": "send_countdown",
+                "message": "Party start in 1"
+            }
+        )
+        await asyncio.sleep(1)
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_countdown",
+                "message": "GO"
+            }
+        )
         await asyncio.sleep(0.4)
         await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "send_countdown",
-                    "message": ""
-                }
-            )
+            self.room_group_name,
+            {
+                "type": "send_countdown",
+                "message": ""
+            }
+        )
 
     async def gameProcess(self):
         await self.countdown()

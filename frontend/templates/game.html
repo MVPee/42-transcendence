@@ -3,20 +3,21 @@
 
 <p id="info"></p>
 <div id="player-display">Player1 vs Player2</div>
-<div id="player-score"> 0 - 0</div>
 <div class="position-relative mx-auto" style="width: 600px; height: 400px;">
     <canvas id="game-canvas" width="600" height="400"></canvas>
     <!-- Paddles are placed as divs overlaying the canvas -->
     <div id="paddle1" class="paddle"></div>
     <div id="ball"></div>
     <div id="paddle2" class="paddle"></div>
+    <div id="countdown"></div>
+    <div id="score-1">0</div>
+    <div id="score-2">0</div>
 </div>
-<div id="countdown">Salut</div>
 
 <style>
     /* Style the game field and paddles */
     #game-canvas {
-        background-color: #333;
+        background-color: #141414;
         border: 2px solid #fff;
     }
     .paddle {
@@ -39,5 +40,27 @@
         position: absolute;
         right: 290px;
         top: 195px;
+    }
+    #countdown {
+        position: absolute;
+        left: 50%;
+        top: 50px;
+        transform: translateX(-50%);
+        font-size: 24px;
+        color: yellow;
+        font-weight: bold;
+    }
+    #score-1, #score-2 {
+        position: absolute;
+        top: 10px;
+        font-size: 24px;
+        color: yellow;
+        font-weight: bold;
+    }
+    #score-1 {
+        left: 10px;
+    }
+    #score-2 {
+        right: 10px;
     }
 </style>
