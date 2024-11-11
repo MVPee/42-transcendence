@@ -10,13 +10,21 @@ User = get_user_model()
 
 class GameConsumer(AsyncWebsocketConsumer):
 
-    PADDLE_SPEED = 1
-    BALL_SPEED = 1
-    PADDLE_MAX_HEIGHT = 100
-    PADDLE_MIN_HEIGHT = 0
+    PADDLE_SPEED = 4
 
-    player1PaddleY = 50
-    player2PaddleY = 50
+    BALL_SPEED = 1
+
+    BALL_X = 300
+    BALL_Y = 200
+
+    BALL_HEIGHT = 5
+    BALL_WIDTH = 5
+
+    PADDLE_HEIGHT = 80
+    PADDLE_WIDTH = 10
+
+    PADDLE_MAX_HEIGHT = 400 - PADDLE_HEIGHT
+    PADDLE_MIN_HEIGHT = 0
 
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
@@ -25,6 +33,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         disconnect_key = f"player_disconnected_{self.game_id}"
         was_disconnected = cache.get(disconnect_key) == self.user.username
+
+        if not cache.get(f"game_{self.game_id}_state"):
+            cache.set(f"game_{self.game_id}_state", {
+                'player1PaddleY': 200 - self.PADDLE_HEIGHT / 2,
+                'player2PaddleY': 200 - self.PADDLE_HEIGHT / 2,
+            })
 
         cache.delete(disconnect_key)
 
@@ -69,13 +83,17 @@ class GameConsumer(AsyncWebsocketConsumer):
         if data["type"] == "movement" and (data["direction"] == 'up' or data["direction"] == 'down'):
             direction = data["direction"]
 
+            game_state = cache.get(f"game_{self.game_id}_state")
+
             if self.user == self.player1:
-                self.player1PaddleY += self.PADDLE_SPEED if direction == "down" else -self.PADDLE_SPEED
-                self.player1PaddleY = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, self.player1PaddleY))
+                game_state['player1PaddleY'] += self.PADDLE_SPEED if direction == "down" else -self.PADDLE_SPEED
+                game_state['player1PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player1PaddleY']))
             elif self.user == self.player2:
-                self.player2PaddleY += self.PADDLE_SPEED if direction == "down" else -self.PADDLE_SPEED
-                self.player2PaddleY = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, self.player2PaddleY))
-    
+                game_state['player2PaddleY'] += self.PADDLE_SPEED if direction == "down" else -self.PADDLE_SPEED
+                game_state['player2PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player2PaddleY']))
+            
+            cache.set(f"game_{self.game_id}_state", game_state)
+
             # Broadcast the movement to other players
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -83,8 +101,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                     "type": "player_movement",
                     "player": self.user.username,
                     "direction": direction,
-                    "player1PaddleY": self.player1PaddleY,
-                    "player2PaddleY": self.player2PaddleY,
+                    "player1PaddleY": game_state['player1PaddleY'],
+                    "player2PaddleY": game_state['player2PaddleY'],
                 }
             )
 

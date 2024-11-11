@@ -81,6 +81,11 @@ function gameWebsocket(link) {
         if (data.type === "player_movement") {
             console.log(`Player ${data.player} moved: ${data.direction}`);
             console.log(`player1PaddleY ${data.player1PaddleY}\nplayer2PaddleY: ${data.player2PaddleY}`);
+
+            const paddle1 = document.getElementById("paddle1");
+            const paddle2 = document.getElementById("paddle2");
+            paddle1.style.top = `${data.player1PaddleY}px`;
+            paddle2.style.top = `${data.player2PaddleY}px`;
         }
         else if (data.type === "player_info") {
             // Display "Player1 vs Player2"
@@ -104,6 +109,24 @@ function gameWebsocket(link) {
     ws.onerror = (error) => {
         console.error("WebSocket error:", error);
     };
+
+    document.removeEventListener("keydown", handleKeydown);
+    document.addEventListener("keydown", handleKeydown);
+}
+
+function handleKeydown(event) {
+    if (event.key === "w" || event.key === "W") direction = "up";
+    else if (event.key === "s" || event.key === "S") direction = "down";
+    else return;
+
+    if (direction && ws) {
+        ws.send(
+            JSON.stringify({
+                type: "movement",
+                direction: direction,
+            })
+        );
+    }
 }
 
 function disconnectWebSocket() {

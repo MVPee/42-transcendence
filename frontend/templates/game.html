@@ -3,4 +3,40 @@
 
 <p id="info"></p>
 <div id="player-display"></div>
-<script src="{% static 'js/pong.js' %}"></script>
+
+<div class="position-relative mx-auto" style="width: 600px; height: 400px;">
+    <canvas id="game-canvas" width="600" height="400"></canvas>
+    <!-- Paddles are placed as divs overlaying the canvas -->
+    <div id="paddle1" class="paddle"></div>
+    <div id="ball"></div>
+    <div id="paddle2" class="paddle"></div>
+</div>
+
+<style>
+    /* Style the game field and paddles */
+    #game-canvas {
+        background-color: #333;
+        border: 2px solid #fff;
+    }
+    .paddle {
+        width: 10px;
+        height: 80px;
+        background-color: #fff;
+        position: absolute;
+        top: 160px;
+    }
+    #paddle1 {
+        left: 30px;
+    }
+    #paddle2 {
+        right: 30px;
+    }
+    #ball {
+        width: 10px;
+        height: 10px;
+        background-color: #fff;
+        position: absolute;
+        right: 290px;
+        top: 195px;
+    }
+</style>
