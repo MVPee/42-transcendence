@@ -14,6 +14,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     BALL_SPEED = 1
 
+    HEIGHT = 400
+    WIDTH = 600
+
     BALL_X = 300
     BALL_Y = 200
 
@@ -26,7 +29,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     PADDLE_MAX_HEIGHT = 400 - PADDLE_HEIGHT
     PADDLE_MIN_HEIGHT = 0
 
-    async def connect(self):
+    async def connect(self):        
         self.game_id = self.scope['url_route']['kwargs']['id']
         self.user = self.scope['user']
         self.room_group_name = f"game_{self.game_id}"
@@ -38,6 +41,11 @@ class GameConsumer(AsyncWebsocketConsumer):
             cache.set(f"game_{self.game_id}_state", {
                 'player1PaddleY': 200 - self.PADDLE_HEIGHT / 2,
                 'player2PaddleY': 200 - self.PADDLE_HEIGHT / 2,
+                'ball_x': self.BALL_X,
+                'ball_y': self.BALL_Y,
+                'ball_dx': self.BALL_SPEED,
+                'ball_dy': self.BALL_SPEED,
+                'paused': False,
             })
 
         cache.delete(disconnect_key)
@@ -54,7 +62,14 @@ class GameConsumer(AsyncWebsocketConsumer):
                     "type": "send_info",
                     "message": f"Player {self.user.username} has reconnected."
                 }
+                
             )
+
+            # Resume the game
+            game_state = cache.get(f"game_{self.game_id}_state")
+            if game_state:
+                game_state['paused'] = False
+                cache.set(f"game_{self.game_id}_state", game_state)
 
         try:
             self.match = await sync_to_async(Match.objects.get)(id=self.game_id)
@@ -73,10 +88,67 @@ class GameConsumer(AsyncWebsocketConsumer):
         except Match.DoesNotExist:
             await self.close()
 
-        await self.gameProcess()
+        game_process_key = f"game_{self.game_id}_process_started"
+        if not cache.get(game_process_key):
+            cache.set(game_process_key, True)
+            asyncio.create_task(self.gameProcess())
 
     async def gameProcess(self):
-        pass
+        while True:
+            game_state = cache.get(f"game_{self.game_id}_state")
+            if not game_state:
+                break
+
+            if game_state.get('paused'):
+                await asyncio.sleep(0.1)
+                continue
+
+            ball_x = game_state['ball_x']
+            ball_y = game_state['ball_y']
+            ball_dx = game_state['ball_dx']
+            ball_dy = game_state['ball_dy']
+
+            ball_x += ball_dx
+            ball_y += ball_dy
+
+            # Handle collision with top and bottom walls
+            if ball_y <= 0 or ball_y >= self.HEIGHT - self.BALL_HEIGHT:
+                ball_dy *= -1
+
+            # Handle collision with side walls (goals)
+            if ball_x <= 0 or ball_x >= self.WIDTH - self.BALL_WIDTH:  # Assuming game width is 600
+                # Ball went out of bounds, reset position
+                ball_x = self.BALL_X
+                ball_y = self.BALL_Y
+                ball_dx *= -1  # Reverse X direction
+
+            # Update game state
+            game_state['ball_x'] = ball_x
+            game_state['ball_y'] = ball_y
+            game_state['ball_dx'] = ball_dx
+            game_state['ball_dy'] = ball_dy
+
+            cache.set(f"game_{self.game_id}_state", game_state)
+
+            # Send updated ball position to clients
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'update_ball_position',
+                    'ball_x': ball_x,
+                    'ball_y': ball_y,
+                }
+            )
+
+            # Sleep for 0.02 seconds (adjust as needed for smooth animation)
+            await asyncio.sleep(0.02)
+
+    async def update_ball_position(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'update_ball_position',
+            'ball_x': event['ball_x'],
+            'ball_y': event['ball_y'],
+        }))
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -123,6 +195,12 @@ class GameConsumer(AsyncWebsocketConsumer):
         if not points_awarded and hasattr(self, 'match'):
             disconnect_key = f"player_disconnected_{self.game_id}"
             cache.set(disconnect_key, self.user.username, timeout=20)
+
+            # Set the game to paused
+            game_state = cache.get(f"game_{self.game_id}_state")
+            if game_state:
+                game_state['paused'] = True
+                cache.set(f"game_{self.game_id}_state", game_state)
 
             await self.channel_layer.group_send(
                 self.room_group_name,

@@ -87,6 +87,11 @@ function gameWebsocket(link) {
             paddle1.style.top = `${data.player1PaddleY}px`;
             paddle2.style.top = `${data.player2PaddleY}px`;
         }
+        else if (data.type === "update_ball_position") {
+            const ball = document.getElementById("ball");
+            ball.style.left = `${data.ball_x}px`;
+            ball.style.top = `${data.ball_y}px`;
+        }
         else if (data.type === "player_info") {
             // Display "Player1 vs Player2"
             const playerDisplay = document.getElementById("player-display");
