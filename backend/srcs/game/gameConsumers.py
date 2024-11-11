@@ -10,8 +10,13 @@ User = get_user_model()
 
 class GameConsumer(AsyncWebsocketConsumer):
 
-    player1Choose = None
-    player2Choose = None
+    PADDLE_SPEED = 1
+    BALL_SPEED = 1
+    PADDLE_MAX_HEIGHT = 100
+    PADDLE_MIN_HEIGHT = 0
+
+    player1PaddleY = 50
+    player2PaddleY = 50
 
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
@@ -61,16 +66,25 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        if data["type"] == "movement":
+        if data["type"] == "movement" and (data["direction"] == 'up' or data["direction"] == 'down'):
             direction = data["direction"]
 
+            if self.user == self.player1:
+                self.player1PaddleY += self.PADDLE_SPEED if direction == "down" else -self.PADDLE_SPEED
+                self.player1PaddleY = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, self.player1PaddleY))
+            elif self.user == self.player2:
+                self.player2PaddleY += self.PADDLE_SPEED if direction == "down" else -self.PADDLE_SPEED
+                self.player2PaddleY = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, self.player2PaddleY))
+    
             # Broadcast the movement to other players
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     "type": "player_movement",
                     "player": self.user.username,
-                    "direction": direction
+                    "direction": direction,
+                    "player1PaddleY": self.player1PaddleY,
+                    "player2PaddleY": self.player2PaddleY,
                 }
             )
 
@@ -79,7 +93,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "player_movement",
             "player": event["player"],
-            "direction": event["direction"]
+            "direction": event["direction"],
+            "player1PaddleY": event["player1PaddleY"],
+            "player2PaddleY": event["player2PaddleY"],
         }))
 
     async def disconnect(self, close_code):

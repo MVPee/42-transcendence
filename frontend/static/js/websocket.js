@@ -78,8 +78,10 @@ function gameWebsocket(link) {
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
 
-        if (data.type === "player_movement")
+        if (data.type === "player_movement") {
             console.log(`Player ${data.player} moved: ${data.direction}`);
+            console.log(`player1PaddleY ${data.player1PaddleY}\nplayer2PaddleY: ${data.player2PaddleY}`);
+        }
         else if (data.type === "player_info") {
             // Display "Player1 vs Player2"
             const playerDisplay = document.getElementById("player-display");
