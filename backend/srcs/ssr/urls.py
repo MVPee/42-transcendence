@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 from .views import *
 
@@ -10,7 +10,7 @@ urlpatterns = [
     path('view/register/', RegisterView.as_view(), name='register_view'),
     path('view/community/', CommunityView.as_view(), name='community_view'),
     path('view/scoreboard/', ScoreboardView.as_view(), name='scoreboard_view'),
-    path('view/waiting/', WaitingView.as_view(), name='waiting_view'),
+    path('view/waiting/<str:game_mode>/<str:queue_type>/', WaitingView.as_view(), name='waiting_view'),
     path('view/game/<int:id>/', GameView.as_view(), name='game_view'),
     path('view/chat/<int:id>/', ChatView.as_view(), name='Chat_view'),
 

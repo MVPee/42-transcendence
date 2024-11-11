@@ -50,6 +50,7 @@ function waitingWebSocket(link) {
             playerCount.innerHTML = count;
         }
         else if (data.type === "redirect") {
+            console.log(data.id);
             loadContent(`game/${data.id}`);
             disconnectWebSocket();
         }
@@ -132,7 +133,9 @@ function checkWebsocketPage(page, queryString = '') {
         chatWebSocket(`wss://42.mvpee.be/ws/${urls[0]}/${id}/`);
     }
     else if (urls[0] === 'waiting') {
-        waitingWebSocket(`wss://42.mvpee.be/ws/${urls[0]}/`);
+        const game_mode = urls[1];
+        const queue_type = urls[2];
+        waitingWebSocket(`wss://42.mvpee.be/ws/${urls[0]}/${game_mode}/${queue_type}/`);
     }
     else if (urls[0] === 'game') {
         const id = urls[1];
