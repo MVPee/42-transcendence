@@ -47,6 +47,8 @@ class BaseSSRView(View):
 
     user = None
     all_users = None
+    all_friends = None
+    all_pendings = None
 
     friend = None
     friend_request = None
@@ -90,6 +92,8 @@ class BaseSSRView(View):
             'success_message': self.success_message,
             'user': self.user,
             'all_users': self.all_users,
+            'all_friends': self.all_friends,
+            'all_pendings': self.all_pendings,
             'friend': self.friend,
             'friend_request': self.friend_request,
             'blocked': self.blocked,
@@ -129,8 +133,20 @@ class CommunityView(BaseSSRView):
 
     page = 'community'
 
-    def get(self, request):
+    def all_users_friends(self, request):
         self.all_users = User.objects.exclude(id=request.user.id)
+        self.all_friends = Friend.objects.filter((Q(user1=request.user.id) | Q(user2=request.user.id)), status=True).all()
+        self.all_pendings = Friend.objects.filter(user2=request.user.id, status=False).all()
+
+    def get(self, request):
+        self.all_users_friends(request)
+        return super().get(request)
+    
+    def post(self, request):
+        self.all_users_friends(request)
+        search = request.POST.get('query', '')
+        if (search):
+            self.all_users = self.all_users.filter(username__icontains=search)
         return super().get(request)
 
 
@@ -154,9 +170,6 @@ class WaitingView(BaseSSRView):
     """
 
     page = 'waiting'
-
-    def get(self, request):
-        return super().get(request)
 
 
 class GameView(BaseSSRView):

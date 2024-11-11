@@ -1,5 +1,3 @@
-<h1>Community</h1>
-
 {% if error_message %}
   <p style="color: red;">{{ error_message }}</p>
 {% endif %}
@@ -8,6 +6,48 @@
   <p style="color: green;">{{ success_message }}</p>
 {% endif %}
 
-{% for user in all_users %}
-    <p>{{ user.username }} <a class="link" href="/profile?profile={{ user.username }}"> Profile </a></p>
-{% endfor %}
+<h2>Friends</h2>
+
+{% if all_friends %}
+  {% for friend in all_friends %}
+    {% if friend.user1.id == request.user.id %}
+      <p>{{ friend.user2.username }} <a class="link" href="/profile?profile={{ friend.user2.username }}"> Profile </a><a class="link" href="/chat/{{ friend.id }}"> Chat </a></p>
+    {% else %}
+      <p>{{ friend.user1.username }} <a class="link" href="/profile?profile={{ friend.user1.username }}"> Profile </a><a class="link" href="/chat/{{ friend.id }}"> Chat </a></p>
+    {% endif %}
+  {% endfor %}
+{% else %}
+  <p>No friend</p>
+{% endif %}
+
+<h2>Pending Friend Requests</h2>
+
+{% if all_pendings %}
+  {% for pending in all_pendings %}
+    <p>{{ pending.user1.username }} <a class="link" href="/profile?profile={{ pending.user1.username }}"> Profile </a></p>
+      <form action="/ssr/friend/" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="profile" value="{{ pending.user1.username }}">
+        <input type="hidden" name="type" value="add">
+        <button type="submit" class="btn btn-success">Accept</button>
+      </form>
+  {% endfor %}
+{% else %}
+  <p>No pending friend requests</p>
+{% endif %}
+
+<h2>Community</h2>
+
+<form action="/ssr/view/community/" method="post">
+  {% csrf_token %}
+  <input type="text" name="query" placeholder="Search..">
+  <button type="submit" class="btn btn-info"><i class="bi bi-search"></i></button>
+</form>
+
+{% if all_users %}
+  {% for user in all_users %}
+      <p>{{ user.username }} <a class="link" href="/profile?profile={{ user.username }}"> Profile </a></p>
+  {% endfor %}
+{% else %}
+  <p>No result</p>
+{% endif %}
