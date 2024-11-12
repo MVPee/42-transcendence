@@ -58,6 +58,8 @@ class BaseSSRView(View):
     #? Online / Offline / Absent
     user_status = None 
 
+    matchs = None
+
     matchs_1v1 = None
     winrate_1v1 = None
     average_score_1v1 = None
@@ -103,6 +105,7 @@ class BaseSSRView(View):
             'friend': self.friend,
             'friend_request': self.friend_request,
             'blocked': self.blocked,
+            'matchs': self.matchs,
             'matchs_1v1': self.matchs_1v1,
             'winrate_1v1': self.winrate_1v1,
             'average_score_1v1': self.average_score_1v1,
