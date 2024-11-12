@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.views import View
 from srcs.user.models import CustomUser as User
 from srcs.community.models import Blocked, Friend
-from srcs.game.models import Match
+from srcs.game.models import Match, Matchs
 from django.utils import timezone
 from datetime import timedelta
 from urllib.parse import urlparse
@@ -183,16 +183,25 @@ class GameView(BaseSSRView):
 
     def get(self, request, *args, **kwargs):
         matchId = kwargs.get('id')
-        self.matchs = Match.objects.filter(id=matchId).first()
+        matchMode = kwargs.get('mode')
+        print(matchMode)
 
-        if self.matchs is None \
-            or (self.matchs.user1.id != request.user.id and self.matchs.user2.id != request.user.id) \
-            or (self.matchs.user1_score >= 5 or self.matchs.user2_score >= 5):
-            self.page = 'play'
-            self.error_message = 'You can\'t have access to this party.'
+        if (matchMode == '1v1'):
+            self.matchs = Match.objects.filter(id=matchId).first()
+
+            if self.matchs is None \
+                or (self.matchs.user1.id != request.user.id and self.matchs.user2.id != request.user.id) \
+                or (self.matchs.user1_score >= 5 or self.matchs.user2_score >= 5):
+                self.page = 'play'
+                self.error_message = 'You can\'t have access to this party.'
+                return super().get(request)
+
             return super().get(request)
 
-        return super().get(request)
+        elif (matchMode == '2v2'):
+            self.page = 'play'
+            self.error_message = '2v2 is comming but not now bro.'
+            return super().get(request)
 
 
 class ChatView(BaseSSRView):
