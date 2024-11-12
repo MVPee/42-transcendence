@@ -342,7 +342,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         )
 
     async def wait_for_reconnection(self, disconnect_key, points_awarded_key):
-        await asyncio.sleep(5)
+        await asyncio.sleep(15)
 
         #? Protection if the match is finish
         if await self.check_win() == 0:
@@ -376,10 +376,8 @@ class GameConsumer(AsyncWebsocketConsumer):
     def set_points_to(self, player, points):
         if player == 1: 
             self.match.user1_score = points
-            self.match.user2_score = self.match.user2_score
         elif player == 2: 
             self.match.user2_score = points
-            self.match.user1_score = self.match.user1_score
         self.match.save()
 
     @sync_to_async
