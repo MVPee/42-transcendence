@@ -62,6 +62,10 @@ class BaseSSRView(View):
     winrate_1v1 = None
     average_score_1v1 = None
 
+    matchs_2v2 = None
+    winrate_2v2 = None
+    average_score_2v2 = None
+
     def get(self, request, *args, **kwargs):
         """
         Handles GET requests and returns the content of the requested page
@@ -102,6 +106,9 @@ class BaseSSRView(View):
             'matchs_1v1': self.matchs_1v1,
             'winrate_1v1': self.winrate_1v1,
             'average_score_1v1': self.average_score_1v1,
+            'matchs_2v2': self.matchs_2v2,
+            'winrate_2v2': self.winrate_2v2,
+            'average_score_2v2': self.average_score_2v2,
             'user_status': self.user_status,
         }
 
@@ -252,6 +259,7 @@ class LoginView(BaseSSRView):
             if self.page == 'login': self.page = 'profile'
             self.user = request.user
 
+            #? 1v1 MATCH
             self.matchs_1v1 = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
 
             total_matches = self.matchs_1v1.count()
@@ -260,6 +268,17 @@ class LoginView(BaseSSRView):
             self.average_score_1v1 = round((sum(match.user1_score for match in self.matchs_1v1 if match.user1 == user) + 
                                 sum(match.user2_score for match in self.matchs_1v1 if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
             self.winrate_1v1 = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
+
+            #? 2v2 MATCH
+            self.matchs_2v2 = Matchs.objects.filter(Q(user1=user) | Q(user2=user) | Q(user3=user) | Q(user4=user)).order_by('-created_at')
+
+            total_matches_2v2 = self.matchs_2v2.count()
+            wins_2v2 = sum(1 for match in self.matchs_2v2 if 
+                        ((match.user1 == user or match.user2 == user) and match.team1_score > match.team2_score) or 
+                        ((match.user3 == user or match.user4 == user) and match.team2_score > match.team1_score))
+            self.average_score_2v2 = round((sum(match.team1_score for match in self.matchs_2v2 if match.user1 == user or match.user2 == user) + 
+                                            sum(match.team2_score for match in self.matchs_2v2 if match.user3 == user or match.user4 == user)) / total_matches_2v2, 2) if total_matches_2v2 > 0 else 0
+            self.winrate_2v2 = round((wins_2v2 / total_matches_2v2 * 100), 2) if total_matches_2v2 > 0 else 0
 
             return super().get(request)
         else:
@@ -337,6 +356,7 @@ class ProfileView(BaseSSRView):
         self.blocked = blocked
         self.user = user
 
+        #? 1v1 MATCH
         self.matchs_1v1 = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
 
         total_matches = self.matchs_1v1.count()
@@ -345,6 +365,17 @@ class ProfileView(BaseSSRView):
         self.average_score_1v1 = round((sum(match.user1_score for match in self.matchs_1v1 if match.user1 == user) + 
                             sum(match.user2_score for match in self.matchs_1v1 if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
         self.winrate_1v1 = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
+
+        #? 2v2 MATCH
+        self.matchs_2v2 = Matchs.objects.filter(Q(user1=user) | Q(user2=user) | Q(user3=user) | Q(user4=user)).order_by('-created_at')
+
+        total_matches_2v2 = self.matchs_2v2.count()
+        wins_2v2 = sum(1 for match in self.matchs_2v2 if 
+                    ((match.user1 == user or match.user2 == user) and match.team1_score > match.team2_score) or 
+                    ((match.user3 == user or match.user4 == user) and match.team2_score > match.team1_score))
+        self.average_score_2v2 = round((sum(match.team1_score for match in self.matchs_2v2 if match.user1 == user or match.user2 == user) + 
+                                        sum(match.team2_score for match in self.matchs_2v2 if match.user3 == user or match.user4 == user)) / total_matches_2v2, 2) if total_matches_2v2 > 0 else 0
+        self.winrate_2v2 = round((wins_2v2 / total_matches_2v2 * 100), 2) if total_matches_2v2 > 0 else 0
 
         if (friend and friend.status):
             time_diff = timezone.now() - user.last_connection
