@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class GameConsumer(AsyncWebsocketConsumer):
+class Game1v1Consumer(AsyncWebsocketConsumer):
     ACCELERATION_FACTOR = 1.1
 
     PADDLE_SPEED = 5
