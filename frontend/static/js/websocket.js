@@ -53,7 +53,7 @@ function waitingWebSocket(link) {
         }
         else if (data.type === "redirect") {
             console.log(data.id);
-            loadContent(`game/${data.id}`);
+            loadContent(`game/pong/1v1/${data.id}`);
             disconnectWebSocket();
         }
     };
@@ -180,8 +180,10 @@ function checkWebsocketPage(page, queryString = '') {
         waitingWebSocket(`wss://42.mvpee.be/ws/${urls[0]}/${game_mode}/${queue_type}/`);
     }
     else if (urls[0] === 'game') {
-        const id = urls[1];
-        gameWebsocket(`wss://42.mvpee.be/ws/${urls[0]}/${id}/`);
+        const game = urls[1];
+        const mode = urls[2];
+        const id = urls[3];
+        gameWebsocket(`wss://42.mvpee.be/ws/${urls[0]}/${game}/${mode}/${id}/`);
     }
     else
         disconnectWebSocket();
