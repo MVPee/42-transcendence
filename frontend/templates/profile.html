@@ -98,12 +98,12 @@
 <div>
 	<p><strong>Win:</strong> {{ user.win }}</p>
 	<p><strong>Defeat:</strong> {{ user.defeat }}</p>
-    <p><strong>Winrate:</strong> {{ winrate }}%</p>
-    <p><strong>Average Score:</strong> {{ average_score }}</p>
+    <p><strong>Winrate:</strong> {{ winrate_1v1 }}%</p>
+    <p><strong>Average Score:</strong> {{ average_score_1v1 }}</p>
 </div>
 
 <h3>Match History</h3>
-{% if matchs %}
+{% if matchs_1v1 %}
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
@@ -114,7 +114,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for match in matchs %}
+            {% for match in matchs_1v1 %}
                 <tr>
 					<td>
 						{% if match.user1_score > match.user2_score %}

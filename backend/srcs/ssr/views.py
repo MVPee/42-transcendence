@@ -57,9 +57,10 @@ class BaseSSRView(View):
 
     #? Online / Offline / Absent
     user_status = None 
-    matchs = None
-    winrate = None
-    average_score = None
+
+    matchs_1v1 = None
+    winrate_1v1 = None
+    average_score_1v1 = None
 
     def get(self, request, *args, **kwargs):
         """
@@ -98,9 +99,9 @@ class BaseSSRView(View):
             'friend': self.friend,
             'friend_request': self.friend_request,
             'blocked': self.blocked,
-            'matchs': self.matchs,
-            'winrate': self.winrate,
-            'average_score': self.average_score,
+            'matchs_1v1': self.matchs_1v1,
+            'winrate_1v1': self.winrate_1v1,
+            'average_score_1v1': self.average_score_1v1,
             'user_status': self.user_status,
         }
 
@@ -251,14 +252,14 @@ class LoginView(BaseSSRView):
             if self.page == 'login': self.page = 'profile'
             self.user = request.user
 
-            self.matchs = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
+            self.matchs_1v1 = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
 
-            total_matches = self.matchs.count()
-            wins = sum(1 for match in self.matchs if (match.user1 == user and match.user1_score > match.user2_score) or 
-                (match.user2 == user and match.user2_score > match.user1_score))
-            self.average_score = round((sum(match.user1_score for match in self.matchs if match.user1 == user) + 
-                sum(match.user2_score for match in self.matchs if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
-            self.winrate = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
+            total_matches = self.matchs_1v1.count()
+            wins = sum(1 for match in self.matchs_1v1 if (match.user1 == user and match.user1_score > match.user2_score) or 
+                    (match.user2 == user and match.user2_score > match.user1_score))
+            self.average_score_1v1 = round((sum(match.user1_score for match in self.matchs_1v1 if match.user1 == user) + 
+                                sum(match.user2_score for match in self.matchs_1v1 if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
+            self.winrate_1v1 = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
 
             return super().get(request)
         else:
@@ -336,14 +337,14 @@ class ProfileView(BaseSSRView):
         self.blocked = blocked
         self.user = user
 
-        self.matchs = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
+        self.matchs_1v1 = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
 
-        total_matches = self.matchs.count()
-        wins = sum(1 for match in self.matchs if (match.user1 == user and match.user1_score > match.user2_score) or 
+        total_matches = self.matchs_1v1.count()
+        wins = sum(1 for match in self.matchs_1v1 if (match.user1 == user and match.user1_score > match.user2_score) or 
                    (match.user2 == user and match.user2_score > match.user1_score))
-        self.average_score = round((sum(match.user1_score for match in self.matchs if match.user1 == user) + 
-                            sum(match.user2_score for match in self.matchs if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
-        self.winrate = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
+        self.average_score_1v1 = round((sum(match.user1_score for match in self.matchs_1v1 if match.user1 == user) + 
+                            sum(match.user2_score for match in self.matchs_1v1 if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
+        self.winrate_1v1 = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
 
         if (friend and friend.status):
             time_diff = timezone.now() - user.last_connection
