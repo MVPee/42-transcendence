@@ -244,7 +244,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 ball_x = self.BALL_X
                 ball_y = self.BALL_Y
 
-                ball_dx = self.BALL_SPEED
+                ball_dx = -self.BALL_SPEED
                 ball_dy = self.BALL_SPEED
 
             elif ball_x + self.BALL_WIDTH >= self.WIDTH:
@@ -375,7 +375,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
 
         #? Protection if the match is finish
         if await self.check_win() == 0:
-            print('No winner for the moment')
             if cache.get(disconnect_key) == self.user.username:
                 if self.match.user1 == self.user:
                     await self.set_points_to(2, 5)
