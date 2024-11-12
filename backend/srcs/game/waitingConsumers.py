@@ -92,18 +92,32 @@ class WaitingConsumer(AsyncWebsocketConsumer):
         print(f'Redirecting players in {self.room_group_name}')
 
         player_usernames = list(WaitingConsumer.rooms.get(self.room_group_name, []))
-        user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
-        user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
+        
+        if self.GAME == 'pong':
+            if self.MODE == '1v1':
+                user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
+                user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
+                match = await sync_to_async(Match.objects.create)(user1=user1, user2=user2, created_at=timezone.now())
+            elif self.MODE == '2v2':
+                user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
+                user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
+                user3 = await sync_to_async(User.objects.get)(username=player_usernames[2])
+                user4 = await sync_to_async(User.objects.get)(username=player_usernames[3])
+                match = await sync_to_async(Match.objects.create)(user1=user1, user2=user2, user3=user3, user4=user4, created_at=timezone.now())
+            elif self.MODE == 'AI':
+                user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
+                ai = await sync_to_async(User.objects.get)(username="AI.")
+                match = await sync_to_async(Match.objects.create)(user1=user1, user2=ai, created_at=timezone.now())
 
-        match = await sync_to_async(Match.objects.create)(user1=user1, user2=user2, created_at=timezone.now())
-
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "broadcast_redirect",
-                "id": match.id
-            }
-        )
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "broadcast_redirect",
+                    "game": self.GAME,
+                    "mode": self.MODE,
+                    "id": match.id
+                }
+            )
 
     async def broadcast_redirect(self, event):
         '''
@@ -111,5 +125,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
         '''
         await self.send(text_data=json.dumps({
             "type": "redirect",
+            "game": event["game"],
+            "mode": event["mode"],
             "id": event["id"]
         }))

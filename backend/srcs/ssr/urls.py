@@ -11,7 +11,7 @@ urlpatterns = [
     path('view/community/', CommunityView.as_view(), name='community_view'),
     path('view/scoreboard/', ScoreboardView.as_view(), name='scoreboard_view'),
     path('view/waiting/<str:game_mode>/<str:queue_type>/', WaitingView.as_view(), name='waiting_view'),
-    path('view/game/pong/1v1/<int:id>/', GameView.as_view(), name='game_view'),
+    path('view/game/<str:game>/<str:mode>/<int:id>/', GameView.as_view(), name='game_view'),
     path('view/chat/<int:id>/', ChatView.as_view(), name='Chat_view'),
 
     path('settings/', SettingsRequest.as_view(), name='settings_request'),

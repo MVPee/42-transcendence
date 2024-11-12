@@ -8,7 +8,8 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class GameConsumer(AsyncWebsocketConsumer):
+class GameAIConsumer(AsyncWebsocketConsumer):
+
     ACCELERATION_FACTOR = 1.1
 
     PADDLE_SPEED = 5
@@ -91,7 +92,42 @@ class GameConsumer(AsyncWebsocketConsumer):
         game_process_key = f"game_{self.game_id}_process_started"
         if not cache.get(game_process_key):
             cache.set(game_process_key, True)
+            asyncio.create_task(self.AIProcess())
             asyncio.create_task(self.gameProcess())
+
+    async def AIProcess(self):
+        direction = 1 #?Up and down
+        while True:
+            await asyncio.sleep(0.02)  #? 20 ms like player
+            game_state = cache.get(f"game_{self.game_id}_state")
+            
+            if not game_state:
+                print(f"No game state found for game {self.game_id}")
+                continue
+
+            game_state['player2PaddleY'] += direction * self.PADDLE_SPEED
+
+            if game_state['player2PaddleY'] <= self.PADDLE_MIN_HEIGHT:
+                game_state['player2PaddleY'] = self.PADDLE_MIN_HEIGHT
+                direction = 1
+            elif game_state['player2PaddleY'] >= self.PADDLE_MAX_HEIGHT:
+                game_state['player2PaddleY'] = self.PADDLE_MAX_HEIGHT
+                direction = -1
+            cache.set(f"game_{self.game_id}_state", game_state)
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "player_movement",
+                    "player": "AI",
+                    "direction": direction,
+                    "player1PaddleY": game_state['player1PaddleY'],
+                    "player2PaddleY": game_state['player2PaddleY'],
+                }
+            )
+
+            if await self.check_win() != 0:
+                break
 
     async def countdown(self):
         await self.channel_layer.group_send(
@@ -178,7 +214,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 # Ball moving left towards Player 1's paddle
                 if ball_x <= paddle1_x + self.PADDLE_WIDTH:
                     if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT:
-                        # Collision detected with Player 1's paddle
                         # Augment ball speed
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
                         ball_dy *= self.ACCELERATION_FACTOR
@@ -186,7 +221,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 # Ball moving right towards Player 2's paddle
                 if ball_x + self.BALL_WIDTH >= paddle2_x:
                     if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT:
-                        # Collision detected with Player 2's paddle
                         # Augment ball speed
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
                         ball_dy *= self.ACCELERATION_FACTOR
@@ -277,12 +311,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             if time_since_last_move >= min_time_between_moves:
                 move_distance = self.PADDLE_SPEED
 
-                if self.user == self.player1:
-                    game_state['player1PaddleY'] += move_distance if direction == "down" else -move_distance
-                    game_state['player1PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player1PaddleY']))
-                elif self.user == self.player2:
-                    game_state['player2PaddleY'] += move_distance if direction == "down" else -move_distance
-                    game_state['player2PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player2PaddleY']))
+                game_state['player1PaddleY'] += move_distance if direction == "down" else -move_distance
+                game_state['player1PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player1PaddleY']))
 
                 game_state[f'last_move_time_{self.user.username}'] = now
 

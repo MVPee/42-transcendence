@@ -53,7 +53,7 @@ function waitingWebSocket(link) {
         }
         else if (data.type === "redirect") {
             console.log(data.id);
-            loadContent(`game/pong/1v1/${data.id}`);
+            loadContent(`game/${data.game}/${data.mode}/${data.id}`);
             disconnectWebSocket();
         }
     };
