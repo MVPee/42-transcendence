@@ -186,7 +186,7 @@ class GameView(BaseSSRView):
         matchMode = kwargs.get('mode')
         print(matchMode)
 
-        if (matchMode == '1v1'):
+        if (matchMode == '1v1' or matchMode == 'AI'):
             self.matchs = Match.objects.filter(id=matchId).first()
 
             if self.matchs is None \
