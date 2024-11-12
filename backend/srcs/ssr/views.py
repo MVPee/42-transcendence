@@ -199,9 +199,16 @@ class GameView(BaseSSRView):
             return super().get(request)
 
         elif (matchMode == '2v2'):
-            self.page = 'play'
-            self.error_message = '2v2 is comming but not now bro.'
-            return super().get(request)
+            self.matchs = Matchs.objects.filter(Q(id=matchId) & Q(user1=request.user) | Q(user2=request.user) | Q(user3=request.user) | Q(user4=request.user)).first()
+            if self.matchs is not None:
+                self.page = 'play'
+                self.error_message = '2v2 is comming but not now bro.'
+                return super().get(request)
+            else:
+                self.page = 'play'
+                self.error_message = 'You can\'t have access to this party.'
+                return super().get(request)
+
 
 
 class ChatView(BaseSSRView):
