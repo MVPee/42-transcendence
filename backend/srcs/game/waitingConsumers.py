@@ -2,7 +2,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from django.utils import timezone
 from asgiref.sync import sync_to_async
-from .models import Match
+from .models import Match, Matchs
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -103,7 +103,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
                 user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
                 user3 = await sync_to_async(User.objects.get)(username=player_usernames[2])
                 user4 = await sync_to_async(User.objects.get)(username=player_usernames[3])
-                match = await sync_to_async(Match.objects.create)(game="pong_2v2", user1=user1, user2=user2, user3=user3, user4=user4, created_at=timezone.now())
+                match = await sync_to_async(Matchs.objects.create)(game="pong_2v2", user1=user1, user2=user2, user3=user3, user4=user4, created_at=timezone.now())
             elif self.MODE == 'AI':
                 user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
                 ai = await sync_to_async(User.objects.get)(username="AI.")
