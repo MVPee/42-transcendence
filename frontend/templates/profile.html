@@ -35,59 +35,66 @@
 <p><strong>Elo:</strong> {{ user.elo }}</p>
 <p><strong>Joined on:</strong> {{ user.created_at|date:"F j, Y" }}</p>
 
-{% if user.username == request.user.username %}
-  	<form action="/ssr/logout/" method="post" id="logout-link">
-    	{% csrf_token %}
-    	<button type="submit">logout</button>
-	</form>
+{% if user.username != 'AI.' %}
 
-{% else %}
+	{% if user.username == request.user.username %}
+		<form action="/ssr/logout/" method="post" id="logout-link">
+			{% csrf_token %}
+			<button type="submit">logout</button>
+		</form>
 
-	{% if not blocked %}
-		{% if not friend %}
-			<form action="/ssr/friend/" method="post">
-				{% csrf_token %}
-				<input type="hidden" name="profile" value="{{ user.username }}">
-				{% if friend_request %}
+	{% else %}
+
+		{% if not blocked %}
+			{% if not friend %}
+				<form action="/ssr/friend/" method="post">
+					{% csrf_token %}
+					<input type="hidden" name="profile" value="{{ user.username }}">
+					{% if friend_request %}
+						<input type="hidden" name="type" value="remove">
+						<button type="submit" class="btn btn-warning">Cancel friend request</button>
+					{% else %}
+						<input type="hidden" name="type" value="add">
+						<button type="submit" class="btn btn-success">Friend Request</button>
+					{% endif %}
+				</form>
+			{% else %}
+				<form action="/ssr/friend/" method="post">
+					{% csrf_token %}
 					<input type="hidden" name="type" value="remove">
-					<button type="submit" class="btn btn-warning">Cancel friend request</button>
-				{% else %}
+					<input type="hidden" name="profile" value="{{ user.username }}">
+						<button type="submit" class="btn btn-danger">Friend Remove</button>
+				</form>
+			{% endif %}
+		{% endif %}
+
+
+		{% if not blocked %}
+			{% if not friend %}
+				<form action="/ssr/block/" method="post">
+					{% csrf_token %}
 					<input type="hidden" name="type" value="add">
-					<button type="submit" class="btn btn-success">Friend Request</button>
-				{% endif %}
-			</form>
+					<input type="hidden" name="profile" value="{{ user.username }}">
+					<button type="submit" class="btn btn-danger">Block Request</button>
+				</form>
+			{% endif %}
 		{% else %}
-			<form action="/ssr/friend/" method="post">
+			<form action="/ssr/block/" method="post">
 				{% csrf_token %}
 				<input type="hidden" name="type" value="remove">
 				<input type="hidden" name="profile" value="{{ user.username }}">
-					<button type="submit" class="btn btn-danger">Friend Remove</button>
+				<button type="submit" class="btn btn-info">Unblock Request</button>
 			</form>
 		{% endif %}
+
 	{% endif %}
-
-
-	{% if not blocked %}
-		{% if not friend %}
-			<form action="/ssr/block/" method="post">
-				{% csrf_token %}
-				<input type="hidden" name="type" value="add">
-				<input type="hidden" name="profile" value="{{ user.username }}">
-				<button type="submit" class="btn btn-danger">Block Request</button>
-			</form>
-		{% endif %}
-	{% else %}
-		<form action="/ssr/block/" method="post">
-			{% csrf_token %}
-			<input type="hidden" name="type" value="remove">
-			<input type="hidden" name="profile" value="{{ user.username }}">
-			<button type="submit" class="btn btn-info">Unblock Request</button>
-		</form>
-	{% endif %}
-
 {% endif %}
 
-<h3>Player Statistics</h3>
+{% if user.username == 'AI.' %}
+	<h3>Our AI Statistics</h3>
+{% else %}
+	<h3>Player Statistics</h3>
+{% endif %}
 <div>
 	<p><strong>Win:</strong> {{ user.win }}</p>
 	<p><strong>Defeat:</strong> {{ user.defeat }}</p>

@@ -135,7 +135,7 @@ class CommunityView(BaseSSRView):
     page = 'community'
 
     def all_users_friends(self, request):
-        self.all_users = User.objects.exclude(id=request.user.id)
+        self.all_users = User.objects.exclude(id=request.user.id).exclude(username='AI.')
         self.all_friends = Friend.objects.filter((Q(user1=request.user.id) | Q(user2=request.user.id)), status=True).all()
         self.all_pendings = Friend.objects.filter(user2=request.user.id, status=False).all()
 
@@ -264,7 +264,7 @@ class RegisterView(BaseSSRView):
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
-        
+
         if User.objects.filter(username=username).exists():
             self.error_message = 'Username already exists.'
             return super().get(request)
