@@ -173,16 +173,13 @@ class GameConsumer(AsyncWebsocketConsumer):
             paddle1_y = game_state['player1PaddleY']
             paddle2_y = game_state['player2PaddleY']
 
-            # Initialize collision flag
-            collision = False
 
-            # Handle collision with paddles
+            #! Handle collision with paddles
             if ball_dx < 0:
                 # Ball moving left towards Player 1's paddle
                 if ball_x <= paddle1_x + self.PADDLE_WIDTH:
                     if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT:
                         # Collision detected with Player 1's paddle
-                        collision = True
                         # Augment ball speed
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
                         ball_dy *= self.ACCELERATION_FACTOR
@@ -191,54 +188,52 @@ class GameConsumer(AsyncWebsocketConsumer):
                 if ball_x + self.BALL_WIDTH >= paddle2_x:
                     if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT:
                         # Collision detected with Player 2's paddle
-                        collision = True
                         # Augment ball speed
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
                         ball_dy *= self.ACCELERATION_FACTOR
 
-            # Handle goal if no collision occurred
-            if not collision:
-                if ball_x <= 0:
-                    await self.add_point_to(2)
+            #! Handle goal
+            if ball_x <= 0:
+                await self.add_point_to(2)
 
-                    await self.send_score_update()
+                await self.send_score_update()
 
-                    winner = await self.check_win()
-                    if winner:
-                        await self.set_win_to(winner)
-                        await self.channel_layer.group_send(
-                            self.room_group_name,
-                            {
-                                "type": "redirect_remaining_player",
-                            }
-                        )
-                        break
-                    ball_x = self.BALL_X
-                    ball_y = self.BALL_Y
+                winner = await self.check_win()
+                if winner:
+                    await self.set_win_to(winner)
+                    await self.channel_layer.group_send(
+                        self.room_group_name,
+                        {
+                            "type": "redirect_remaining_player",
+                        }
+                    )
+                    break
+                ball_x = self.BALL_X
+                ball_y = self.BALL_Y
 
-                    ball_dx = self.BALL_SPEED
-                    ball_dy = self.BALL_SPEED
+                ball_dx = self.BALL_SPEED
+                ball_dy = self.BALL_SPEED
 
-                elif ball_x + self.BALL_WIDTH >= self.WIDTH:
-                    await self.add_point_to(1)
+            elif ball_x + self.BALL_WIDTH >= self.WIDTH:
+                await self.add_point_to(1)
 
-                    await self.send_score_update()
+                await self.send_score_update()
 
-                    winner = await self.check_win()
-                    if winner:
-                        await self.set_win_to(winner)
-                        await self.channel_layer.group_send(
-                            self.room_group_name,
-                            {
-                                "type": "redirect_remaining_player",
-                            }
-                        )
-                        break
-                    ball_x = self.BALL_X
-                    ball_y = self.BALL_Y
+                winner = await self.check_win()
+                if winner:
+                    await self.set_win_to(winner)
+                    await self.channel_layer.group_send(
+                        self.room_group_name,
+                        {
+                            "type": "redirect_remaining_player",
+                        }
+                    )
+                    break
+                ball_x = self.BALL_X
+                ball_y = self.BALL_Y
 
-                    ball_dx = self.BALL_SPEED
-                    ball_dy = self.BALL_SPEED
+                ball_dx = self.BALL_SPEED
+                ball_dy = self.BALL_SPEED
 
             # Update game state
             game_state['ball_x'] = ball_x
@@ -347,24 +342,27 @@ class GameConsumer(AsyncWebsocketConsumer):
         )
 
     async def wait_for_reconnection(self, disconnect_key, points_awarded_key):
-        await asyncio.sleep(15)
+        await asyncio.sleep(5)
 
-        if cache.get(disconnect_key) == self.user.username:
-            if self.match.user1 == self.user:
-                await self.set_points_to(2, 5)
-                await self.set_win_to(2)
-            elif self.match.user2 == self.user:
-                await self.set_points_to(1, 5)
-                await self.set_win_to(1)
+        #? Protection if the match is finish
+        if await self.check_win() == 0:
+            print('No winner for the moment')
+            if cache.get(disconnect_key) == self.user.username:
+                if self.match.user1 == self.user:
+                    await self.set_points_to(2, 5)
+                    await self.set_win_to(2)
+                elif self.match.user2 == self.user:
+                    await self.set_points_to(1, 5)
+                    await self.set_win_to(1)
 
-            cache.set(points_awarded_key, True, timeout=None)
+                cache.set(points_awarded_key, True, timeout=None)
 
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "redirect_remaining_player",
-                }
-            )
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                        {
+                            "type": "redirect_remaining_player",
+                        }
+                )
 
     @sync_to_async
     def add_point_to(self, player):
@@ -376,8 +374,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     @sync_to_async
     def set_points_to(self, player, points):
-        if player == 1: self.match.user1_score = points
-        elif player == 2: self.match.user2_score = points
+        if player == 1: 
+            self.match.user1_score = points
+            self.match.user2_score = self.match.user2_score
+        elif player == 2: 
+            self.match.user2_score = points
+            self.match.user1_score = self.match.user1_score
         self.match.save()
 
     @sync_to_async

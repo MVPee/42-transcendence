@@ -33,8 +33,6 @@
 <p><strong>Username:</strong> {{ user.username }}</p>
 <p><strong>Email:</strong> {{ user.email }}</p>
 <p><strong>Elo:</strong> {{ user.elo }}</p>
-<p><strong>Wins:</strong> {{ user.win }}</p>
-<p><strong>Defeats:</strong> {{ user.defeat }}</p>
 <p><strong>Joined on:</strong> {{ user.created_at|date:"F j, Y" }}</p>
 
 {% if user.username == request.user.username %}
@@ -91,7 +89,6 @@
 
 <h3>Player Statistics</h3>
 <div>
-	<p><strong>Elo:</strong> {{ user.elo }}</p>
 	<p><strong>Win:</strong> {{ user.win }}</p>
 	<p><strong>Defeat:</strong> {{ user.defeat }}</p>
     <p><strong>Winrate:</strong> {{ winrate }}%</p>

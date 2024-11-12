@@ -97,11 +97,6 @@ function gameWebsocket(link) {
             score1.textContent = `${data.player1_score}`;
             score2.textContent = `${data.player2_score}`;
         }
-        else if (data.type === "player_info") {
-            // Afficher "Player1 vs Player2"
-            const playerDisplay = document.getElementById("player-display");
-            playerDisplay.textContent = `${data.player1} vs ${data.player2}`;
-        }
         else if (data.type === "info") {
             const infoDisplay = document.getElementById("info");
             infoDisplay.textContent = data.info;
