@@ -13,6 +13,12 @@ class Match(models.Model):
     def __str__(self):
         return f"{self.user1.username if self.user1 else 'deleted user'} vs {self.user2.username if self.user2 else 'deleted user'}: {self.user1_score}/{self.user2_score}"
 
+    class Meta:
+        verbose_name = "Match 1v1"
+        verbose_name_plural = "Matchs 1v1"
+        ordering = ['-created_at']
+
+
 class Matchs(models.Model):
     game = models.CharField(default="pong_2v2", max_length=50)
     user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='matchs_first_opponents_1', null=True)
@@ -25,3 +31,8 @@ class Matchs(models.Model):
 
     def __str__(self):
         return f"2v2 {self.user1.username} && {self.user2.username} ({self.team1_score}) VS ({self.team2_score}) {self.user3.username} && {self.user4.username}"
+
+    class Meta:
+        verbose_name = "Match 2v2"
+        verbose_name_plural = "Matchs 2v2"
+        ordering = ['-created_at']
