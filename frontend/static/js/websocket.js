@@ -10,15 +10,12 @@ function chatWebSocket(link) {
 
     ws.onopen = () => {
         console.log("WebSocket connection opened.");
-        // ws.send("Hello, WebSocket server!");
     };
 
     ws.onmessage = (event) => {
         console.log(event);
 		const data = JSON.parse(event.data)
 		render_message(data.username, data.message);
-		// document.querySelector('#chat-text').innerHTML += (data.username + ": " + data.message + '\n')
-		// scrollToBottom();
     };
 
     ws.onclose = () => {
