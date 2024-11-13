@@ -171,7 +171,7 @@ class ScoreboardView(BaseSSRView):
     page = 'scoreboard'
 
     def get(self, request):
-        self.all_users = User.objects.all().order_by('-elo')
+        self.all_users = User.objects.exclude(username='AI.').order_by('-elo')
         return super().get(request)
 
 
