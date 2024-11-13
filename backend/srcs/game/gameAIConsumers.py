@@ -48,8 +48,8 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 'player2PaddleY': self.HEIGHT / 2 - self.PADDLE_HEIGHT / 2,
                 'ball_x': self.BALL_X,
                 'ball_y': self.BALL_Y,
-                'ball_dx': self.BALL_SPEED,
-                'ball_dy': self.BALL_SPEED,
+                'ball_dx': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
+                'ball_dy': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
                 'paused': False,
             })
 
