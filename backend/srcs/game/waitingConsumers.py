@@ -109,11 +109,11 @@ class WaitingConsumer(AsyncWebsocketConsumer):
                 ai = await sync_to_async(User.objects.get)(username="AI.")
                 match = await sync_to_async(Match.objects.create)(game="pong_ai", user1=user1, user2=ai, created_at=timezone.now())
 
-        elif self.GAME == 'shifumi':
+        elif self.GAME == 'puissance4':
             if self.MODE == '1v1':
                 user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
                 user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
-                match = await sync_to_async(Match.objects.create)(game="shifumi_1v1", user1=user1, user2=user2, created_at=timezone.now())
+                match = await sync_to_async(Match.objects.create)(game="puissance4_1v1", user1=user1, user2=user2, created_at=timezone.now())
 
         await self.channel_layer.group_send(
             self.room_group_name,

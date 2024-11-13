@@ -37,7 +37,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
         self.user = self.scope['user']
-        self.room_group_name = f"game_{self.game_id}"
+        self.room_group_name = f"game_{self.game_id}_ai"
 
         disconnect_key = f"player_disconnected_{self.game_id}"
         was_disconnected = cache.get(disconnect_key) == self.user.username
@@ -82,12 +82,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             self.player2 = await sync_to_async(lambda: self.match.user2 if self.match.user2 else "Player2")()
             
             await self.accept()
-            
-            await self.send(text_data=json.dumps({
-                "type": "player_info",
-                "player1": self.player1.username,
-                "player2": self.player2.username
-            }))
 
         except Match.DoesNotExist:
             await self.close()
@@ -99,7 +93,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             asyncio.create_task(self.gameProcess())
 
     async def AIProcess(self):
-        direction = 1 #?Up and down
         while True:
             await asyncio.sleep(0.02)  #? 20 ms like player
             game_state = cache.get(f"game_{self.game_id}_ai_state")
@@ -108,14 +101,12 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 print(f"No game state found for game {self.game_id}")
                 continue
 
-            game_state['player2PaddleY'] += direction * self.PADDLE_SPEED
+            game_state['player2PaddleY'] = game_state['ball_y'] - self.PADDLE_HEIGHT / 2
+            if game_state['player2PaddleY'] < 0:
+                game_state['player2PaddleY'] = 0
+            elif game_state['player2PaddleY'] > self.HEIGHT - self.PADDLE_HEIGHT:
+                game_state['player2PaddleY'] = self.HEIGHT - self.PADDLE_HEIGHT
 
-            if game_state['player2PaddleY'] <= self.PADDLE_MIN_HEIGHT:
-                game_state['player2PaddleY'] = self.PADDLE_MIN_HEIGHT
-                direction = 1
-            elif game_state['player2PaddleY'] >= self.PADDLE_MAX_HEIGHT:
-                game_state['player2PaddleY'] = self.PADDLE_MAX_HEIGHT
-                direction = -1
             cache.set(f"game_{self.game_id}_ai_state", game_state)
 
             await self.channel_layer.group_send(
@@ -123,7 +114,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 {
                     "type": "player_movement",
                     "player": "AI",
-                    "direction": direction,
+                    "direction": 'me follow ball',
                     "player1PaddleY": game_state['player1PaddleY'],
                     "player2PaddleY": game_state['player2PaddleY'],
                 }

@@ -36,6 +36,7 @@ class BaseSSRView(View):
         'chat': {'template': 'chat.html', 'auth_required': True},
         'waiting': {'template': 'waiting.html', 'auth_required': True},
         'game': {'template': 'game.html', 'auth_required': True},
+        'puissance4': {'template': 'puissance4.html', 'auth_required': True},
     }
 
     context = None
@@ -193,9 +194,20 @@ class GameView(BaseSSRView):
     page = 'game'
 
     def get(self, request, *args, **kwargs):
+        game = kwargs.get('game')
         matchId = kwargs.get('id')
         matchMode = kwargs.get('mode')
-        print(matchMode)
+
+        if (game == 'puissance4'):
+            self.matchs = Match.objects.filter((Q(id=matchId) & Q(game='puissance4_1v1')) & (Q(user1=request.user) | Q(user2=request.user))).first()
+            print(self.matchs)
+
+            if self.matchs is not None and self.matchs.user1_score < 5 and self.matchs.user2_score < 5:
+                self.page = 'puissance4'
+                return super().get(request)
+            self.error_message = 'You can\'t have access to this party.'
+            self.page = 'play'
+            return super().get(request)
 
         if (matchMode == '1v1' or matchMode == 'AI'):
             self.matchs = Match.objects.filter(id=matchId).first()

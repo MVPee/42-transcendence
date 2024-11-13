@@ -1,0 +1,149 @@
+{% load static %}
+
+<div class="game-banner d-flex align-items-center justify-content-center mb-3 p-2">
+    <div class="player-info d-flex align-items-center">
+        <img src="{{ matchs.user1.avatar.url }}" class="avatar mr-2" alt="avatar-player1">
+        <span class="player-name">{{ matchs.user1.username }}</span>
+        <span id="player-yellow-color"></span>
+    </div>
+    <div class="vs-text mx-4">VS</div>
+    <div class="player-info d-flex align-items-center">
+        <span id="player-red-color"></span>
+        <span class="player-name">{{ matchs.user2.username }}</span>
+        <img src="{{ matchs.user2.avatar.url }}" class="avatar ml-2" alt="avatar-player2">
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th><button onclick="ws.send(0);" id="press-0">1</button></th>
+            <th><button onclick="ws.send(1);" id="press-1">2</button></th>
+            <th><button onclick="ws.send(2);" id="press-2">3</button></th>
+            <th><button onclick="ws.send(3);" id="press-3">4</button></th>
+            <th><button onclick="ws.send(4);" id="press-4">5</button></th>
+            <th><button onclick="ws.send(5);" id="press-5">6</button></th>
+            <th><button onclick="ws.send(6);" id="press-6">7</button></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td id="1-1"></td>
+            <td id="1-2"></td>
+            <td id="1-3"></td>
+            <td id="1-4"></td>
+            <td id="1-5"></td>
+            <td id="1-6"></td>
+            <td id="1-7"></td>
+        </tr>
+        <tr>
+            <td id="2-1"></td>
+            <td id="2-2"></td>
+            <td id="2-3"></td>
+            <td id="2-4"></td>
+            <td id="2-5"></td>
+            <td id="2-6"></td>
+            <td id="2-7"></td>
+        </tr>
+        <tr>
+            <td id="3-1"></td>
+            <td id="3-2"></td>
+            <td id="3-3"></td>
+            <td id="3-4"></td>
+            <td id="3-5"></td>
+            <td id="3-6"></td>
+            <td id="3-7"></td>
+        </tr>
+        <tr>
+            <td id="4-1"></td>
+            <td id="4-2"></td>
+            <td id="4-3"></td>
+            <td id="4-4"></td>
+            <td id="4-5"></td>
+            <td id="4-6"></td>
+            <td id="4-7"></td>
+        </tr>
+        <tr>
+            <td id="5-1"></td>
+            <td id="5-2"></td>
+            <td id="5-3"></td>
+            <td id="5-4"></td>
+            <td id="5-5"></td>
+            <td id="5-6"></td>
+            <td id="5-7"></td>
+        </tr>
+        <tr>
+            <td id="6-1"></td>
+            <td id="6-2"></td>
+            <td id="6-3"></td>
+            <td id="6-4"></td>
+            <td id="6-5"></td>
+            <td id="6-6"></td>
+            <td id="6-7"></td>
+        </tr>
+    </tbody>
+</table>
+
+<p id="turn" class="text-center mt-5">Yellow turn</p>
+<p id="info" class="text-center mt-5"></p>
+
+<style>
+    th {
+        height: 80px;
+        width: 80px;
+        text-align: center;
+    }
+    td {
+        height: 80px;
+        width: 80px;
+        background-color: gray;
+        align-items: center;
+        border-radius: 100px;
+        border: 1px solid transparent;
+    }
+    #player-yellow-color {
+        height: 40px;
+        width: 40px;
+        background-color: yellow;
+        border: 1px solid transparent;
+        border-radius: 100px;
+    }
+    #player-red-color {
+        height: 40px;
+        width: 40px;
+        background-color: red;
+        border: 1px solid transparent;
+        border-radius: 100px;
+    }
+
+    .game-banner {
+        background-color: #333;
+        color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+    }
+
+    .player-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .player-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #c7c7c7;
+    }
+
+    .vs-text {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #ff5733;
+    }
+</style>

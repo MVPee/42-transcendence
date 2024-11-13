@@ -2,30 +2,6 @@ let ws;
 let moveInterval;
 let currentDirection = null;
 
-function chatWebSocket(link) {
-    if (ws)
-        ws.close();
-
-    ws = new WebSocket(link);
-
-    ws.onopen = () => {
-        console.log("WebSocket connection opened.");
-        ws.send("Hello, WebSocket server!");
-    };
-
-    ws.onmessage = (event) => {
-        console.log(event.data);
-    };
-
-    ws.onclose = () => {
-        console.log("WebSocket connection closed.");
-    };
-
-    ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-    };
-}
-
 function waitingWebSocket(link) {
     if (ws)
         ws.close();
@@ -67,7 +43,72 @@ function waitingWebSocket(link) {
     };
 }
 
-function gameWebsocket(link) {
+function chatWebSocket(link) {
+    if (ws)
+        ws.close();
+
+    ws = new WebSocket(link);
+
+    ws.onopen = () => {
+        console.log("WebSocket connection opened.");
+        ws.send("Hello, WebSocket server!");
+    };
+
+    ws.onmessage = (event) => {
+        console.log(event.data);
+    };
+
+    ws.onclose = () => {
+        console.log("WebSocket connection closed.");
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+}
+
+function puissance4Websocket(link) {
+    if (ws)
+        ws.close();
+
+    ws = new WebSocket(link);
+
+    ws.onopen = () => {
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.type === "info") {
+            const infoDisplay = document.getElementById("info");
+            infoDisplay.textContent = data.info;
+        }
+        if (data.type === "turn") {
+            const infoDisplay = document.getElementById("turn");
+            infoDisplay.textContent = data.turn;
+        }
+        if (data.type === "color") {
+            row = data.row;
+            column = data.column;
+            const td = document.getElementById(`${column}-${row}`);
+            td.style.backgroundColor = data.color;
+        }
+        else if (data.type === "redirect") {
+            loadContent(`profile`);
+            disconnectWebSocket();
+        }
+    };
+
+    ws.onclose = () => {
+        console.log("WebSocket connection closed.");
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+}
+
+function pongWebsocket(link) {
     if (ws)
         ws.close();
 
@@ -183,7 +224,10 @@ function checkWebsocketPage(page, queryString = '') {
         const game = urls[1];
         const mode = urls[2];
         const id = urls[3];
-        gameWebsocket(`wss://42.mvpee.be/ws/${urls[0]}/${game}/${mode}/${id}/`);
+        if (game === 'pong')
+            pongWebsocket(`wss://42.mvpee.be/ws/${urls[0]}/${game}/${mode}/${id}/`);
+        else if (game === 'puissance4')
+            puissance4Websocket(`wss://42.mvpee.be/ws/${urls[0]}/${game}/${mode}/${id}/`);
     }
     else
         disconnectWebSocket();

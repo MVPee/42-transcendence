@@ -36,7 +36,7 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
         self.user = self.scope['user']
-        self.room_group_name = f"game_{self.game_id}"
+        self.room_group_name = f"game_{self.game_id}_1v1"
 
         disconnect_key = f"player_disconnected_{self.game_id}"
         was_disconnected = cache.get(disconnect_key) == self.user.username
@@ -81,12 +81,6 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
             self.player2 = await sync_to_async(lambda: self.match.user2 if self.match.user2 else "Player2")()
             
             await self.accept()
-            
-            await self.send(text_data=json.dumps({
-                "type": "player_info",
-                "player1": self.player1.username,
-                "player2": self.player2.username
-            }))
 
         except Match.DoesNotExist:
             await self.close()
