@@ -8,3 +8,52 @@ body {
     }
 }
 
+.navbar nav {
+    position: fixed;
+    top: 1%;
+    background-color: #f8f9fa;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 10px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/*
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+*/
+
+/* play.html */
+
+.container {
+    display: flex; /* Enables flexbox layout */
+    justify-content: space-between; /* Distributes space evenly between the boxes */
+}
+
+.subheader {
+    width: 100%;
+    margin: 0 left;
+    background-color: rgb(0, 0, 0);
+    padding: 20px;
+    text-align: center;
+}
+
+.pong-box {
+    margin: 0 auto;
+    background-color: #afb2b4;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 10px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.puissance4-box {
+    background-color: #afb2b4;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 10px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}

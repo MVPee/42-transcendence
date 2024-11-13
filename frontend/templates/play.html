@@ -1,4 +1,6 @@
-<h1>Play</h1>
+<h1 class="subheader">
+	Choose your game
+</h1>
 
 {% if error_message %}
   <p style="color: red;">{{ error_message }}</p>
@@ -8,11 +10,21 @@
   <p style="color: green;">{{ success_message }}</p>
 {% endif %}
 
-<h2>Pong Game</h2>
-<a href="/waiting/pong/1v1" class="link btn btn-success">1v1 Match Queue</a>
-<a href="/waiting/pong/2v2" class="link btn btn-info">2v2 Match Queue</a>
-<a href="/waiting/pong/AI" class="link btn btn-danger">AI Match Queue</a>
-<a href="/waiting/pong/tournament" class="link btn btn-warning disabled">Tournament Queue</a>
+<br></br>
 
-<h2>SHI FU MI</h2>
-<a href="/waiting/shifumi/1v1" class="link btn btn-success disabled">1v1 Match Queue</a>
+<h2 class="container pong-box">
+	Pong Game
+	<br></br>
+	<a href="/waiting/pong/1v1" class="link btn btn-success">1v1 Match Queue</a>
+	<a href="/waiting/pong/2v2" class="link btn btn-info">2v2 Match Queue</a>
+	<a href="/waiting/pong/AI" class="link btn btn-danger">AI Match Queue</a>
+	<a href="/waiting/pong/tournament" class="link btn btn-warning disabled">Tournament Queue</a>
+</h2>
+
+<br></br>
+
+<h2 class="container puissance4-box">
+	Puissance 4
+	<br></br>
+	<a href="/waiting/puissance4/1v1" class="link btn btn-success">1v1 Match Queue</a>
+</h2>
