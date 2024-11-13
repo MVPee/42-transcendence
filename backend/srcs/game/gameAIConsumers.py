@@ -5,6 +5,7 @@ from django.core.cache import cache
 import json
 from .models import Match
 from django.contrib.auth import get_user_model
+import random
 
 User = get_user_model()
 
@@ -213,6 +214,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             if ball_dx < 0:
                 # Ball moving left towards Player 1's paddle
                 if ball_x <= paddle1_x + self.PADDLE_WIDTH:
+                    # Collision detected with Player 1's paddle
                     if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT:
                         # Augment ball speed
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
@@ -220,6 +222,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             elif ball_dx > 0:
                 # Ball moving right towards Player 2's paddle
                 if ball_x + self.BALL_WIDTH >= paddle2_x:
+                    # Collision detected with Player 2's paddle
                     if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT:
                         # Augment ball speed
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
@@ -245,7 +248,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 ball_y = self.BALL_Y
 
                 ball_dx = -self.BALL_SPEED
-                ball_dy = self.BALL_SPEED
+                ball_dy = self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED
 
             elif ball_x + self.BALL_WIDTH >= self.WIDTH:
                 await self.add_point_to(1)
@@ -266,7 +269,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 ball_y = self.BALL_Y
 
                 ball_dx = self.BALL_SPEED
-                ball_dy = self.BALL_SPEED
+                ball_dy = self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED
 
             # Update game state
             game_state['ball_x'] = ball_x
@@ -332,7 +335,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 pass
 
     async def player_movement(self, event):
-        # Send the movement data to WebSocket
+        # Send the movement data to client
         await self.send(text_data=json.dumps({
             "type": "player_movement",
             "player": event["player"],
