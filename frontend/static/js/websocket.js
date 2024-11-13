@@ -83,14 +83,15 @@ function puissance4Websocket(link) {
             const infoDisplay = document.getElementById("info");
             infoDisplay.textContent = data.info;
         }
-        if (data.type === "turn") {
+        else if (data.type === "turn") {
             const infoDisplay = document.getElementById("turn");
             infoDisplay.textContent = data.turn;
         }
-        if (data.type === "color") {
+        else if (data.type === "color") {
             row = data.row;
             column = data.column;
-            const td = document.getElementById(`${column}-${row}`);
+            color = data.color;
+            const td = document.getElementById(`${row}-${column}`);
             td.style.backgroundColor = data.color;
         }
         else if (data.type === "redirect") {

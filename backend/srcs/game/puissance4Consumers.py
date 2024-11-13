@@ -8,6 +8,10 @@ from srcs.community.models import Friend
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 class Puissance4Consumer(AsyncWebsocketConsumer):
+
+    YELLOW = 0
+    RED = 0
+
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
         self.room_group_name = f'game_{self.game_id}_puissance4'
@@ -106,22 +110,70 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
                 )
 
     async def receive(self, text_data):
+        print(text_data)
         if text_data.isnumeric() and int(text_data) >= 0 and int(text_data) <= 7:
+            column = int(text_data)
             game_state = cache.get(f"game_{self.game_id}_puissance4_state")
-            if game_state['turn'] == 'yellow' and self.user == self.player1:
-                print(f'player1 turn press {text_data}')
-                game_state['turn'] = 'red'
-            elif game_state['turn'] == 'red' and self.user == self.player2:
-                print(f'player2 turn press {text_data}')
-                game_state['turn'] = 'yellow'
+            if game_state['turn'] == 'yellow' and self.user == self.player1 and game_state['table'][column][0] is None:
+                for row in range(5, -1, -1):
+                    if game_state['table'][column][row] is None:
+                        game_state['table'][column][row] = self.YELLOW
+                        game_state['turn'] = 'red'
+                        await self.channel_layer.group_send(
+                            self.room_group_name,
+                            {
+                                "type": "send_color",
+                                "column": column ,
+                                "row": row,
+                                "color": 'yellow',
+                            }
+                        )
+                        break
+
+            elif game_state['turn'] == 'red' and self.user == self.player2 and game_state['table'][column][0] is None:
+                for row in range(5, -1, -1):
+                    if game_state['table'][column][row] is None:
+                        game_state['table'][column][row] = self.RED
+                        game_state['turn'] = 'yellow'
+                        await self.channel_layer.group_send(
+                            self.room_group_name,
+                            {
+                                "type": "send_color",
+                                "column": column ,
+                                "row": row,
+                                "color": 'red',
+                            }
+                        )
+                        break
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "send_turn",
+                    "message": f"{game_state['turn']} turn."
+                }
+            )
 
             cache.set(f"game_{self.game_id}_puissance4_state", game_state)
 
+    async def send_color(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "color",
+            "column": event["column"],
+            "row": event["row"],
+            "color": event["color"]
+        }))
 
     async def send_info(self, event):
         await self.send(text_data=json.dumps({
             "type": "info",
             "info": event["message"]
+        }))
+
+    async def send_turn(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "turn",
+            "turn": event["message"]
         }))
 
     @sync_to_async
