@@ -1,5 +1,5 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import Friend
+from .models import Friend, Messages
 from django.db.models import Q
 from asgiref.sync import sync_to_async
 import json
@@ -37,6 +37,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'username': username,
             'message': message,
         })
+        await self.add_chatdb(message)
+
 
     @sync_to_async
     def validate_friendship(self):
@@ -47,16 +49,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not self.user.is_authenticated:
             return False
 
-        # Assuming 'id' corresponds to a Friend relationship
-        try:
-            friend = Friend.objects.filter(
-                (Q(user1=self.user.id) | Q(user2=self.user.id)),
-                id=self.id,
-                status=True
-            ).first()
-            return friend is not None
-        except Friend.DoesNotExist:
-            return False
+        return self.get_friendship() != None
         
     async def chatroom_message(self, event):
         message = event['message']
@@ -65,3 +58,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'username': username,
             'message': message,
         }))
+
+    @sync_to_async
+    def add_chatdb(self, message):
+        friendship = self.get_friendship()
+        new_message = Messages.objects.create(friend_id=friendship, sender_id=self.user, context=message)
+        new_message.save()
+
+    def get_friendship(self):
+        # Assuming 'id' corresponds to a Friend relationship
+        try:
+            friend = Friend.objects.filter(
+                (Q(user1=self.user.id) | Q(user2=self.user.id)),
+                id=self.id,
+                status=True
+            ).first()
+            return friend
+        except Friend.DoesNotExist:
+            return None

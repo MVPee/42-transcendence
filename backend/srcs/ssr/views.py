@@ -39,7 +39,6 @@ class BaseSSRView(View):
         'game': {'template': 'game.html', 'auth_required': True},
     }
 
-    # r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
     context = None
     page = None
@@ -239,17 +238,13 @@ class ChatView(BaseSSRView):
     def get(self, request, *args, **kwargs):
 
         id = kwargs.get('id')
-        friend = Friend.objects.filter((Q(user1=request.user.id) | Q(user2=request.user.id)), status=True).first()
-        if (friend is None or friend.id != id):
+        friend = Friend.objects.filter(id=id).first()
+        if (friend is None or (friend.user1 != request.user and friend.user2 != request.user)):
             self.page = 'community'
             self.error_message = 'You can\'t access to this page'
             self.all_users = User.objects.exclude(id=request.user.id)
         else: #* load messages history
-            # redis_messages = self.r.lrange('chat_history', -20, -1)
-            # if redis_messages:
-            #     self.messages = [msg.decode('utf-8') for msg in redis_messages]
-            # else:
-                self.messages = Messages.objects.filter(friend_id=id).order_by('-created_at')[:20]
+            self.messages = Messages.objects.filter(friend_id=id).order_by('created_at')
         return super().get(request)
 
 

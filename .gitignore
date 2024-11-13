@@ -3,3 +3,8 @@ DS_Store
 db.sqlite3
 data
 create_superuser.py
+.gitignore
+backend/app/settings.py
+frontend/static/js/websocket.js
+nginx/conf/nginx.conf
+venv
