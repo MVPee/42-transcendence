@@ -20,8 +20,10 @@ class GameAIConsumer(AsyncWebsocketConsumer):
     HEIGHT = 400
     WIDTH = 600
 
-    BALL_X = 300
-    BALL_Y = 200
+    DISTANCE_BETWEEN_WALL_PADDLE = 30
+
+    BALL_X = 295
+    BALL_Y = 195
 
     BALL_HEIGHT = 5
     BALL_WIDTH = 5
@@ -42,8 +44,8 @@ class GameAIConsumer(AsyncWebsocketConsumer):
 
         if not cache.get(f"game_{self.game_id}_state"):
             cache.set(f"game_{self.game_id}_state", {
-                'player1PaddleY': 200 - self.PADDLE_HEIGHT / 2,
-                'player2PaddleY': 200 - self.PADDLE_HEIGHT / 2,
+                'player1PaddleY': self.HEIGHT / 2 - self.PADDLE_HEIGHT / 2,
+                'player2PaddleY': self.HEIGHT / 2 - self.PADDLE_HEIGHT / 2,
                 'ball_x': self.BALL_X,
                 'ball_y': self.BALL_Y,
                 'ball_dx': self.BALL_SPEED,
@@ -215,16 +217,14 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 # Ball moving left towards Player 1's paddle
                 if ball_x <= paddle1_x + self.PADDLE_WIDTH:
                     # Collision detected with Player 1's paddle
-                    if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT:
-                        # Augment ball speed
+                    if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT and ball_x >= self.DISTANCE_BETWEEN_WALL_PADDLE:
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
                         ball_dy *= self.ACCELERATION_FACTOR
             elif ball_dx > 0:
                 # Ball moving right towards Player 2's paddle
                 if ball_x + self.BALL_WIDTH >= paddle2_x:
                     # Collision detected with Player 2's paddle
-                    if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT:
-                        # Augment ball speed
+                    if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT and ball_x <= self.WIDTH - self.DISTANCE_BETWEEN_WALL_PADDLE:
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
                         ball_dy *= self.ACCELERATION_FACTOR
 
