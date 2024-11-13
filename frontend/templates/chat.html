@@ -1,4 +1,26 @@
 {% load static %}
 
+
 <h2>Chat</h2>
-<p>Dan part loading...</p>
+
+
+<div id="chat-text"> </div>
+<br>
+<input id="input" type="text" size="100">
+<br>
+<input id="submit" type="button" value="Send">
+
+<script>
+	function render_message(sender, context) {
+		const div = document.createElement('div');
+		div.className = sender === '{{ request.user.username }}' ? "message_sender" : "message_receiver";
+		div.innerHTML = `<p>${sender}: ${context}</p>`;
+		document.querySelector('#chat-text').appendChild(div);
+		scrollToBottom();
+	}
+	{% for message in messages %}
+		render_message('{{ message.sender_id.username }}', '{{ message.context }}')
+	{% endfor %}
+</script>
+
+{{ request.user.username|json_script:"sender_username" }}

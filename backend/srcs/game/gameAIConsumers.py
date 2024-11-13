@@ -208,14 +208,14 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 # Ball moving left towards Player 1's paddle
                 if ball_x <= paddle1_x + self.PADDLE_WIDTH:
                     # Collision detected with Player 1's paddle
-                    if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT and ball_x >= self.DISTANCE_BETWEEN_WALL_PADDLE:
+                    if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT and ball_x >= self.DISTANCE_BETWEEN_WALL_PADDLE - 5:
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
                         ball_dy *= self.ACCELERATION_FACTOR
             elif ball_dx > 0:
                 # Ball moving right towards Player 2's paddle
                 if ball_x + self.BALL_WIDTH >= paddle2_x:
                     # Collision detected with Player 2's paddle
-                    if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT and ball_x <= self.WIDTH - self.DISTANCE_BETWEEN_WALL_PADDLE:
+                    if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT and ball_x <= self.WIDTH - self.DISTANCE_BETWEEN_WALL_PADDLE + 5:
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
                         ball_dy *= self.ACCELERATION_FACTOR
 

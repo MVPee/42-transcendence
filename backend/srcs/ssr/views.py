@@ -5,13 +5,14 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 from srcs.user.models import CustomUser as User
-from srcs.community.models import Blocked, Friend
+from srcs.community.models import Blocked, Friend, Messages
 from srcs.game.models import Match, Matchs
 from django.utils import timezone
 from datetime import timedelta
 from urllib.parse import urlparse
 from django.db.models import Q
 from django.conf import settings
+import redis
 import os
 
 class BaseSSRView(View):
@@ -38,6 +39,7 @@ class BaseSSRView(View):
         'game': {'template': 'game.html', 'auth_required': True},
         'puissance4': {'template': 'puissance4.html', 'auth_required': True},
     }
+
 
     context = None
     page = None
@@ -68,6 +70,8 @@ class BaseSSRView(View):
     matchs_2v2 = None
     winrate_2v2 = None
     average_score_2v2 = None
+    
+    messages = None
 
     def get(self, request, *args, **kwargs):
         """
@@ -114,6 +118,7 @@ class BaseSSRView(View):
             'winrate_2v2': self.winrate_2v2,
             'average_score_2v2': self.average_score_2v2,
             'user_status': self.user_status,
+            'messages': self.messages,
         }
 
         # Check if the page requires authentication
@@ -245,11 +250,13 @@ class ChatView(BaseSSRView):
     def get(self, request, *args, **kwargs):
 
         id = kwargs.get('id')
-        friend = Friend.objects.filter((Q(user1=request.user.id) | Q(user2=request.user.id)), status=True).first()
-        if (friend is None or friend.id != id):
+        friend = Friend.objects.filter(id=id).first()
+        if (friend is None or (friend.user1 != request.user and friend.user2 != request.user)):
             self.page = 'community'
             self.error_message = 'You can\'t access to this page'
             self.all_users = User.objects.exclude(id=request.user.id)
+        else: #* load messages history
+            self.messages = Messages.objects.filter(friend_id=id).order_by('created_at')
         return super().get(request)
 
 

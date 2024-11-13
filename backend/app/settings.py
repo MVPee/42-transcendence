@@ -26,11 +26,11 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = [
-    '42.mvpee.be',
+	'42.mvpee.be',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://42.mvpee.be',
+	'https://42.mvpee.be',
 ]
 
 # Application definition

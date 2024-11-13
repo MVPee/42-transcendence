@@ -2,6 +2,36 @@ let ws;
 let moveInterval;
 let currentDirection = null;
 
+function chatWebSocket(link) {
+    if (ws)
+        ws.close();
+
+    ws = new WebSocket(link);
+
+    ws.onopen = () => {
+        console.log("WebSocket connection opened.");
+    };
+
+    ws.onmessage = (event) => {
+        console.log(event);
+		const data = JSON.parse(event.data)
+		render_message(data.username, data.message);
+    };
+
+    ws.onclose = () => {
+        console.log("WebSocket connection closed.");
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+
+	const submit_button = document.getElementById('submit')
+    submit_button.removeEventListener("click", sendMessage(ws));
+	submit_button.addEventListener("click", sendMessage(ws))
+	scrollToBottom();
+}
+
 function waitingWebSocket(link) {
     if (ws)
         ws.close();
@@ -32,30 +62,6 @@ function waitingWebSocket(link) {
             loadContent(`game/${data.game}/${data.mode}/${data.id}`);
             disconnectWebSocket();
         }
-    };
-
-    ws.onclose = () => {
-        console.log("WebSocket connection closed.");
-    };
-
-    ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-    };
-}
-
-function chatWebSocket(link) {
-    if (ws)
-        ws.close();
-
-    ws = new WebSocket(link);
-
-    ws.onopen = () => {
-        console.log("WebSocket connection opened.");
-        ws.send("Hello, WebSocket server!");
-    };
-
-    ws.onmessage = (event) => {
-        console.log(event.data);
     };
 
     ws.onclose = () => {
