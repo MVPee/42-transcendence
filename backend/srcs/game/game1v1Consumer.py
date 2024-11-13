@@ -19,6 +19,8 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
     HEIGHT = 400
     WIDTH = 600
 
+    DISTANCE_BETWEEN_WALL_PADDLE = 30
+
     BALL_X = 295
     BALL_Y = 195
 
@@ -39,8 +41,8 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
         disconnect_key = f"player_disconnected_{self.game_id}"
         was_disconnected = cache.get(disconnect_key) == self.user.username
 
-        if not cache.get(f"game_{self.game_id}_state"):
-            cache.set(f"game_{self.game_id}_state", {
+        if not cache.get(f"game_{self.game_id}_1v1_state"):
+            cache.set(f"game_{self.game_id}_1v1_state", {
                 'player1PaddleY': self.HEIGHT / 2 - self.PADDLE_HEIGHT / 2,
                 'player2PaddleY': self.HEIGHT / 2 - self.PADDLE_HEIGHT / 2,
                 'ball_x': self.BALL_X,
@@ -67,10 +69,10 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
             )
 
             # Resume the game
-            game_state = cache.get(f"game_{self.game_id}_state")
+            game_state = cache.get(f"game_{self.game_id}_1v1_state")
             if game_state:
                 game_state['paused'] = False
-                cache.set(f"game_{self.game_id}_state", game_state)
+                cache.set(f"game_{self.game_id}_1v1_state", game_state)
 
         try:
             self.match = await sync_to_async(Match.objects.get)(id=self.game_id)
@@ -146,7 +148,7 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
     async def gameProcess(self):
         await self.countdown()
         while True:
-            game_state = cache.get(f"game_{self.game_id}_state")
+            game_state = cache.get(f"game_{self.game_id}_1v1_state")
             if not game_state:
                 break
 
@@ -239,7 +241,7 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
             game_state['ball_dx'] = ball_dx
             game_state['ball_dy'] = ball_dy
 
-            cache.set(f"game_{self.game_id}_state", game_state)
+            cache.set(f"game_{self.game_id}_1v1_state", game_state)
 
             # Send updated ball position to clients
             await self.channel_layer.group_send(
@@ -265,7 +267,7 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
         if data["type"] == "movement" and data["direction"] in ('up', 'down'):
             direction = data["direction"]
 
-            game_state = cache.get(f"game_{self.game_id}_state")
+            game_state = cache.get(f"game_{self.game_id}_1v1_state")
 
             now = asyncio.get_event_loop().time()
             last_move_time = game_state.get(f'last_move_time_{self.user.username}', 0)
@@ -285,7 +287,7 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
 
                 game_state[f'last_move_time_{self.user.username}'] = now
 
-                cache.set(f"game_{self.game_id}_state", game_state)
+                cache.set(f"game_{self.game_id}_1v1_state", game_state)
 
                 await self.channel_layer.group_send(
                     self.room_group_name,
@@ -319,10 +321,10 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
             cache.set(disconnect_key, self.user.username, timeout=20)
 
             # Set the game to paused
-            game_state = cache.get(f"game_{self.game_id}_state")
+            game_state = cache.get(f"game_{self.game_id}_1v1_state")
             if game_state:
                 game_state['paused'] = True
-                cache.set(f"game_{self.game_id}_state", game_state)
+                cache.set(f"game_{self.game_id}_1v1_state", game_state)
 
             await self.channel_layer.group_send(
                 self.room_group_name,
