@@ -18,14 +18,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
         await self.accept()
-        await self.send(text_data=json.dumps({"message": "WebSocket connection established"}))
 
     async def disconnect(self, close_code):
-        pass
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
-        await self.send(text_data=json.dumps({"message": "Received: " + text_data}))
+        text_data_json = json.loads(text_data)
+        message = text_data_json['message']
+        username = text_data_json['username']
+        await self.channel_layer.group_send(self.room_group_name,{
+            'type': 'chatroom_message',
+            'username': username,
+            'message': message,
+        })
 
     @sync_to_async
     def validate_friendship(self):
@@ -46,3 +57,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return friend is not None
         except Friend.DoesNotExist:
             return False
+        
+    async def chatroom_message(self, event):
+        message = event['message']
+        username = event['username']
+        await self.send(text_data=json.dumps({
+            'username': username,
+            'message': message,
+        }))
