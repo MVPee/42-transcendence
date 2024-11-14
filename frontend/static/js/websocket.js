@@ -225,10 +225,7 @@ function checkWebsocketPage(page, queryString = '') {
     else if (urls[0] === 'waiting') {
         const game_mode = urls[1];
         const queue_type = urls[2];
-        if (game_mode === 'pong' || game_mode === 'puissance4')
-            waitingWebSocket(`wss://42.mvpee.be/ws/${urls[0]}/${game_mode}/${queue_type}/`);
-        else if (game_mode === 'private')
-            waitingWebSocket(`wss://42.mvpee.be/ws/${urls[0]}/${game_mode}/${queue_type}/`);
+        waitingWebSocket(`wss://42.mvpee.be/ws/${urls[0]}/${game_mode}/${queue_type}/`);
     }
     else if (urls[0] === 'game') {
         const game = urls[1];
