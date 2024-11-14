@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.views import View
 from srcs.user.models import CustomUser as User
 from srcs.community.models import Blocked, Friend, Messages
-from srcs.game.models import Match, Matchs
+from srcs.game.models import Match, Matchs, Tournament
 from django.utils import timezone
 from datetime import timedelta
 from urllib.parse import urlparse
@@ -38,6 +38,7 @@ class BaseSSRView(View):
         'waiting': {'template': 'waiting.html', 'auth_required': True},
         'game': {'template': 'game.html', 'auth_required': True},
         'puissance4': {'template': 'puissance4.html', 'auth_required': True},
+        'tournament': {'template': 'tournament.html', 'auth_required': True},
     }
 
 
@@ -243,7 +244,7 @@ class GameView(BaseSSRView):
             self.page = 'play'
             return super().get(request)
 
-        if (matchMode == '1v1' or matchMode == 'AI'):
+        elif (matchMode == '1v1' or matchMode == 'AI'):
             self.matchs = Match.objects.filter(id=matchId).first()
 
             if self.matchs is None \
@@ -260,6 +261,17 @@ class GameView(BaseSSRView):
             if self.matchs is not None and self.matchs.team1_score < 5 or self.matchs.team2_score < 5:
                 self.page = 'play'
                 self.error_message = '2v2 is comming but not now bro.'
+                return super().get(request)
+            else:
+                self.page = 'play'
+                self.error_message = 'You can\'t have access to this party.'
+                return super().get(request)
+    
+        elif (matchMode == 'tournament'):
+            self.matchs = Tournament.objects.filter(Q(id=matchId) & Q(user1=request.user) | Q(user2=request.user) | Q(user3=request.user) | Q(user4=request.user)).first()
+            if self.matchs is not None and self.matchs.winner is None:
+                self.page = 'play'
+                self.error_message = 'tournament is comming but not now bro.'
                 return super().get(request)
             else:
                 self.page = 'play'

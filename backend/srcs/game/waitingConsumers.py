@@ -4,7 +4,7 @@ from django.utils import timezone
 from asgiref.sync import sync_to_async
 from django.db.models import Q
 from srcs.community.models import Friend
-from .models import Match, Matchs
+from .models import Match, Matchs, Tournament
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -31,6 +31,8 @@ class WaitingConsumer(AsyncWebsocketConsumer):
             self.LEN_NEEDED = 4
         elif self.MODE == 'AI':
             self.LEN_NEEDED = 1
+        elif self.MODE == 'tournament':
+            self.LEN_NEEDED = 4
 
         self.room_group_name = f'waiting_{self.GAME}_{self.MODE}'
 
@@ -124,6 +126,12 @@ class WaitingConsumer(AsyncWebsocketConsumer):
                 user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
                 ai = await sync_to_async(User.objects.get)(username="AI.")
                 match = await sync_to_async(Match.objects.create)(game="pong_ai", user1=user1, user2=ai, created_at=timezone.now())
+            if self.MODE == 'tournament':
+                user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
+                user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
+                user3 = await sync_to_async(User.objects.get)(username=player_usernames[2])
+                user4 = await sync_to_async(User.objects.get)(username=player_usernames[3])
+                match = await sync_to_async(Tournament.objects.create)(user1=user1, user2=user2, user3=user3, user4=user4, created_at=timezone.now())
 
         elif self.GAME == 'puissance4':
             if self.MODE == '1v1':
