@@ -29,7 +29,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
-        print(text_data)
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
         username = text_data_json['username']
@@ -62,9 +61,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @sync_to_async
     def add_chatdb(self, message):
-        friendship = self.get_friendship()
-        new_message = Messages.objects.create(friend_id=friendship, sender_id=self.user, context=message)
-        new_message.save()
+        if len(message) <= 100:
+            friendship = self.get_friendship()
+            new_message = Messages.objects.create(friend_id=friendship, sender_id=self.user, context=message)
+            new_message.save()
 
     def get_friendship(self):
         # Assuming 'id' corresponds to a Friend relationship
