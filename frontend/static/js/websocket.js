@@ -115,7 +115,7 @@ function puissance4Websocket(link) {
     };
 }
 
-function pongWebsocket(link) {
+function pongWebsocket(link, mode) {
     if (ws)
         ws.close();
 
@@ -131,6 +131,12 @@ function pongWebsocket(link) {
         if (data.type === "player_movement") {
             const paddle1 = document.getElementById("paddle1");
             const paddle2 = document.getElementById("paddle2");
+            if (mode === '2v2') {
+                const paddle3 = document.getElementById("paddle3");
+                const paddle4 = document.getElementById("paddle4");
+                paddle3.style.top = `${data.player3PaddleY}px`;
+                paddle4.style.top = `${data.player4PaddleY}px`;
+            }
             paddle1.style.top = `${data.player1PaddleY}px`;
             paddle2.style.top = `${data.player2PaddleY}px`;
         }
@@ -232,7 +238,7 @@ function checkWebsocketPage(page, queryString = '') {
         const mode = urls[2];
         const id = urls[3];
         if (game === 'pong')
-            pongWebsocket(`wss://42.mvpee.be/ws/${urls[0]}/${game}/${mode}/${id}/`);
+            pongWebsocket(`wss://42.mvpee.be/ws/${urls[0]}/${game}/${mode}/${id}/`, mode);
         else if (game === 'puissance4')
             puissance4Websocket(`wss://42.mvpee.be/ws/${urls[0]}/${game}/${mode}/${id}/`);
     }
