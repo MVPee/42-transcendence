@@ -256,6 +256,7 @@ class ChatView(BaseSSRView):
             self.error_message = 'You can\'t access to this page'
             self.all_users = User.objects.exclude(id=request.user.id)
         else: #* load messages history
+            self.friend = friend
             self.messages = Messages.objects.filter(friend_id=id).order_by('created_at')
         return super().get(request)
 

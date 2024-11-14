@@ -1,8 +1,10 @@
 {% load static %}
 
-
-<h2>Chat</h2>
-
+{% if friend.user1.username == request.user.username %}
+	<h2>Chat with <a class="link" href="/profile?profile={{ friend.user2.username }}">{{ friend.user2.username }}</a></h2>
+{% else %}
+	<h2>Chat with <a class="link" href="/profile?profile={{ friend.user1.username }}">{{ friend.user1.username }}</a></h2>
+{% endif %}
 
 <div id="chat-text"> </div>
 <br>
