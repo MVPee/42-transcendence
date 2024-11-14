@@ -382,10 +382,10 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
         #? Protection if the match is finish
         if await self.check_win() == 0:
             if cache.get(disconnect_key) == self.user.username:
-                if self.match.user1 == self.user:
+                if self.match.user1 == self.user or self.match.user2 == self.user:
                     await self.set_points_to(2, 5)
                     await self.set_win_to(2)
-                elif self.match.user2 == self.user:
+                elif self.match.user3 == self.user or self.match.user4 == self.user:
                     await self.set_points_to(1, 5)
                     await self.set_win_to(1)
 

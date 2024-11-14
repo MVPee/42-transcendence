@@ -259,9 +259,7 @@ class GameView(BaseSSRView):
 
         elif (matchMode == '2v2'):
             self.matchs = Matchs.objects.filter(Q(id=matchId) & Q(user1=request.user) | Q(user2=request.user) | Q(user3=request.user) | Q(user4=request.user)).first()
-            if self.matchs is not None and self.matchs.team1_score < 5 or self.matchs.team2_score < 5:
-                # self.page = 'play'
-                # self.error_message = '2v2 is comming but not now bro.'
+            if self.matchs is not None and self.matchs.team1_score < 5 and self.matchs.team2_score < 5:
                 self.page = '2v2'
                 return super().get(request)
             else:

@@ -3,17 +3,17 @@
 <div class="game-banner d-flex align-items-center justify-content-center mb-3 p-2">
     <div class="player-info d-flex align-items-center">
         <img src="{{ matchs.user1.avatar.url }}" class="avatar mr-2" alt="avatar-player1">
-        <span class="player-name"> {{ matchs.user1.username }} </span>
+        <span class="player-name" style="color: #fff;"> {{ matchs.user1.username }} </span>
         <span class="pl-2 pr-2"> & </span>
-        <span class="player-name"> {{ matchs.user2.username }} </span>
+        <span class="player-name" style="color: #d31b1b;"> {{ matchs.user2.username }} </span>
         <img src="{{ matchs.user2.avatar.url }}" class="avatar ml-2" alt="avatar-player2">
     </div>
     <div class="vs-text mx-4">VS</div>
     <div class="player-info d-flex align-items-center">
         <img src="{{ matchs.user3.avatar.url }}" class="avatar mr-2" alt="avatar-player1">
-        <span class="player-name"> {{ matchs.user3.username }} </span>
+        <span class="player-name" style="color: #fff;"> {{ matchs.user3.username }} </span>
         <span class="pl-2 pr-2"> & </span>
-        <span class="player-name"> {{ matchs.user4.username }} </span>
+        <span class="player-name" style="color: #d31b1b;"> {{ matchs.user4.username }} </span>
         <img src="{{ matchs.user4.avatar.url }}" class="avatar ml-2" alt="avatar-player2">
     </div>
 </div>
@@ -51,7 +51,7 @@
     }
 
     #paddle2 {
-        background-color: rgb(211, 27, 27);
+        background-color: #d31b1b;
         top: 240px;
         left: 30px;
     }
@@ -63,7 +63,7 @@
     }
 
     #paddle4 {
-        background-color: rgb(211, 27, 27);
+        background-color: #d31b1b;
         top: 240px;
         right: 30px;
     }
@@ -125,7 +125,6 @@
     .player-name {
         font-size: 1.2rem;
         font-weight: bold;
-        color: #c7c7c7;
     }
 
     .vs-text {
