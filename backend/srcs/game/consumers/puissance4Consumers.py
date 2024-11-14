@@ -1,6 +1,6 @@
 import json
 import asyncio
-from .models import Match
+from ..models import Match
 from django.db.models import Q
 from django.core.cache import cache
 from asgiref.sync import sync_to_async

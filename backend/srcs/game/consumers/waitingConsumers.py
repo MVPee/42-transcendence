@@ -4,7 +4,7 @@ from django.utils import timezone
 from asgiref.sync import sync_to_async
 from django.db.models import Q
 from srcs.community.models import Friend
-from .models import Match, Matchs, Tournament
+from ..models import Match, Matchs, Tournament
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
