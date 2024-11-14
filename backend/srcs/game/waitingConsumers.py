@@ -2,6 +2,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from django.utils import timezone
 from asgiref.sync import sync_to_async
+from django.db.models import Q
+from srcs.community.models import Friend
 from .models import Match, Matchs
 from django.contrib.auth import get_user_model
 
@@ -14,9 +16,16 @@ class WaitingConsumer(AsyncWebsocketConsumer):
         websocket_url = self.scope['path']
         self.GAME = websocket_url.split('/')[-3]
         self.MODE = websocket_url.split('/')[-2]
+        self.user = self.scope['user']
         # print(f'waiting_{self.GAME}_{self.MODE}') #* DEBUG
 
-        if self.MODE == '1v1':
+        if self.GAME == 'private':
+            friend = await self.get_friendship()
+            if friend is None:
+                self.close()
+                return
+            self.LEN_NEEDED = 2
+        elif self.MODE == '1v1':
             self.LEN_NEEDED = 2
         elif self.MODE == '2v2':
             self.LEN_NEEDED = 4
@@ -24,7 +33,6 @@ class WaitingConsumer(AsyncWebsocketConsumer):
             self.LEN_NEEDED = 1
 
         self.room_group_name = f'waiting_{self.GAME}_{self.MODE}'
-        self.user = self.scope['user']
 
         if self.user.is_authenticated:
             #? Create the room
@@ -53,18 +61,19 @@ class WaitingConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if self.user.is_authenticated:
-            if self.room_group_name in WaitingConsumer.rooms:
+            if hasattr(self, 'room_group_name') and self.room_group_name in WaitingConsumer.rooms:
                 WaitingConsumer.rooms[self.room_group_name].discard(self.user.username)
                 if not WaitingConsumer.rooms[self.room_group_name]:
                     del WaitingConsumer.rooms[self.room_group_name]
 
-            await self.channel_layer.group_discard(
-                self.room_group_name,
-                self.channel_name
-            )
+                await self.channel_layer.group_discard(
+                    self.room_group_name,
+                    self.channel_name
+                )
 
-            #? MAJ of the player list
-            await self.send_player_list_to_all()
+                # Update player list
+                await self.send_player_list_to_all()
+
 
     async def send_player_list_to_all(self):
         '''
@@ -93,6 +102,13 @@ class WaitingConsumer(AsyncWebsocketConsumer):
 
         player_usernames = list(WaitingConsumer.rooms.get(self.room_group_name, []))
         
+        if self.GAME == 'private':
+            self.GAME = 'pong'
+            self.MODE = '1v1'
+            user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
+            user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
+            match = await sync_to_async(Match.objects.create)(game="private_1v1", user1=user1, user2=user2, created_at=timezone.now())
+
         if self.GAME == 'pong':
             if self.MODE == '1v1':
                 user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
@@ -135,3 +151,11 @@ class WaitingConsumer(AsyncWebsocketConsumer):
             "mode": event["mode"],
             "id": event["id"]
         }))
+
+    @sync_to_async
+    def get_friendship(self):
+        return Friend.objects.filter(
+            (Q(user1=self.user.id) | Q(user2=self.user.id)),
+            id=self.MODE,
+            status=True
+        ).first()

@@ -188,6 +188,16 @@ class WaitingView(BaseSSRView):
     """
 
     page = 'waiting'
+    def get(self, request, *args, **kwargs):
+        game_mode = kwargs.get('game_mode')
+        queue_type = kwargs.get('queue_type')
+        if game_mode == 'private':
+            self.friend = Friend.objects.filter(Q(id=int(queue_type)) & Q(user1=request.user) | Q(user2=request.user)).first()
+            if self.friend is None:
+                self.error_message = 'You can\'t have access to this party.'
+                self.page = 'play'
+                return super().get(request)
+        return super().get(request)
 
 
 class GameView(BaseSSRView):
