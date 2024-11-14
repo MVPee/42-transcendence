@@ -11,8 +11,15 @@ function sendMessage(chatSocket){
 	};
 }
 
-
 function scrollToBottom() {
     let objDiv = document.getElementById("chat-text");
     objDiv.scrollTop = objDiv.scrollHeight;
+}
+
+function Send1v1() {
+	const sender_username = JSON.parse(document.getElementById('sender_username').textContent);
+	ws.send(JSON.stringify({
+		'username': sender_username,
+		'message': '1v1',
+	}));
 }

@@ -10,15 +10,17 @@
 <br>
 <input id="input" type="text" size="100" maxlength="100">
 <br>
-<input id="submit" type="button" value="Send">
-
-<a class="link" href="/waiting/private/{{ friend.id }}">friend 1v1</a>
+<input id="submit" type="button" class="btn btn-info" value="Send">
+<button onclick="Send1v1()" class="btn btn-success">1v1 Request</button>
 
 <script>
 	function render_message(sender, context) {
 		const div = document.createElement('div');
 		div.className = sender === '{{ request.user.username }}' ? "message_sender" : "message_receiver";
-		div.innerHTML = `<p>${sender}: ${context}</p>`;
+		if (context === '1v1')
+			div.innerHTML = `<p>${sender}: <a class="link" href="/waiting/private/{{ friend.id }}">1v1</a></p>`;
+		else
+			div.innerHTML = `<p>${sender}: ${context}</p>`;
 		document.querySelector('#chat-text').appendChild(div);
 		scrollToBottom();
 	}
