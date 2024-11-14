@@ -3,3 +3,4 @@ from .models import *
 
 admin.site.register(Match)
 admin.site.register(Matchs)
+admin.site.register(Tournament)

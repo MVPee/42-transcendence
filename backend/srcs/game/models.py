@@ -36,3 +36,23 @@ class Matchs(models.Model):
         verbose_name = "Match 2v2"
         verbose_name_plural = "Matchs 2v2"
         ordering = ['-created_at']
+
+class Tournament(models.Model):
+    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='tournaments_first_opponents_1', null=True)
+    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='tournaments_second_opponents_1', null=True)
+    user3 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='tournaments_first_opponents_2', null=True)
+    user4 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='tournaments_second_opponents_2', null=True)
+    user1_position = models.IntegerField(default=4)
+    user2_position = models.IntegerField(default=4)
+    user3_position = models.IntegerField(default=4)
+    user4_position = models.IntegerField(default=4)
+    winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='tournaments_winner', null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Winner of the tournament {winner.username}"
+
+    class Meta:
+        verbose_name = "Tournament 1v1v1v1"
+        verbose_name_plural = "Tournaments 1v1v1v1"
+        ordering = ['-created_at']
