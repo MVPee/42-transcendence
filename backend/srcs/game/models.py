@@ -11,7 +11,7 @@ class Match(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.user1.username if self.user1 else 'deleted user'} vs {self.user2.username if self.user2 else 'deleted user'}: {self.user1_score}/{self.user2_score}"
+        return f"{self.user1.username if self.user1 else 'deleted user'} vs {self.user2.username if self.user2 else 'deleted user'}: {self.user1_score}/{self.user2_score}: {self.game}"
 
     class Meta:
         verbose_name = "Match 1v1"
@@ -30,7 +30,7 @@ class Matchs(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"2v2 {self.user1.username} && {self.user2.username} ({self.team1_score}) VS ({self.team2_score}) {self.user3.username} && {self.user4.username}"
+        return f"2v2 {self.user1.username} && {self.user2.username} ({self.team1_score}) VS ({self.team2_score}) {self.user3.username} && {self.user4.username}: {self.game}"
 
     class Meta:
         verbose_name = "Match 2v2"

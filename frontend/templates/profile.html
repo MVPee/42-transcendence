@@ -33,8 +33,6 @@
 <p><strong>Username:</strong> {{ user.username }}</p>
 <p><strong>Email:</strong> {{ user.email }}</p>
 <p><strong>Elo:</strong> {{ user.elo }}</p>
-<p><strong>Win:</strong> {{ user.win }}</p>
-<p><strong>Defeat:</strong> {{ user.defeat }}</p>
 <p><strong>Joined on:</strong> {{ user.created_at|date:"F j, Y" }}</p>
 
 {% if user.username != 'AI.' %}
@@ -92,71 +90,20 @@
 	{% endif %}
 {% endif %}
 
-{% if user.username == 'AI.' %}
-	<h3>Our AI Statistics</h3>
-{% else %}
-	<h3>Player Statistics 1v1</h3>
-{% endif %}
-<div>
-    <p><strong>Winrate:</strong> {{ winrate_1v1 }}%</p>
-    <p><strong>Average Score:</strong> {{ average_score_1v1 }}</p>
-</div>
+<h2>Statistics</h2>
 
-{% if user.username != 'AI.' %}
-	<h3>Player Statistics 2v2</h3>
-	<div>
-		<p><strong>Winrate:</strong> {{ winrate_2v2 }}%</p>
-		<p><strong>Average Score:</strong> {{ average_score_2v2 }}</p>
-	</div>
-{% endif %}
+<button class="btn btn-info" onclick="displayStats('pong-1v1')">Pong 1v1 Stats</button>
+<button class="btn btn-success" onclick="displayStats('pong-2v2')">Pong 2v2 Stats</button>
+<button class="btn btn-warning" onclick="displayStats('pong-ai')">Pong 1vAi Stats</button>
+<button class="btn btn-danger" onclick="displayStats('puissance4-1v1')">Puissance4 Stats</button>
 
-<h3>Match History 1v1</h3>
-{% if matchs_1v1 %}
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-				<th>Winner</th>
-                <th>Match Date</th>
-                <th>Players</th>
-                <th>Score</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for match in matchs_1v1 %}
-                <tr>
-					<td>
-						{% if match.user1_score > match.user2_score %}
-							<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
-						{% else %}
-							<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
-						{% endif %}
-					</td>
-                    <td>{{ match.created_at|date:"F j, Y, g:i a" }}</td>
-                    <td>
-                        {% if match.user1 %}
-							<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
-                        {% else %}
-                            Deleted User
-                        {% endif %}
-                        <b>VS</b>
-                        {% if match.user2 %}
-							<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
-                        {% else %}
-                            Deleted User
-                        {% endif %}
-                    </td>
-                    <td>{{ match.user1_score }} - {{ match.user2_score }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>No match history available.</p>
-{% endif %}
-
-{% if user.username != 'AI.' %}
-	<h3>Match History 2v2</h3>
-	{% if matchs_2v2 %}
+<div class="Statistics" id="pong-1v1" style="display: block;">
+	<h3>Pong 1v1</h3>
+	<p>Win: {{ pong.1v1.win }}</p>
+	<p>Defeat: {{ pong.1v1.defeat }}</p>
+	<p>Winrate: {{ pong.1v1.winrate }}%</p>
+	<h4>Match history</h4>
+	{% if pong.1v1.matchs %}
 		<table class="table table-striped table-bordered">
 			<thead>
 				<tr>
@@ -167,7 +114,57 @@
 				</tr>
 			</thead>
 			<tbody>
-				{% for match in matchs_2v2 %}
+				{% for match in pong.1v1.matchs%}
+					<tr>
+						<td>
+							{% if match.user1_score > match.user2_score %}
+								<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+							{% else %}
+								<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+							{% endif %}
+						</td>
+						<td>{{ match.created_at|date:"F j, Y, g:i a" }}</td>
+						<td>
+							{% if match.user1 %}
+								<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+							{% else %}
+								Deleted User
+							{% endif %}
+							<b>VS</b>
+							{% if match.user2 %}
+								<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+							{% else %}
+								Deleted User
+							{% endif %}
+						</td>
+						<td>{{ match.user1_score }} - {{ match.user2_score }}</td>
+					</tr>
+				{% endfor%}
+			</tbody>
+		</table>
+	{% else %}
+		<p>No data available</p>
+	{% endif %}
+</div>
+
+<div class="Statistics" id="pong-2v2" style="display: none;">
+	<h3>Pong 2v2</h3>
+	<p>Win: {{ pong.2v2.win }}</p>
+	<p>Defeat: {{ pong.2v2.defeat }}</p>
+	<p>Winrate: {{ pong.2v2.winrate }}%</p>
+	<h3>Match History</h3>
+	{% if pong.2v2.matchs %}
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>Winner</th>
+					<th>Match Date</th>
+					<th>Players</th>
+					<th>Score</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for match in pong.2v2.matchs %}
 					<tr>
 						<td>
 							{% if match.team1_score > match.team2_score %}
@@ -202,4 +199,106 @@
 	{% else %}
 		<p>No match history available.</p>
 	{% endif %}
-{% endif %}
+</div>
+
+<div class="Statistics" id="pong-ai" style="display: none;">
+	<h3>Pong 1vAi</h3>
+	<p>Win: {{ pong.ai.win }}</p>
+	<p>Defeat: {{ pong.ai.defeat }}</p>
+	<p>Winrate: {{ pong.ai.winrate }}%</p>
+	<h4>Match history</h4>
+	{% if pong.ai.matchs %}
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>Winner</th>
+					<th>Match Date</th>
+					<th>Players</th>
+					<th>Score</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for match in pong.ai.matchs%}
+					<tr>
+						<td>
+							{% if match.user1_score > match.user2_score %}
+								<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+							{% else %}
+								<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+							{% endif %}
+						</td>
+						<td>{{ match.created_at|date:"F j, Y, g:i a" }}</td>
+						<td>
+							{% if match.user1 %}
+								<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+							{% else %}
+								Deleted User
+							{% endif %}
+							<b>VS</b>
+							{% if match.user2 %}
+								<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+							{% else %}
+								Deleted User
+							{% endif %}
+						</td>
+						<td>{{ match.user1_score }} - {{ match.user2_score }}</td>
+					</tr>
+				{% endfor%}
+			</tbody>
+		</table>
+	{% else %}
+		<p>No data available</p>
+	{% endif %}
+</div>
+
+<div class="Statistics" id="puissance4-1v1" style="display: none;">
+	<h3>Puissance4 1v1</h3>
+	<p>Win: {{ puissance4.1v1.win }}</p>
+	<p>Defeat: {{ puissance4.1v1.defeat }}</p>
+	<p>Winrate: {{ puissance4.1v1.winrate }}%</p>
+	<h4>Match history</h4>
+	{% if puissance4.1v1.matchs %}
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>Winner</th>
+					<th>Match Date</th>
+					<th>Players</th>
+					<th>Score</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for match in puissance4.1v1.matchs%}
+					<tr>
+						<td>
+							{% if match.user1_score > match.user2_score %}
+								<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+							{% else %}
+								<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+							{% endif %}
+						</td>
+						<td>{{ match.created_at|date:"F j, Y, g:i a" }}</td>
+						<td>
+							{% if match.user1 %}
+								<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+							{% else %}
+								Deleted User
+							{% endif %}
+							<b>VS</b>
+							{% if match.user2 %}
+								<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+							{% else %}
+								Deleted User
+							{% endif %}
+						</td>
+						<td>{{ match.user1_score }} - {{ match.user2_score }}</td>
+					</tr>
+				{% endfor%}
+			</tbody>
+		</table>
+	{% else %}
+		<p>No data available</p>
+	{% endif %}
+</div>
+
+<script src="{% static 'js/profile.js' %}"></script>

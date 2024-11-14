@@ -413,15 +413,11 @@ class GameAIConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def set_win_to(self, player):
         if player == 1:
-            self.match.user1.win += 1
             self.match.user1.elo += 50
-            self.match.user2.defeat += 1
             self.match.user2.elo -= 25
             if self.match.user2.elo < 0: self.match.user2.elo = 0
         elif player == 2:
-            self.match.user2.win += 1
             self.match.user2.elo += 50
-            self.match.user1.defeat += 1
             self.match.user1.elo -= 25
             if self.match.user1.elo < 0: self.match.user1.elo = 0
         self.match.user1.save()

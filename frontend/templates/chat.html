@@ -18,7 +18,7 @@
 		const div = document.createElement('div');
 		div.className = sender === '{{ request.user.username }}' ? "message_sender" : "message_receiver";
 		if (context === '1v1')
-			div.innerHTML = `<p>${sender}: <a class="link" href="/waiting/private/{{ friend.id }}">1v1</a></p>`;
+			div.innerHTML = `<p>${sender}: <a class="link" style="color:red;" href="/waiting/private/{{ friend.id }}"><b>1v1</b></a></p>`;
 		else
 			div.innerHTML = `<p>${sender}: ${context}</p>`;
 		document.querySelector('#chat-text').appendChild(div);

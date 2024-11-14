@@ -63,13 +63,8 @@ class BaseSSRView(View):
 
     matchs = None
 
-    matchs_1v1 = None
-    winrate_1v1 = None
-    average_score_1v1 = None
-
-    matchs_2v2 = None
-    winrate_2v2 = None
-    average_score_2v2 = None
+    pong = None
+    puissance4 = None
     
     messages = None
 
@@ -111,12 +106,8 @@ class BaseSSRView(View):
             'friend_request': self.friend_request,
             'blocked': self.blocked,
             'matchs': self.matchs,
-            'matchs_1v1': self.matchs_1v1,
-            'winrate_1v1': self.winrate_1v1,
-            'average_score_1v1': self.average_score_1v1,
-            'matchs_2v2': self.matchs_2v2,
-            'winrate_2v2': self.winrate_2v2,
-            'average_score_2v2': self.average_score_2v2,
+            'pong': self.pong,
+            'puissance4': self.puissance4,
             'user_status': self.user_status,
             'messages': self.messages,
         }
@@ -288,30 +279,8 @@ class LoginView(BaseSSRView):
         if user is not None:
             login(request, user)
             self.success_message = 'Login successfull.'
-            self.page = urlparse(request.META.get('HTTP_REFERER')).path[1:]
-            if self.page == 'login': self.page = 'profile'
+            self.page = 'play'
             self.user = request.user
-
-            #? 1v1 MATCH
-            self.matchs_1v1 = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
-
-            total_matches = self.matchs_1v1.count()
-            wins = sum(1 for match in self.matchs_1v1 if (match.user1 == user and match.user1_score > match.user2_score) or 
-                    (match.user2 == user and match.user2_score > match.user1_score))
-            self.average_score_1v1 = round((sum(match.user1_score for match in self.matchs_1v1 if match.user1 == user) + 
-                                sum(match.user2_score for match in self.matchs_1v1 if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
-            self.winrate_1v1 = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
-
-            #? 2v2 MATCH
-            self.matchs_2v2 = Matchs.objects.filter(Q(user1=user) | Q(user2=user) | Q(user3=user) | Q(user4=user)).order_by('-created_at')
-
-            total_matches_2v2 = self.matchs_2v2.count()
-            wins_2v2 = sum(1 for match in self.matchs_2v2 if 
-                        ((match.user1 == user or match.user2 == user) and match.team1_score > match.team2_score) or 
-                        ((match.user3 == user or match.user4 == user) and match.team2_score > match.team1_score))
-            self.average_score_2v2 = round((sum(match.team1_score for match in self.matchs_2v2 if match.user1 == user or match.user2 == user) + 
-                                            sum(match.team2_score for match in self.matchs_2v2 if match.user3 == user or match.user4 == user)) / total_matches_2v2, 2) if total_matches_2v2 > 0 else 0
-            self.winrate_2v2 = round((wins_2v2 / total_matches_2v2 * 100), 2) if total_matches_2v2 > 0 else 0
 
             return super().get(request)
         else:
@@ -358,7 +327,6 @@ class RegisterView(BaseSSRView):
             self.error_message = f"An error occurred: {str(e)}"
             return super().get(request)
 
-
 class ProfileView(BaseSSRView):
     """
     A view for the 'profile' page.
@@ -369,6 +337,34 @@ class ProfileView(BaseSSRView):
             a profile parameter from the request's query string.
     """
     
+    def get_game_stats(self, games, mode):
+        win = 0
+        defeat = 0
+        winrate = 0
+        if games is not None:
+
+            if mode in ['1v1', 'ai', 'puissance4']:
+                for game in games:
+                    if game.user1 == self.user and game.user1_score > game.user2_score:
+                        win += 1
+                    elif game.user2 == self.user and game.user2_score > game.user1_score:
+                        win += 1
+                    else:
+                        defeat += 1
+            elif mode == '2v2':
+                for game in games:
+                    if (game.user1 == self.user or game.user2 == self.user) and game.team1_score > game.team2_score:
+                        win += 1
+                    elif (game.user3 == self.user or game.user4 == self.user) and game.team2_score > game.team1_score:
+                        win += 1
+                    else:
+                        defeat += 1
+
+            total_matches = win + defeat
+            winrate = round((win / total_matches * 100), 2) if total_matches > 0 else 0
+
+        return {"win": win, "defeat": defeat, "winrate": winrate, 'matchs': games}
+
     page = 'profile'
 
     def get(self, request):
@@ -389,26 +385,31 @@ class ProfileView(BaseSSRView):
         self.blocked = blocked
         self.user = user
 
-        #? 1v1 MATCH
-        self.matchs_1v1 = Match.objects.filter(Q(user1=user) | Q(user2=user)).order_by('-created_at')
+        pong_1v1 = Match.objects.filter(
+            Q(game='pong_1v1') & (Q(user1=user) | Q(user2=user))
+        ).order_by('-created_at').all()
 
-        total_matches = self.matchs_1v1.count()
-        wins = sum(1 for match in self.matchs_1v1 if (match.user1 == user and match.user1_score > match.user2_score) or 
-                   (match.user2 == user and match.user2_score > match.user1_score))
-        self.average_score_1v1 = round((sum(match.user1_score for match in self.matchs_1v1 if match.user1 == user) + 
-                            sum(match.user2_score for match in self.matchs_1v1 if match.user2 == user)) / total_matches, 2) if total_matches > 0 else 0
-        self.winrate_1v1 = round((wins / total_matches * 100), 2) if total_matches > 0 else 0
+        pong_ai = Match.objects.filter(
+            Q(game='pong_ai') & (Q(user1=user) | Q(user2=user))
+        ).order_by('-created_at').all()
 
-        #? 2v2 MATCH
-        self.matchs_2v2 = Matchs.objects.filter(Q(user1=user) | Q(user2=user) | Q(user3=user) | Q(user4=user)).order_by('-created_at')
+        pong_2v2 = Matchs.objects.filter(
+            Q(game='pong_2v2') & (Q(user1=user) | Q(user2=user) | Q(user3=user) | Q(user4=user))
+        ).order_by('-created_at').all()
 
-        total_matches_2v2 = self.matchs_2v2.count()
-        wins_2v2 = sum(1 for match in self.matchs_2v2 if 
-                    ((match.user1 == user or match.user2 == user) and match.team1_score > match.team2_score) or 
-                    ((match.user3 == user or match.user4 == user) and match.team2_score > match.team1_score))
-        self.average_score_2v2 = round((sum(match.team1_score for match in self.matchs_2v2 if match.user1 == user or match.user2 == user) + 
-                                        sum(match.team2_score for match in self.matchs_2v2 if match.user3 == user or match.user4 == user)) / total_matches_2v2, 2) if total_matches_2v2 > 0 else 0
-        self.winrate_2v2 = round((wins_2v2 / total_matches_2v2 * 100), 2) if total_matches_2v2 > 0 else 0
+        puissance4_1v1 = Match.objects.filter(
+            Q(game='puissance4_1v1') & (Q(user1=user) | Q(user2=user))
+        ).order_by('-created_at').all()
+
+        self.pong = {
+            "1v1": self.get_game_stats(pong_1v1, '1v1'),
+            "2v2": self.get_game_stats(pong_2v2, '2v2'),
+            "ai": self.get_game_stats(pong_ai, 'ai')
+        }
+
+        self.puissance4 = {
+            "1v1": self.get_game_stats(puissance4_1v1, 'puissance4')
+        }
 
         if (friend and friend.status):
             time_diff = timezone.now() - user.last_connection

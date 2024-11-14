@@ -5,8 +5,6 @@ from django.db import models
 class CustomUser(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/', default='avatars/profile.png', blank=True)
     elo = models.IntegerField(default=0)
-    win = models.IntegerField(default=0)
-    defeat = models.IntegerField(default=0)
     language = models.CharField(default="EN")
     last_connection = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
