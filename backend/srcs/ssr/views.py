@@ -300,6 +300,7 @@ class ChatView(BaseSSRView):
         else: #* load messages history
             self.friend = friend
             self.messages = Messages.objects.filter(friend_id=id).order_by('created_at')
+        self.user = request.user
         return super().get(request)
 
 
