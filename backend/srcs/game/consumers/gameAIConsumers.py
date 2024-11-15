@@ -105,7 +105,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
 
     async def AIProcess(self):
         while True:
-            await asyncio.sleep(0.02)  #? 20 ms like player
+            await asyncio.sleep(0.02)  
             game_state = cache.get(f"game_{self.game_id}_ai_state")
             
             if not game_state:
@@ -179,7 +179,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 cache.set(f"game_{self.game_id}_ai_state", game_state)
                 if await self.check_win() != 0:
                     break
-                await asyncio.sleep(0.02)
+                await asyncio.sleep(0.02) #? 20 ms like player
 
             if await self.check_win() != 0:
                 break
@@ -273,14 +273,14 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                     # Collision detected with Player 1's paddle
                     if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT and ball_x >= self.DISTANCE_BETWEEN_WALL_PADDLE - 5:
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
-                        ball_dy *= self.ACCELERATION_FACTOR
+                        ball_dy *= self.ACCELERATION_FACTOR + random.uniform(-0.1, 0.1)
             elif ball_dx > 0:
                 # Ball moving right towards Player 2's paddle
                 if ball_x + self.BALL_WIDTH >= paddle2_x:
                     # Collision detected with Player 2's paddle
                     if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT and ball_x <= self.WIDTH - self.DISTANCE_BETWEEN_WALL_PADDLE + 5:
                         ball_dx = -ball_dx * self.ACCELERATION_FACTOR
-                        ball_dy *= self.ACCELERATION_FACTOR
+                        ball_dy *= self.ACCELERATION_FACTOR + random.uniform(-0.1, 0.1)
 
             #! Handle goal
             if ball_x <= 0:
