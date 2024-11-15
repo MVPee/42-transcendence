@@ -112,26 +112,79 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 print(f"No game state found for game {self.game_id}")
                 continue
 
-            game_state['player2PaddleY'] = game_state['ball_y'] - self.PADDLE_HEIGHT / 2
-            if game_state['player2PaddleY'] < 0:
-                game_state['player2PaddleY'] = 0
-            elif game_state['player2PaddleY'] > self.HEIGHT - self.PADDLE_HEIGHT:
-                game_state['player2PaddleY'] = self.HEIGHT - self.PADDLE_HEIGHT
+            ball_x = game_state['ball_x']
+            ball_y = game_state['ball_y']
+            ball_dx = game_state['ball_dx']
+            ball_dy = game_state['ball_dy']
+            paddle2_y = game_state['player2PaddleY']
+            paddle1_x = 30  # Fixed x-position for paddle1 from CSS
+            paddle2_x = self.WIDTH - 30 - self.PADDLE_WIDTH  # Fixed x-position for paddle2 from CSS
 
-            cache.set(f"game_{self.game_id}_ai_state", game_state)
+            #! take start time to know when it can refresh (after 1 sec)
+            start_time = asyncio.get_event_loop().time()
 
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "player_movement",
-                    "player": "AI",
-                    "player1PaddleY": game_state['player1PaddleY'],
-                    "player2PaddleY": game_state['player2PaddleY'],
-                }
-            )
+            #* emulate ball trajectory until it is reachable by the AI
+            while (ball_x < paddle2_x):
+
+                # Update ball position
+                ball_x += ball_dx
+                ball_y += ball_dy
+
+                # Handle collision with top and bottom walls
+                if ball_y <= 0 or ball_y >= self.HEIGHT - self.BALL_HEIGHT:
+                    ball_dy *= -1
+
+                # Get paddle positions
+                paddle1_y = ball_y - self.PADDLE_HEIGHT / 2 #* assume ennemy player is perfectly placed (otherwhise game is won anyways)
+
+
+                #! Handle collision with ennemy paddle
+                if ball_dx < 0:
+                    # Ball moving left towards Player 1's paddle
+                    if ball_x <= paddle1_x + self.PADDLE_WIDTH:
+                        # Collision detected with Player 1's paddle
+                        if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT and ball_x >= self.DISTANCE_BETWEEN_WALL_PADDLE - 5:
+                            ball_dx = -ball_dx * self.ACCELERATION_FACTOR
+                            ball_dy *= self.ACCELERATION_FACTOR
+
+            move_distance = self.PADDLE_SPEED
+
+            direction = None
+            while asyncio.get_event_loop().time() - start_time < 1:
+                game_state = cache.get(f"game_{self.game_id}_ai_state")
+                paddle2_y = game_state['player2PaddleY']
+                #* Decide direction of action
+                if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT and ball_x <= self.WIDTH - self.DISTANCE_BETWEEN_WALL_PADDLE + 5:
+                    direction = None
+                elif ball_y < paddle2_y + self.PADDLE_HEIGHT / 2:
+                    direction = "up"
+                else:
+                    direction = "down"
+                if (direction != None):
+                    game_state['player2PaddleY'] += move_distance if direction == "down" else -move_distance
+                    if game_state['player2PaddleY'] < 0:
+                        game_state['player2PaddleY'] = 0
+                    elif game_state['player2PaddleY'] > self.HEIGHT - self.PADDLE_HEIGHT:
+                        game_state['player2PaddleY'] = self.HEIGHT - self.PADDLE_HEIGHT
+
+                    await self.channel_layer.group_send(
+                        self.room_group_name,
+                        {
+                            "type": "player_movement",
+                            "player": "AI",
+                            "player1PaddleY": game_state['player1PaddleY'],
+                            "player2PaddleY": game_state['player2PaddleY'],
+                        }
+                    )
+                cache.set(f"game_{self.game_id}_ai_state", game_state)
+                if await self.check_win() != 0:
+                    break
+                await asyncio.sleep(0.02)
 
             if await self.check_win() != 0:
                 break
+
+
 
     async def countdown(self):
         await self.channel_layer.group_send(
