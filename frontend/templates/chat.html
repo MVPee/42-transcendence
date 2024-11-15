@@ -18,9 +18,17 @@
 		const div = document.createElement('div');
 		div.className = sender === '{{ user.username }}' ? "message_sender" : "message_receiver";
 		if (context === '1v1')
-			div.innerHTML = `<p>${sender}: <a class="link" style="color:red;" href="/waiting/private/{{ friend.id }}"><b>1v1</b></a></p>`;
+		{
+			div.innerHTML= `${sender}: <a class="link" style="color:red;" href="/waiting/private/{{ friend.id }}"><b>1v1</b></a>`;
+		}
 		else
-			div.innerHTML = `<p>${sender}: ${context}</p>`;
+		{
+			const p = document.createElement('p'); //sanitize XSS
+			const tempElement = document.createElement("textarea"); //clean the output
+			tempElement.innerHTML = `${sender}: ${context}`;
+			p.innerText = tempElement.value;
+			div.appendChild(p);
+		}
 		document.querySelector('#chat-text').appendChild(div);
 		scrollToBottom();
 	}
