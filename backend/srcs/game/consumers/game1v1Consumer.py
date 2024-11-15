@@ -72,6 +72,15 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
             game_state = cache.get(f"game_{self.game_id}_1v1_state")
             if game_state:
                 game_state['paused'] = False
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "player_movement",
+                        "player": self.user.username,
+                        "player1PaddleY": game_state['player1PaddleY'],
+                        "player2PaddleY": game_state['player2PaddleY'],
+                    }
+                )
                 cache.set(f"game_{self.game_id}_1v1_state", game_state)
 
         try:
@@ -89,6 +98,8 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
         if not cache.get(game_process_key):
             cache.set(game_process_key, True)
             asyncio.create_task(self.gameProcess())
+        else:
+            await self.send_score_update()
 
     async def countdown(self):
         await self.channel_layer.group_send(
@@ -288,7 +299,6 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
                     {
                         "type": "player_movement",
                         "player": self.user.username,
-                        "direction": direction,
                         "player1PaddleY": game_state['player1PaddleY'],
                         "player2PaddleY": game_state['player2PaddleY'],
                     }
@@ -301,7 +311,6 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "player_movement",
             "player": event["player"],
-            "direction": event["direction"],
             "player1PaddleY": event["player1PaddleY"],
             "player2PaddleY": event["player2PaddleY"],
         }))

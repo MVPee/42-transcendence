@@ -73,6 +73,15 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             game_state = cache.get(f"game_{self.game_id}_ai_state")
             if game_state:
                 game_state['paused'] = False
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "player_movement",
+                        "player": self.user.username,
+                        "player1PaddleY": game_state['player1PaddleY'],
+                        "player2PaddleY": game_state['player2PaddleY'],
+                    }
+                )
                 cache.set(f"game_{self.game_id}_ai_state", game_state)
 
         try:
@@ -91,6 +100,8 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             cache.set(game_process_key, True)
             asyncio.create_task(self.AIProcess())
             asyncio.create_task(self.gameProcess())
+        else:
+            await self.send_score_update()
 
     async def AIProcess(self):
         while True:
@@ -114,7 +125,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 {
                     "type": "player_movement",
                     "player": "AI",
-                    "direction": 'me follow ball',
                     "player1PaddleY": game_state['player1PaddleY'],
                     "player2PaddleY": game_state['player2PaddleY'],
                 }
@@ -317,7 +327,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                     {
                         "type": "player_movement",
                         "player": self.user.username,
-                        "direction": direction,
                         "player1PaddleY": game_state['player1PaddleY'],
                         "player2PaddleY": game_state['player2PaddleY'],
                     }
@@ -330,7 +339,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "player_movement",
             "player": event["player"],
-            "direction": event["direction"],
             "player1PaddleY": event["player1PaddleY"],
             "player2PaddleY": event["player2PaddleY"],
         }))

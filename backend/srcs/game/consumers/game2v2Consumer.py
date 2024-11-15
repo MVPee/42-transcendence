@@ -74,6 +74,15 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
             game_state = cache.get(f"game_{self.game_id}_2v2_state")
             if game_state:
                 game_state['paused'] = False
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "player_movement",
+                        "player": self.user.username,
+                        "player1PaddleY": game_state['player1PaddleY'],
+                        "player2PaddleY": game_state['player2PaddleY'],
+                    }
+                )
                 cache.set(f"game_{self.game_id}_2v2_state", game_state)
 
         try:
@@ -86,13 +95,15 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
     
             await self.accept()
 
-        except Match.DoesNotExist:
+        except Matchs.DoesNotExist:
             await self.close()
 
         game_process_key = f"game_{self.game_id}_process_started"
         if not cache.get(game_process_key):
             cache.set(game_process_key, True)
             asyncio.create_task(self.gameProcess())
+        else:
+            await self.send_score_update()
 
     async def countdown(self):
         await self.channel_layer.group_send(
@@ -328,7 +339,6 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
                     {
                         "type": "player_movement",
                         "player": self.user.username,
-                        "direction": direction,
                         "player1PaddleY": game_state['player1PaddleY'],
                         "player2PaddleY": game_state['player2PaddleY'],
                         "player3PaddleY": game_state['player3PaddleY'],
@@ -340,7 +350,6 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "player_movement",
             "player": event["player"],
-            "direction": event["direction"],
             "player1PaddleY": event["player1PaddleY"],
             "player2PaddleY": event["player2PaddleY"],
             "player3PaddleY": event["player3PaddleY"],
