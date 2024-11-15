@@ -8,7 +8,7 @@
 
 <div id="chat-text"> </div>
 <br>
-<input id="input" type="text" size="100" maxlength="100">
+<input id="input" type="text" size="100" maxlength="100" placeholder="Write a message...">
 <br>
 <input id="submit" type="button" class="btn btn-info" value="Send">
 <button onclick="Send1v1()" class="btn btn-success">1v1 Request</button>
@@ -16,7 +16,7 @@
 <script>
 	function render_message(sender, context) {
 		const div = document.createElement('div');
-		div.className = sender === '{{ request.user.username }}' ? "message_sender" : "message_receiver";
+		div.className = sender === '{{ user.username }}' ? "message_sender" : "message_receiver";
 		if (context === '1v1')
 			div.innerHTML = `<p>${sender}: <a class="link" style="color:red;" href="/waiting/private/{{ friend.id }}"><b>1v1</b></a></p>`;
 		else
@@ -28,5 +28,3 @@
 		render_message('{{ message.sender_id.username }}', '{{ message.context }}')
 	{% endfor %}
 </script>
-
-{{ request.user.username|json_script:"sender_username" }}
