@@ -112,10 +112,10 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
         if await self.check_win() == 0:
             if cache.get(disconnect_key) == self.user.username:
                 if self.match.user1 == self.user:
-                    await self.set_points_to(2, 5)
+                    await self.set_points_to(2, 1)
                     await self.set_win_to(2)
                 elif self.match.user2 == self.user:
-                    await self.set_points_to(1, 5)
+                    await self.set_points_to(1, 1)
                     await self.set_win_to(1)
 
                 cache.set(points_awarded_key, True, timeout=None)
@@ -214,9 +214,9 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
 
     @sync_to_async
     def check_win(self):
-        if self.match.user1_score >= 5:
+        if self.match.user1_score >= 1:
             return 1
-        elif self.match.user2_score >= 5:
+        elif self.match.user2_score >= 1:
             return 2
         return 0
     
