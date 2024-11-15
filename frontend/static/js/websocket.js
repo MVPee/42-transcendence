@@ -29,6 +29,9 @@ function chatWebSocket(link) {
 	const submit_button = document.getElementById('submit')
     submit_button.removeEventListener("click", sendMessage(ws));
 	submit_button.addEventListener("click", sendMessage(ws))
+	const input = document.getElementById('input')
+    input.removeEventListener("keypress", SendOnEnter(ws));
+	input.addEventListener("keypress", SendOnEnter(ws))
 	scrollToBottom();
 }
 

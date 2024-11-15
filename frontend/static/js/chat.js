@@ -1,11 +1,11 @@
 function sendMessage(chatSocket){
 	return function(e) {
-		const messageInputDom = document.querySelector('#input');
-		const message = messageInputDom.value;
-		chatSocket.send(JSON.stringify({
-			'message': message,
-		}));
-		messageInputDom.value = ''; //clear the writing area after message is sent
+			const messageInputDom = document.querySelector('#input');
+			const message = messageInputDom.value;
+			chatSocket.send(JSON.stringify({
+				'message': message,
+			}));
+			messageInputDom.value = ''; //clear the writing area after message is sent
 	};
 }
 
@@ -18,4 +18,12 @@ function Send1v1() {
 	ws.send(JSON.stringify({
 		'message': '1v1',
 	}));
+}
+
+function SendOnEnter(chatSocket) {
+	return function(e) {
+		if (e.key === 'Enter') { // handle 'enter'
+			sendMessage(chatSocket)(e);
+		}
+	};
 }
