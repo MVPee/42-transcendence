@@ -50,7 +50,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             self.player4 = await sync_to_async(lambda: self.match.user4 if self.match.user4 else "Player4")()
             
 
-        except Match.DoesNotExist:
+        except Tournament.DoesNotExist:
             await self.close()
 
         if not cache.get(f"game_{self.game_id}_tournament_state"):
