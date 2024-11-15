@@ -9,8 +9,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 class Puissance4Consumer(AsyncWebsocketConsumer):
 
-    YELLOW = 0
-    RED = 0
+    YELLOW = 1
+    RED = 2
 
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
@@ -43,10 +43,28 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
             )
 
             # Resume the game
-            game_state = cache.get(f"game_{self.game_id}_1v1_state")
+            game_state = cache.get(f"game_{self.game_id}_puissance4_state")
             if game_state:
                 game_state['paused'] = False
-                cache.set(f"game_{self.game_id}_1v1_state", game_state)
+
+                #? Send game board to the disconnected player
+                for column in range(7):
+                    for row in range(6):
+                        color = None
+                        if game_state['table'][column][row] == self.YELLOW: color = 'yellow'
+                        elif game_state['table'][column][row] == self.RED: color = 'red'
+                        if color is not None:
+                            await self.channel_layer.group_send(
+                                self.room_group_name,
+                                {
+                                    "type": "send_color",
+                                    "column": column ,
+                                    "row": row,
+                                    "color": color,
+                                }
+                            )
+
+                cache.set(f"game_{self.game_id}_puissance4_state", game_state)
         
         try:
             self.match = await sync_to_async(Match.objects.get)(id=self.game_id)
@@ -67,10 +85,10 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
             cache.set(disconnect_key, self.user.username, timeout=20)
 
             # Set the game to paused
-            game_state = cache.get(f"game_{self.game_id}_1v1_state")
+            game_state = cache.get(f"game_{self.game_id}_puissance4_state")
             if game_state:
                 game_state['paused'] = True
-                cache.set(f"game_{self.game_id}_1v1_state", game_state)
+                cache.set(f"game_{self.game_id}_puissance4_state", game_state)
 
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -155,6 +173,16 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
             )
 
             cache.set(f"game_{self.game_id}_puissance4_state", game_state)
+            await self.check_puissance4()
+
+    async def check_puissance4(self): #? return 0 when nobody win. 1 Yellow. 2 Red
+        # game_state = cache.get(f"game_{self.game_id}_puissance4_state")
+        # table = game_state.get('table')
+        # print(table)
+        # for column in range(7):
+        #     for row in range(6):
+        #         print(table[column][row])
+        return 0
 
     async def send_color(self, event):
         await self.send(text_data=json.dumps({
