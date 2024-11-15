@@ -128,7 +128,6 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
                 )
 
     async def receive(self, text_data):
-        print(text_data)
         if text_data.isnumeric() and int(text_data) >= 0 and int(text_data) <= 7:
             column = int(text_data)
             game_state = cache.get(f"game_{self.game_id}_puissance4_state")
@@ -173,15 +172,85 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
             )
 
             cache.set(f"game_{self.game_id}_puissance4_state", game_state)
-            await self.check_puissance4()
+            winner = await self.check_puissance4()
+            if winner != 0:
+                await self.set_points_to(winner, 1)
+                await self.set_win_to(winner)
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                        {
+                            "type": "redirect_remaining_player",
+                        }
+                )
+                
 
-    async def check_puissance4(self): #? return 0 when nobody win. 1 Yellow. 2 Red
-        # game_state = cache.get(f"game_{self.game_id}_puissance4_state")
-        # table = game_state.get('table')
-        # print(table)
-        # for column in range(7):
-        #     for row in range(6):
-        #         print(table[column][row])
+    def check_victory(self, table, column, row, player_color):
+        directions = [
+            (1, 0),  # Horizontal
+            (0, 1),  # Vertical
+            (1, 1),  # Diagonal /
+            (1, -1), # Diagonal \
+        ]
+
+        for dx, dy in directions:
+            count = 1
+            x, y = column, row
+            while True:
+                x += dx
+                y += dy
+                if 0 <= x < 7 and 0 <= y < 6 and table[x][y] == player_color: count += 1
+                else: break
+
+            x, y = column, row
+            while True:
+                x -= dx
+                y -= dy
+                if 0 <= x < 7 and 0 <= y < 6 and table[x][y] == player_color: count += 1
+                else: break
+
+            if count >= 4: return True
+        return False
+
+    async def check_puissance4(self):
+        """
+        Check the current state of the game to determine if there's a winner or a draw.
+
+        Returns:
+            int: 0 if no one has won, 1 if Yellow wins, 2 if Red wins.
+        """
+        game_state_key = f"game_{self.game_id}_puissance4_state"
+        game_state = cache.get(game_state_key)
+        table = game_state.get('table')
+
+        for column in range(7):
+            for row in range(6):
+                player_color = table[column][row]
+                if player_color is not None:
+                    if self.check_victory(table, column, row, player_color):
+                        return player_color
+
+        #? Check for a draw
+        if all(table[col][0] is not None for col in range(7)):
+            print('draw detected')
+            for column in range(7):
+                for row in range(6):
+                    table[column][row] = 0
+            for column in range(7):
+                for row in range(6):
+                    await self.channel_layer.group_send(
+                        self.room_group_name,
+                        {
+                            "type": "send_color",
+                            "column": column,
+                            "row": row,
+                            "color": 'gray',
+                        }
+                    )
+            cache.set(f"game_{self.game_id}_puissance4_state", {
+                'table': [[None for _ in range(6)] for _ in range(7)],
+                'turn': 'yellow'
+            })
+
         return 0
 
     async def send_color(self, event):
