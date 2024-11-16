@@ -1,3 +1,29 @@
+let wsNotification;
+
+function notificationWebsocket(link) {
+
+    wsNotification = new WebSocket(link);
+
+    wsNotification.onopen = () => {
+        console.log("Notification connection opened.");
+    };
+    
+    wsNotification.onmessage = (event) => {
+		const data = JSON.parse(event.data)
+        if (data.type === 'notification') {
+            alert(`${data.username}: ${data.message}`);
+        }
+    };
+    
+    wsNotification.onclose = () => {
+        console.log("Notification connection closed.");
+    };
+    
+    wsNotification.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+}
+
 let ws;
 let moveInterval;
 let currentDirection = null;
@@ -225,6 +251,8 @@ function disconnectWebSocket() {
 }
 
 function checkWebsocketPage(page, queryString = '') {
+    if (!wsNotification)
+        notificationWebsocket('wss://42.mvpee.be/ws/notification/')
     // console.log("Page:", page);
     const urls = page.split('/');
     if (urls[0] === 'chat' && urls[1]) {

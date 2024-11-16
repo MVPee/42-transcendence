@@ -1,7 +1,8 @@
+import time
 from django.core.management.base import BaseCommand
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from srcs.community.notificationConsumers import NotificationConsumer
+from transcendence.backend.srcs.community.consumers.notificationConsumer import NotificationConsumer
 
 class Command(BaseCommand):
     help = "Send a notification to all connected WebSocket clients"

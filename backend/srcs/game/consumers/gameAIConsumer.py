@@ -146,7 +146,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                         if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT and ball_x >= self.DISTANCE_BETWEEN_WALL_PADDLE - 5:
                             ball_dx = -ball_dx * self.ACCELERATION_FACTOR
                             ball_dy *= self.ACCELERATION_FACTOR
-
             move_distance = self.PADDLE_SPEED
 
             direction = None
