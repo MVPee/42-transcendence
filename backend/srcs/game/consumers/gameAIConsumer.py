@@ -11,11 +11,11 @@ User = get_user_model()
 
 class GameAIConsumer(AsyncWebsocketConsumer):
 
-    ACCELERATION_FACTOR = 1.1
+    ACCELERATION_FACTOR = 1.05
 
-    PADDLE_SPEED = 5
+    PADDLE_SPEED = 8
 
-    BALL_SPEED = 4
+    BALL_SPEED = 6
 
     HEIGHT = 400
     WIDTH = 600
@@ -105,7 +105,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
 
     async def AIProcess(self):
         while await self.check_win() == 0:
-            await asyncio.sleep(0.02)  
             game_state = cache.get(f"game_{self.game_id}_ai_state")
             
             if not game_state:
@@ -169,8 +168,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                     )
                 cache.set(f"game_{self.game_id}_ai_state", game_state)
                 await asyncio.sleep(0.02) #? 20 ms like player
-
-
 
     async def countdown(self):
         await self.channel_layer.group_send(
@@ -257,15 +254,15 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 # Ball moving left towards Player 1's paddle
                 if ball_x <= paddle1_x + self.PADDLE_WIDTH:
                     # Collision detected with Player 1's paddle
-                    if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT and ball_x >= self.DISTANCE_BETWEEN_WALL_PADDLE - 5:
-                        ball_dx = -ball_dx * self.ACCELERATION_FACTOR
+                    if paddle1_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle1_y + self.PADDLE_HEIGHT and ball_x >= self.DISTANCE_BETWEEN_WALL_PADDLE - 10:
+                        ball_dx *= -self.ACCELERATION_FACTOR
                         ball_dy *= self.ACCELERATION_FACTOR + random.uniform(-0.1, 0.1)
             elif ball_dx > 0:
                 # Ball moving right towards Player 2's paddle
                 if ball_x + self.BALL_WIDTH >= paddle2_x:
                     # Collision detected with Player 2's paddle
-                    if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT and ball_x <= self.WIDTH - self.DISTANCE_BETWEEN_WALL_PADDLE + 5:
-                        ball_dx = -ball_dx * self.ACCELERATION_FACTOR
+                    if paddle2_y <= ball_y + self.BALL_HEIGHT and ball_y <= paddle2_y + self.PADDLE_HEIGHT and ball_x <= self.WIDTH - self.DISTANCE_BETWEEN_WALL_PADDLE + 10:
+                        ball_dx *= -self.ACCELERATION_FACTOR
                         ball_dy *= self.ACCELERATION_FACTOR + random.uniform(-0.1, 0.1)
 
             #! Handle goal

@@ -14,93 +14,96 @@
     </div>
 </div>
 
-<table>
-    <thead>
-        <tr>
-            <th><button onclick="ws.send(0);" class="p4-btn"></button></th>
-            <th><button onclick="ws.send(1);" class="p4-btn"></button></th>
-            <th><button onclick="ws.send(2);" class="p4-btn"></button></th>
-            <th><button onclick="ws.send(3);" class="p4-btn"></button></th>
-            <th><button onclick="ws.send(4);" class="p4-btn"></button></th>
-            <th><button onclick="ws.send(5);" class="p4-btn"></button></th>
-            <th><button onclick="ws.send(6);" class="p4-btn"></button></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td id="0-0"></td>
-            <td id="0-1"></td>
-            <td id="0-2"></td>
-            <td id="0-3"></td>
-            <td id="0-4"></td>
-            <td id="0-5"></td>
-            <td id="0-6"></td>
-        </tr>
-        <tr>
-            <td id="1-0"></td>
-            <td id="1-1"></td>
-            <td id="1-2"></td>
-            <td id="1-3"></td>
-            <td id="1-4"></td>
-            <td id="1-5"></td>
-            <td id="1-6"></td>
-        </tr>
-        <tr>
-            <td id="2-0"></td>
-            <td id="2-1"></td>
-            <td id="2-2"></td>
-            <td id="2-3"></td>
-            <td id="2-4"></td>
-            <td id="2-5"></td>
-            <td id="2-6"></td>
-        </tr>
-        <tr>
-            <td id="3-0"></td>
-            <td id="3-1"></td>
-            <td id="3-2"></td>
-            <td id="3-3"></td>
-            <td id="3-4"></td>
-            <td id="3-5"></td>
-            <td id="3-6"></td>
-        </tr>
-        <tr>
-            <td id="4-0"></td>
-            <td id="4-1"></td>
-            <td id="4-2"></td>
-            <td id="4-3"></td>
-            <td id="4-4"></td>
-            <td id="4-5"></td>
-            <td id="4-6"></td>
-        </tr>
-        <tr>
-            <td id="5-0"></td>
-            <td id="5-1"></td>
-            <td id="5-2"></td>
-            <td id="5-3"></td>
-            <td id="5-4"></td>
-            <td id="5-5"></td>
-            <td id="5-6"></td>
-        </tr>
-    </tbody>
-</table>
+<p id="info" class="text-center mt-5">Player 1 win the game</p>
 
-<p id="turn" class="text-center mt-5">Yellow turn</p>
-<p id="info" class="text-center mt-5"></p>
+<div class="board-container">
+    <table>
+        <tbody>
+            <tr>
+                <td onclick="ws.send(0);" id="0-0"></td>
+                <td onclick="ws.send(1);" id="0-1"></td>
+                <td onclick="ws.send(2);" id="0-2"></td>
+                <td onclick="ws.send(3);" id="0-3"></td>
+                <td onclick="ws.send(4);" id="0-4"></td>
+                <td onclick="ws.send(5);" id="0-5"></td>
+                <td onclick="ws.send(6);" id="0-6"></td>
+            </tr>
+            <tr>
+                <td onclick="ws.send(0);" id="1-0"></td>
+                <td onclick="ws.send(1);" id="1-1"></td>
+                <td onclick="ws.send(2);" id="1-2"></td>
+                <td onclick="ws.send(3);" id="1-3"></td>
+                <td onclick="ws.send(4);" id="1-4"></td>
+                <td onclick="ws.send(5);" id="1-5"></td>
+                <td onclick="ws.send(6);" id="1-6"></td>
+            </tr>
+            <tr>
+                <td onclick="ws.send(0);" id="2-0"></td>
+                <td onclick="ws.send(1);" id="2-1"></td>
+                <td onclick="ws.send(2);" id="2-2"></td>
+                <td onclick="ws.send(3);" id="2-3"></td>
+                <td onclick="ws.send(4);" id="2-4"></td>
+                <td onclick="ws.send(5);" id="2-5"></td>
+                <td onclick="ws.send(6);" id="2-6"></td>
+            </tr>
+            <tr>
+                <td onclick="ws.send(0);" id="3-0"></td>
+                <td onclick="ws.send(1);" id="3-1"></td>
+                <td onclick="ws.send(2);" id="3-2"></td>
+                <td onclick="ws.send(3);" id="3-3"></td>
+                <td onclick="ws.send(4);" id="3-4"></td>
+                <td onclick="ws.send(5);" id="3-5"></td>
+                <td onclick="ws.send(6);" id="3-6"></td>
+            </tr>
+            <tr>
+                <td onclick="ws.send(0);" id="4-0"></td>
+                <td onclick="ws.send(1);" id="4-1"></td>
+                <td onclick="ws.send(2);" id="4-2"></td>
+                <td onclick="ws.send(3);" id="4-3"></td>
+                <td onclick="ws.send(4);" id="4-4"></td>
+                <td onclick="ws.send(5);" id="4-5"></td>
+                <td onclick="ws.send(6);" id="4-6"></td>
+            </tr>
+            <tr>
+                <td onclick="ws.send(0);" id="5-0"></td>
+                <td onclick="ws.send(1);" id="5-1"></td>
+                <td onclick="ws.send(2);" id="5-2"></td>
+                <td onclick="ws.send(3);" id="5-3"></td>
+                <td onclick="ws.send(4);" id="5-4"></td>
+                <td onclick="ws.send(5);" id="5-5"></td>
+                <td onclick="ws.send(6);" id="5-6"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<p id="turn" class="text-center mt-5">Yellow turn.</p>
 
 <style>
-    th {
-        height: 80px;
-        width: 80px;
-        text-align: center;
+    .board-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
     }
+
     td {
-        height: 80px;
-        width: 80px;
+        height: 12vh;
+        width: 12vh;
+        
         background-color: gray;
         align-items: center;
         border-radius: 100px;
         border: 1px solid transparent;
     }
+
+    @media (max-width: 1000px) {
+        td {
+            height: 12vw;
+            width: 12vw;
+        }
+    }
+
     #player-yellow-color {
         height: 40px;
         width: 40px;
@@ -150,8 +153,13 @@
     }
 
     .vs-text {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         font-weight: bold;
         color: #ff5733;
+    }
+
+    #info {
+        font-weight: bold;
+        font-size: 1.5rem;
     }
 </style>

@@ -22,6 +22,11 @@
     <div id="score-2">0</div>
 </div>
 
+<div class="button-container text-center">
+    <button id="phone-up" class="btn btn-success p-2 m-2">Up</button>
+    <button id="phone-down" class="btn btn-success p-2 m-2">Down</button>
+</div>
+
 <p id="info" class="text-center mt-5"></p>
 
 <style>
@@ -112,4 +117,55 @@
         color: #ff5733;
     }
 
+    .button-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+
 </style>
+
+<script>
+    const phoneUp = document.getElementById("phone-up");
+    const phoneDown = document.getElementById("phone-down");
+
+    function handlePhoneButton(direction) {
+        if (currentDirection === direction) return;
+
+        currentDirection = direction;
+
+        if (moveInterval) clearInterval(moveInterval);
+
+        if (currentDirection) {
+            moveInterval = setInterval(() => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(
+                        JSON.stringify({
+                            type: "movement",
+                            direction: currentDirection,
+                        })
+                    );
+                }
+            }, 10);
+        }
+    }
+
+    function stopMovement() {
+        if (moveInterval) {
+            clearInterval(moveInterval);
+            moveInterval = null;
+            currentDirection = null;
+        }
+    }
+
+    phoneUp.addEventListener("mousedown", () => handlePhoneButton('up'));
+    phoneDown.addEventListener("mousedown", () => handlePhoneButton('down'));
+    phoneUp.addEventListener("mouseup", stopMovement);
+    phoneDown.addEventListener("mouseup", stopMovement);
+
+    phoneUp.addEventListener("touchstart", () => handlePhoneButton('up'));
+    phoneDown.addEventListener("touchstart", () => handlePhoneButton('down'));
+    phoneUp.addEventListener("touchend", stopMovement);
+    phoneDown.addEventListener("touchend", stopMovement);
+</script>

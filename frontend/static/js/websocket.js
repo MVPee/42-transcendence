@@ -17,10 +17,12 @@ function notificationWebsocket(link) {
     
     wsNotification.onclose = () => {
         console.log("Notification connection closed.");
+        wsNotification = new WebSocket(link);
     };
     
     wsNotification.onerror = (error) => {
         console.error("WebSocket error:", error);
+        wsNotification = new WebSocket(link);
     };
 }
 
@@ -202,10 +204,11 @@ function pongWebsocket(link, mode) {
         console.error("WebSocket error:", error);
     };
 
-    document.removeEventListener("keydown", handleKeydown);
     document.removeEventListener("keyup", handleKeyup);
-    document.addEventListener("keydown", handleKeydown);
+    document.removeEventListener("keydown", handleKeydown);
+
     document.addEventListener("keyup", handleKeyup);
+    document.addEventListener("keydown", handleKeydown);
 }
 
 function handleKeydown(event) {
