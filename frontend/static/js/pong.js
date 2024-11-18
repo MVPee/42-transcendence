@@ -1,5 +1,7 @@
 let moveInterval;
 let currentDirection = null;
+let phoneUp;
+let phoneDown;
 
 function handleKeydown(event) {
     let direction = null;
