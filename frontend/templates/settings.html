@@ -22,6 +22,7 @@
     {% csrf_token %}
     <input type="hidden" name="action" value="avatar">
     <label for="avatar">Change Avatar:</label>
+    <img src="{{ user.avatar.url }}" alt="User Avatar" width="50" height="50">
     <input type="file" id="avatar" name="avatar" required>
     <button type="submit">Change Avatar</button>
 </form>
