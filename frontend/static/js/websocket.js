@@ -1,34 +1,30 @@
+let ws;
 let wsNotification;
 
 function notificationWebsocket(link) {
-
     wsNotification = new WebSocket(link);
 
     wsNotification.onopen = () => {
         console.log("Notification connection opened.");
     };
-    
+
     wsNotification.onmessage = (event) => {
-		const data = JSON.parse(event.data)
+        const data = JSON.parse(event.data);
         if (data.type === 'notification') {
-            alert(`${data.username}: ${data.message}`);
+            showCustomNotification(data.username, data.message);
         }
     };
-    
+
     wsNotification.onclose = () => {
         console.log("Notification connection closed.");
         wsNotification = new WebSocket(link);
     };
-    
+
     wsNotification.onerror = (error) => {
         console.error("WebSocket error:", error);
         wsNotification = new WebSocket(link);
     };
 }
-
-let ws;
-let moveInterval;
-let currentDirection = null;
 
 function chatWebSocket(link) {
     if (ws)
@@ -211,40 +207,6 @@ function pongWebsocket(link, mode) {
     document.addEventListener("keydown", handleKeydown);
 }
 
-function handleKeydown(event) {
-    let direction = null;
-    if (event.key === "w" || event.key === "W") direction = "up";
-    else if (event.key === "s" || event.key === "S") direction = "down";
-    else return;
-
-    if (currentDirection === direction) return;
-
-    currentDirection = direction;
-
-    if (moveInterval) clearInterval(moveInterval);
-
-    moveInterval = setInterval(() => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(
-                JSON.stringify({
-                    type: "movement",
-                    direction: currentDirection,
-                })
-            );
-        }
-    }, 10);
-}
-
-function handleKeyup(event) {
-    let keyReleased = event.key.toLowerCase();
-    if ((keyReleased === "w" && currentDirection === "up") ||
-        (keyReleased === "s" && currentDirection === "down")) {
-        clearInterval(moveInterval);
-        moveInterval = null;
-        currentDirection = null;
-    }
-}
-
 function disconnectWebSocket() {
     if (ws) {
         ws.close();
@@ -254,9 +216,14 @@ function disconnectWebSocket() {
 }
 
 function checkWebsocketPage(page, queryString = '') {
-    if (!wsNotification)
+    if (!wsNotification || wsNotification.readyState == WebSocket.CLOSED || wsNotification.readyState == WebSocket.CLOSING) {
+        if (wsNotification)
+            wsNotification.close()
+            wsNotification = null;
         notificationWebsocket('wss://42.mvpee.be/ws/notification/')
-    // console.log("Page:", page);
+    }
+
+    // console.log("Page:", page); //* DEBUG
     const urls = page.split('/');
     if (urls[0] === 'chat' && urls[1]) {
         const id = urls[1];

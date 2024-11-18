@@ -36,8 +36,8 @@ class BaseSSRView(View):
         'register': {'template': 'register.html', 'auth_required': False},
         'chat': {'template': 'chat.html', 'auth_required': True},
         'waiting': {'template': 'waiting.html', 'auth_required': True},
-        'game': {'template': 'game.html', 'auth_required': True},
-        '2v2': {'template': '2v2.html', 'auth_required': True},
+        'pong1v1': {'template': 'pong1v1.html', 'auth_required': True},
+        'pong2v2': {'template': 'pong2v2.html', 'auth_required': True},
         'puissance4': {'template': 'puissance4.html', 'auth_required': True},
         'tournament': {'template': 'tournament.html', 'auth_required': True},
     }
@@ -227,7 +227,7 @@ class GameView(BaseSSRView):
     Inherits from BaseSSRView and sets the page attribute to 'waiting'.
     """
 
-    page = 'game'
+    page = 'pong1v1'
 
     def get(self, request, *args, **kwargs):
         game = kwargs.get('game')
@@ -260,7 +260,7 @@ class GameView(BaseSSRView):
         elif (matchMode == '2v2'):
             self.matchs = Matchs.objects.filter(Q(id=matchId) & Q(user1=request.user) | Q(user2=request.user) | Q(user3=request.user) | Q(user4=request.user)).first()
             if self.matchs is not None and self.matchs.team1_score < 5 and self.matchs.team2_score < 5:
-                self.page = '2v2'
+                self.page = 'pong2v2'
                 return super().get(request)
             else:
                 self.page = 'play'

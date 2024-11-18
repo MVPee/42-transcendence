@@ -130,35 +130,6 @@
     const phoneUp = document.getElementById("phone-up");
     const phoneDown = document.getElementById("phone-down");
 
-    function handlePhoneButton(direction) {
-        if (currentDirection === direction) return;
-
-        currentDirection = direction;
-
-        if (moveInterval) clearInterval(moveInterval);
-
-        if (currentDirection) {
-            moveInterval = setInterval(() => {
-                if (ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(
-                        JSON.stringify({
-                            type: "movement",
-                            direction: currentDirection,
-                        })
-                    );
-                }
-            }, 10);
-        }
-    }
-
-    function stopMovement() {
-        if (moveInterval) {
-            clearInterval(moveInterval);
-            moveInterval = null;
-            currentDirection = null;
-        }
-    }
-
     phoneUp.addEventListener("mousedown", () => handlePhoneButton('up'));
     phoneDown.addEventListener("mousedown", () => handlePhoneButton('down'));
     phoneUp.addEventListener("mouseup", stopMovement);
