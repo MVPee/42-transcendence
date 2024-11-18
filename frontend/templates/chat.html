@@ -19,7 +19,7 @@
 		div.className = sender === '{{ user.username }}' ? "message_sender" : "message_receiver";
 		if (context === '1v1')
 		{
-			div.innerHTML= `${sender}: <a class="link" style="color:red;" href="/waiting/private/{{ friend.id }}"><b>1v1</b></a>`;
+			div.innerHTML= `<p>1v1 request by ${sender} <a class="link btn btn-danger" href="/waiting/private/{{ friend.id }}"><b>Join here</b></a>`;
 		}
 		else
 		{
