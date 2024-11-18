@@ -3,57 +3,68 @@ body {
     margin: 0;
     background-color: rgb(44, 44, 44);
     color: white;
-    td, th {
-        color: white;
-    }
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-.navbar nav {
-    position: fixed;
-    top: 1%;
-    background-color: #f8f9fa;
-    border: 2px solid #ddd;
+.title-card {
+    background-color: #333;
+    color: #fff;
     border-radius: 10px;
-    padding: 10px 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/*
-.footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-}
-*/
-
-/* play.html */
-
-.container {
-    display: flex; /* Enables flexbox layout */
-    justify-content: space-between; /* Distributes space evenly between the boxes */
-}
-
-.subheader {
-    width: 100%;
-    margin: 0 left;
-    background-color: rgb(0, 0, 0);
-    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
+    width: 85%;
+    padding: 10px;
+    margin: 10px;
 }
 
-.pong-box {
-    margin: 0 auto;
-    background-color: #afb2b4;
-    border: 2px solid #ddd;
+.little-title-card {
+    background-color: #333;
+    color: #fff;
     border-radius: 10px;
-    padding: 10px 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 60%;
+    padding: 10px;
+    margin: 10px;
+}
+
+a {
+    color: rgb(233, 106, 106);
+}
+
+a:hover {
+    color: rgb(222, 55, 55);
+}
+
+.navbar {
+    position: sticky;
+	max-width: max-content;
+    top: 1%;
+    left: 1%;
+	justify-content: space-between;
+	margin-bottom: 1em;
+    background-color: #333;
+    border: 1px solid rgb(233, 106, 106);
+    border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.puissance4-box {
-    background-color: #afb2b4;
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    padding: 10px 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.footer {
+    background-color: rgb(36, 36, 36);
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid rgb(233, 106, 106);
 }
+
+#content {
+	display: flex;
+	flex-direction: column;
+    flex: 1;
+}
+
+.d-flex.justify-content-center.p-4 {
+	gap: 10px; /* Default spacing */
+  }

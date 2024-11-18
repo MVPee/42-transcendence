@@ -1,7 +1,7 @@
 {% load static %}
 
 <div class="d-flex justify-content-center">
-    <h1 id="title-scoreboard">Scoreboard</h1>
+    <h2 class="title-card">Scoreboard</h2>
 </div>
 
 <div class="d-flex justify-content-center">
@@ -19,7 +19,7 @@
                     {% if user == request.user %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-white" href="/profile?profile={{ user.username }}"><b>{{ user.username }}</b></a>
+                            <a class="text-red" href="/profile?profile={{ user.username }}"><b>{{ user.username }}</b></a>
                             <img src="{% static 'assets/gold_crown.png' %}" alt="Gold Crown" style="width: 50px; height: 50px;">
                         </td>
                     {% else %}
@@ -33,7 +33,7 @@
                     {% if user == request.user %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-white" href="/profile?profile={{ user.username }}"><b>{{ user.username }}</b></a>
+                            <a class="text-red" href="/profile?profile={{ user.username }}"><b>{{ user.username }}</b></a>
                             <img src="{% static 'assets/argent_crown.png' %}" alt="Argent Crown" style="width: 50px; height: 50px;">
                         </td>    
                     {% else %}
@@ -47,7 +47,7 @@
                     {% if user == request.user %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-white" href="/profile?profile={{ user.username }}"><b>{{ user.username }}</b></a>
+                            <a class="text-red" href="/profile?profile={{ user.username }}"><b>{{ user.username }}</b></a>
                             <img src="{% static 'assets/bronze_crown.png' %}" alt="Bronze Crown" style="width: 50px; height: 50px;">
                         </td>    
                     {% else %}
@@ -61,7 +61,7 @@
                     {% if user == request.user %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-white" href="/profile/{{ user.username }}"><b>{{ user.username }}</b></a>
+                            <a class="text-red" href="/profile/{{ user.username }}"><b>{{ user.username }}</b></a>
                         </td>    
                     {% else %}
                         <td class="align-middle">
@@ -84,15 +84,6 @@
 </div>
 
 <style>
-    #title-scoreboard {
-        background-color: #333;
-        color: #fff;
-        border-radius: 10px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-        text-align: center;
-        width: 90%;
-    }
-
     table {
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
         margin: 20px;

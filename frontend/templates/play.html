@@ -1,30 +1,38 @@
-<h1 class="subheader">
-	Choose your game
-</h1>
+{% load static %}
 
-{% if error_message %}
-  <p style="color: red;">{{ error_message }}</p>
-{% endif %}
+<div class="d-flex justify-content-center">
+    <h2 class="title-card">Choose a game</h2>
+</div>
 
-{% if success_message %}
-  <p style="color: green;">{{ success_message }}</p>
-{% endif %}
+<div class="d-flex justify-content-center">
+	<img src="{% static 'favicon.ico' %}" alt="favicon" width="20%" height="auto">
+</div>
 
-<br></br>
+<div class="d-flex justify-content-center">
+	{% if error_message %}
+	<p style="color: red;">{{ error_message }}</p>
+	{% endif %}
 
-<h2 class="container pong-box">
-	Pong Game
-	<br></br>
-	<a href="/waiting/pong/1v1" class="link btn btn-success">1v1 Match Queue</a>
-	<a href="/waiting/pong/2v2" class="link btn btn-info">2v2 Match Queue</a>
-	<a href="/waiting/pong/AI" class="link btn btn-danger">AI Match Queue</a>
-	<a href="/waiting/pong/tournament" class="link btn btn-warning">Tournament Queue</a>
-</h2>
+	{% if success_message %}
+	<p style="color: green;">{{ success_message }}</p>
+	{% endif %}
+</div>
 
-<br></br>
+<div class="d-flex justify-content-center">
+    <h4 class="little-title-card">Pong</h4>
+</div>
 
-<h2 class="container puissance4-box">
-	Puissance 4
-	<br></br>
-	<a href="/waiting/puissance4/1v1" class="link btn btn-success">1v1 Match Queue</a>
-</h2>
+<div class="d-flex justify-content-center p-4">
+	<a href="/waiting/pong/1v1" class="link btn btn-outline-success">1v1 Match Queue</a>
+	<a href="/waiting/pong/2v2" class="link btn btn-outline-info">2v2 Match Queue</a>
+	<a href="/waiting/pong/AI" class="link btn btn-outline-danger">AI Match Queue</a>
+	<a href="/waiting/pong/tournament" class="link btn btn-outline-warning">Tournament Queue</a>
+</div>
+
+<div class="d-flex justify-content-center">
+	<h4 class="little-title-card">Puissance4</h4>
+</div>
+
+<div class="d-flex justify-content-center p-4">
+	<a href="/waiting/puissance4/1v1" class="link btn btn-outline-success">1v1 Match Queue</a>
+</div>

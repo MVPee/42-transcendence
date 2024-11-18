@@ -6,53 +6,65 @@
   <p style="color: green;">{{ success_message }}</p>
 {% endif %}
 
-<h2>Friends</h2>
+<div class="d-flex justify-content-center">
+  <h2 class="title-card">Friends</h2>
+</div>
 
-{% if all_friends %}
-  {% for friend in all_friends %}
-    {% if friend.user1.id == request.user.id %}
-      <p>{{ friend.user2.username }} <a class="link" href="/profile?profile={{ friend.user2.username }}"> Profile </a><a class="link" href="/chat/{{ friend.id }}"> Chat </a></p>
-    {% else %}
-      <p>{{ friend.user1.username }} <a class="link" href="/profile?profile={{ friend.user1.username }}"> Profile </a><a class="link" href="/chat/{{ friend.id }}"> Chat </a></p>
-    {% endif %}
-  {% endfor %}
-{% else %}
-  <p>No friend</p>
-{% endif %}
+<div class="d-flex justify-content-center">
+  {% if all_friends %}
+    {% for friend in all_friends %}
+      {% if friend.user1.id == request.user.id %}
+        <p>{{ friend.user2.username }} <a class="link" href="/profile?profile={{ friend.user2.username }}"> Profile </a><a class="link" href="/chat/{{ friend.id }}"> Chat </a></p>
+      {% else %}
+        <p>{{ friend.user1.username }} <a class="link" href="/profile?profile={{ friend.user1.username }}"> Profile </a><a class="link" href="/chat/{{ friend.id }}"> Chat </a></p>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <p>No friend</p>
+  {% endif %}
+</div>
 
-<h2>Pending Friend Requests</h2>
+<div class="d-flex justify-content-center">
+  <h2 class="title-card">Pending Friend Requests</h2>
+</div>
 
-{% if all_pendings %}
-  {% for pending in all_pendings %}
-    <div class="d-flex align-items-center mb-2">
-      <p class="mb-0 me-2">
-          {{ pending.user1.username }}
-          <a class="link" href="/profile?profile={{ pending.user1.username }}">Profile</a>
-      </p>
-      <form action="/ssr/friend/" method="post" class="d-inline">
-        {% csrf_token %}
-        <input type="hidden" name="profile" value="{{ pending.user1.username }}">
-        <input type="hidden" name="type" value="add">
-        <button type="submit" class="btn btn-success btn-sm ms-2">Accept</button>
-      </form>
-    </div>
-  {% endfor %}
-{% else %}
-  <p>No pending friend requests</p>
-{% endif %}
+<div class="d-flex justify-content-center">
+  {% if all_pendings %}
+    {% for pending in all_pendings %}
+      <div class="d-flex justify-content-center">
+        <p>
+            {{ pending.user1.username }}
+            <a class="link" href="/profile?profile={{ pending.user1.username }}">Profile</a>
+        </p>
+        <form action="/ssr/friend/" method="post" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="profile" value="{{ pending.user1.username }}">
+          <input type="hidden" name="type" value="add">
+          <button type="submit" class="btn btn-outline-success btn-sm ms-2">Accept</button>
+        </form>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No pending friend requests</p>
+  {% endif %}
+</div>
 
-<h2>Community</h2>
+<div class="d-flex justify-content-center">
+  <h2 class="title-card">Player's list</h2>
+</div>
 
-<form action="/ssr/view/community/" method="post">
-  {% csrf_token %}
-  <input type="text" name="query" placeholder="Search..">
-  <button type="submit" class="btn btn-info"><i class="bi bi-search"></i></button>
-</form>
+<div class="d-flex justify-content-center">
+  <form action="/ssr/view/community/" method="post">
+    {% csrf_token %}
+    <input type="text" name="query" placeholder="Search..">
+    <button type="submit" class="btn btn-outline-info"><i class="bi bi-search"></i></button>
+  </form>
+</div>
 
 {% if all_users %}
   {% for user in all_users %}
-      <p>{{ user.username }} <a class="link" href="/profile?profile={{ user.username }}"> Profile </a></p>
+      <p class="text-center">{{ user.username }} <a class="link" href="/profile?profile={{ user.username }}"> Profile </a></p>
   {% endfor %}
 {% else %}
-  <p>No result</p>
+  <p class="text-center">No result</p>
 {% endif %}

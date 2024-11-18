@@ -16,12 +16,10 @@ function notificationWebsocket(link) {
     };
 
     wsNotification.onclose = () => {
-        console.log("Notification connection closed.");
         wsNotification = null;
     };
 
     wsNotification.onerror = (error) => {
-        console.error("WebSocket error:", error);
         wsNotification = null;
     };
 }

@@ -1,25 +1,31 @@
 {% load static %}
 
-<h1>Login</h1>
+<div class="d-flex justify-content-center">
+  <h2 class="little-title-card">Login</h2>
+</div>
 
-{% if error_message %}
-  <p style="color: red;">{{ error_message }}</p>
-{% endif %}
+<div class="d-flex justify-content-center">
+  {% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+  {% endif %}
 
-{% if success_message %}
-  <p style="color: green;">{{ success_message }}</p>
-{% endif %}
+  {% if success_message %}
+    <p style="color: green;">{{ success_message }}</p>
+  {% endif %}
+</div>
 
-<form id="login-form" action="/ssr/view/login/" method="POST">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
-    </div>
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
-    </div>
-    <button type="submit">Login</button>
-</form>
-<p>Don't have an account? <a href="/register" class="link">Register here</a>.</p>
+<div class="d-flex justify-content-center">
+  <form id="login-form" action="/ssr/view/login/" method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit">Login</button>
+      <p>Don't have an account? <a href="/register" class="link">Register here</a>.</p>
+  </form>
+</div>
