@@ -1,16 +1,23 @@
 {% load static %}
 
-<div class="chat-header">
+<div class="d-flex justify-content-center">
 	{% if friend.user1.username == request.user.username %}
-		<h2>Chat with <a class="link" href="/profile?profile={{ friend.user2.username }}">{{ friend.user2.username }}</a></h2>
+		<h2 class="title-card">Chat with <a class="link" href="/profile?profile={{ friend.user2.username }}">{{ friend.user2.username }}</a>
+		<img src="{{ friend.user2.avatar.url }}" href="/profile?profile={{ friend.user2.username }}" alt="User Avatar" width="50" height="50"/></h2>
 	{% else %}
-		<h2>Chat with <a class="link" href="/profile?profile={{ friend.user1.username }}">{{ friend.user1.username }}</a></h2>
+		<h2 class="title-card">Chat with <a class="link" href="/profile?profile={{ friend.user1.username }}">{{ friend.user1.username }}</a>
+		<img src="{{ friend.user1.avatar.url }}" href="/profile?profile={{ friend.user1.username }}" alt="User Avatar" width="50" height="50"/></h2>
 	{% endif %}
 </div>
-<div id="chat-text"> </div>
-<input id="input" type="text" size="100" maxlength="100" minlength="1" placeholder="Write a message...">
-<input id="submit" type="button" class="btn btn-info" value="Send">
-<button onclick="Send1v1()" id="1v1" class="btn btn-success">1v1 Request</button>
+
+<div id="chat-all"> 
+	<div id="chat-text"> </div>
+	<div class="chat-footer">
+		<input id="input" type="text" size="100" maxlength="100" minlength="1" placeholder="Write a message..." autocomplete="off">
+		<input id="submit" type="button" class="btn btn-outline-info" value="Send">
+		<button onclick="Send1v1()" id="1v1" class="btn btn-outline-success">1v1 Request</button>
+	</div>
+</div>
 
 <script>
 	function render_message(sender, context) {
@@ -18,7 +25,7 @@
 		div.className = sender === '{{ user.username }}' ? "chat-bubble message_sender" : "chat-bubble message_receiver";
 		if (context === '1v1')
 		{
-			div.innerHTML= `<p>1v1 request by ${sender} <a class="link btn btn-danger" href="/waiting/private/{{ friend.id }}"><b>Join here</b></a>`;
+			div.innerHTML= `<p>1v1 request by ${sender} <a class="link btn btn-outline-danger" href="/waiting/private/{{ friend.id }}"><b>Join here</b></a>`;
 		}
 		else
 		{
