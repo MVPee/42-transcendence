@@ -126,7 +126,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             while (ball_x < paddle2_x):
                 # Update ball position
                 ball_x += ball_dx
-                ball_y += ball_dy
+                ball_y += ball_dy * random.uniform(0.8, 1.2) #* introduce error in estimations
 
                 # Handle collision with top and bottom walls
                 if ball_y <= 0 or ball_y >= self.HEIGHT - self.BALL_HEIGHT:
@@ -167,7 +167,8 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                         }
                     )
                 cache.set(f"game_{self.game_id}_ai_state", game_state)
-                await asyncio.sleep(0.02) #? 20 ms like player
+                #await asyncio.sleep(0.02) #? 20 ms like player
+                await asyncio.sleep(random.uniform(0.02, 0.03)) #? 20 ms like player at best, sometimes slower
 
     async def countdown(self):
         await self.channel_layer.group_send(
