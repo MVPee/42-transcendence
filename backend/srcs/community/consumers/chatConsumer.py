@@ -27,16 +27,46 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-        username = self.user.username
-        await self.channel_layer.group_send(self.room_group_name,{
-            'type': 'chatroom_message',
-            'username': username,
-            'message': message,
-        })
-        await self.add_chatdb(message)
+        try:
+            text_data_json = json.loads(text_data)
+            message = text_data_json['message']
+            username = self.user.username
+            await self.channel_layer.group_send(self.room_group_name,{
+                'type': 'chatroom_message',
+                'username': username,
+                'message': message,
+            })
+            await self.add_chatdb(message)
+            await self.send_notification_to_friend(message)
+        except json.JSONDecodeError:
+            print(text_data)
 
+    async def send_notification_to_friend(self, message):
+        """
+        Send a notification to the other user in the friendship.
+        """
+        friend_user = await self.get_friend_user()
+        if friend_user:
+            await self.channel_layer.group_send(
+                f'notification_{friend_user.id}',  # Friend's private notification group
+                {
+                    'type': 'notification',
+                    'username': self.user.username,
+                    'message': f"{message}",
+                }
+            )
+
+    @sync_to_async
+    def get_friend_user(self):
+        """
+        Get the other user in the friendship.
+        """
+        friendship = self.get_friendship()
+        if friendship:
+            if friendship.user1.id == self.user.id:
+                return friendship.user2
+            return friendship.user1
+        return None
 
     @sync_to_async
     def validate_friendship(self):
@@ -75,3 +105,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return friend
         except Friend.DoesNotExist:
             return None
+
+    async def notification(self, event):
+        """
+        Handle broadcast notifications sent to the group.
+        """
+        username = event.get('username', 'System')
+
+        # Send the message to WebSocket
+        await self.send(text_data=json.dumps({
+            'type': 'notification',
+            'username': username,
+            'message': event['message'],
+        }))

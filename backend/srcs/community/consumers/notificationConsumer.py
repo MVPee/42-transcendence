@@ -9,11 +9,21 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     active_connections = set()
 
     async def connect(self):
-        self.room_group_name = 'notification'
         self.user = self.scope['user']
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+
+        self.room_group_name = f'notification'
+        self.private_group_name = f'notification_{self.user.id}'
 
         await self.channel_layer.group_add(
             self.room_group_name,
+            self.channel_name
+        )
+
+        await self.channel_layer.group_add(
+            self.private_group_name,
             self.channel_name
         )
 
