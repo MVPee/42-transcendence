@@ -17,12 +17,12 @@ function notificationWebsocket(link) {
 
     wsNotification.onclose = () => {
         console.log("Notification connection closed.");
-        wsNotification = new WebSocket(link);
+        wsNotification = null;
     };
 
     wsNotification.onerror = (error) => {
         console.error("WebSocket error:", error);
-        wsNotification = new WebSocket(link);
+        wsNotification = null;
     };
 }
 
@@ -216,13 +216,6 @@ function disconnectWebSocket() {
 }
 
 function checkWebsocketPage(page, queryString = '') {
-    if (!wsNotification || wsNotification.readyState == WebSocket.CLOSED || wsNotification.readyState == WebSocket.CLOSING) {
-        if (wsNotification)
-            wsNotification.close()
-            wsNotification = null;
-        notificationWebsocket('wss://42.mvpee.be/ws/notification/')
-    }
-
     // console.log("Page:", page); //* DEBUG
     const urls = page.split('/');
     if (urls[0] === 'chat' && urls[1]) {
