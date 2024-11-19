@@ -1,16 +1,50 @@
 body {
     padding: 0;
     margin: 0;
-    background-color: rgb(44, 44, 44);
+    border: 1px solid #2d313c;
+    background-color: #12141a;
     color: white;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
+table {
+    width: 90%;
+    max-width: 1000px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #2d313c;
+}
+
+th, td {
+    color: white;
+    height: 50px;
+    padding: 10px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+tr:nth-child(odd) {
+    background-color: #161820;
+}
+
+tr:nth-child(even) {
+    background-color: #1d2028;
+}
+
+th {
+    background-color: #1d2028;
+}
+
 .title-card {
-    background-color: #333;
+    background-color: #1d2028;
     color: #fff;
+    border: 1px solid #2d313c;
     border-radius: 10px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
@@ -20,8 +54,9 @@ body {
 }
 
 .little-title-card {
-    background-color: #333;
+    background-color: #1d2028;
     color: #fff;
+    border: 1px solid #2d313c;
     border-radius: 10px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
@@ -45,7 +80,7 @@ a:hover {
     top: 1%;
     margin: 0 auto; /* Center */
     max-width: auto;
-    background-color: #333;
+    background-color: #1d2028;
     border: 1px solid rgb(233, 106, 106);
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -66,7 +101,7 @@ nav {
 }
 
 .footer {
-    background-color: rgb(36, 36, 36);
+    background-color: #1d2028;
     color: white;
     text-align: center;
     padding: 20px 0;
