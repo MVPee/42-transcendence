@@ -65,6 +65,6 @@ a:hover {
     flex: 1;
 }
 
-.d-flex.justify-content-center.p-4 {
-	gap: 10px; /* Default spacing */
-  }
+.d-flex.justify-content-center{
+	gap: 10px;
+}

@@ -24,18 +24,24 @@
 	{% if success_message %}
 		<p style="color: green;">{{ success_message }}</p>
 	{% endif %}
-
+	
+	<p>{{ user.username }}</p>
 	{% if user_status %}
-		<p>{{ user_status }}</p>
+		{% if user_status == "Online" %}
+			<p style="color: green;"><b>{{ user_status }}</b></p>
+		{% elif user_status == "Absent" %}
+			<p style="color: orange;"><b>{{ user_status }}</b></p>
+		{% else %}
+			<p style="color: red;"><b>{{ user_status }}</b></p>
+		{% endif %}
 	{% endif %}
 	{% if friend %}
-		<a href="/chat/{{ friend.id }}" class="link btn btn-outline-info">Chat</a>
+		<a href="/chat/{{ friend.id }}" class="link btn btn-info mb-2">Chat</a>
 	{% endif %}
 
-	<p><strong>Username:</strong> {{ user.username }}</p>
-	<p><strong>Elo:</strong> {{ user.elo }}</p>
+	<p>{{ user.elo }} <img src="{% static 'assets/elo.png' %}" alt="elo" width="25" height="25"> </p>
 	{% if user.username != 'AI.'%}
-		<p><strong>Joined on:</strong> {{ user.created_at|date:"F j, Y" }}</p>
+		<p>{{ user.created_at|date:"F j, Y" }}</p>
 	{% endif %}
 
 	{% if user.username != 'AI.' %}
@@ -99,16 +105,15 @@
 </div>
 
 {% if user.username != 'AI.'%}
-	<div class="d-flex justify-content-center">
-		<button class="btn btn-outline-info" onclick="displayStats('pong-1v1')">Pong 1v1 Stats</button>
-		<button class="btn btn-outline-success" onclick="displayStats('pong-2v2')">Pong 2v2 Stats</button>
-		<button class="btn btn-outline-warning" onclick="displayStats('pong-ai')">Pong 1vAi Stats</button>
-		<button class="btn btn-outline-danger" onclick="displayStats('puissance4-1v1')">Puissance4 Stats</button>
+	<div class="d-flex justify-content-center mb-4 mt-1">
+		<button id="pong-1v1" class="btn btn-warning" onclick="displayStats('pong-1v1')">Pong 1v1</button>
+		<button id="pong-2v2" class="btn btn-outline-warning" onclick="displayStats('pong-2v2')">Pong 2v2</button>
+		<button id="pong-ai" class="btn btn-outline-warning" onclick="displayStats('pong-ai')">Pong 1vAi</button>
+		<button id="puissance4-1v1" class="btn btn-outline-warning" onclick="displayStats('puissance4-1v1')">Puissance4</button>
 	</div>
 
-	<div class="Statistics" id="pong-1v1" style="display: block;">
+	<div class="Statistics" id="pong-1v1-block" style="display: block;">
 		<div class="d-flex flex-column justify-content-center text-center">
-			<h3>Pong 1v1</h3>
 			<p>Win: {{ pong.1v1.win }}</p>
 			<p>Defeat: {{ pong.1v1.defeat }}</p>
 			<p>Winrate: {{ pong.1v1.winrate }}%</p>
@@ -162,9 +167,8 @@
 		</div>
 	</div>
 
-	<div class="Statistics" id="pong-2v2" style="display: none;">
+	<div class="Statistics" id="pong-2v2-block" style="display: none;">
 		<div class="d-flex flex-column justify-content-center text-center">
-			<h3>Pong 2v2</h3>
 			<p>Win: {{ pong.2v2.win }}</p>
 			<p>Defeat: {{ pong.2v2.defeat }}</p>
 			<p>Winrate: {{ pong.2v2.winrate }}%</p>
@@ -224,14 +228,11 @@
 {% endif %}
 
 {% if user.username != 'AI.'%}
-	<div class="Statistics" id="pong-ai" style="display: none;">
+	<div class="Statistics" id="pong-ai-block" style="display: none;">
 {% else %}
-	<div class="Statistics" id="pong-ai" style="display: block;">
+	<div class="Statistics" id="pong-ai-block" style="display: block;">
 {% endif %}
 	<div class="d-flex flex-column justify-content-center text-center">
-		{% if user.username != 'AI.'%}
-			<h3>Pong 1vAi</h3>
-		{% endif %}
 		<p>Win: {{ pong.ai.win }}</p>
 		<p>Defeat: {{ pong.ai.defeat }}</p>
 		<p>Winrate: {{ pong.ai.winrate }}%</p>
@@ -286,9 +287,8 @@
 </div>
 
 {% if user.username != 'AI.'%}
-	<div class="Statistics" id="puissance4-1v1" style="display: none;">
+	<div class="Statistics" id="puissance4-1v1-block" style="display: none;">
 		<div class="d-flex flex-column justify-content-center text-center">
-			<h3>Puissance4 1v1</h3>
 			<p>Win: {{ puissance4.1v1.win }}</p>
 			<p>Defeat: {{ puissance4.1v1.defeat }}</p>
 			<p>Winrate: {{ puissance4.1v1.winrate }}%</p>

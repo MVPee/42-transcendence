@@ -15,7 +15,7 @@
 	<div class="chat-footer">
 		<input id="input" type="text" size="100" maxlength="100" minlength="1" placeholder="Write a message..." autocomplete="off">
 		<input id="submit" type="button" class="btn btn-outline-info" value="Send">
-		<button onclick="Send1v1()" id="1v1" class="btn btn-outline-success">1v1 Request</button>
+		<button onclick="Send1v1()" id="1v1" class="btn btn-outline-danger">1v1 Request</button>
 	</div>
 </div>
 
@@ -24,11 +24,8 @@
 		const div = document.createElement('div');
 		div.className = sender === '{{ user.username }}' ? "chat-bubble message_sender" : "chat-bubble message_receiver";
 		if (context === '1v1')
-		{
-			div.innerHTML= `<p>1v1 request by ${sender} <a class="link btn btn-outline-danger" href="/waiting/private/{{ friend.id }}"><b>Join here</b></a>`;
-		}
-		else
-		{
+			div.innerHTML= `<p>1v1 request by ${sender} <a class="link btn btn-danger" href="/waiting/private/{{ friend.id }}"><b>Join here</b></a>`;
+		else {
 			const p = document.createElement('p'); //sanitize XSS
 			const tempElement = document.createElement("textarea"); //clean the output
 			tempElement.innerHTML = `${sender}: ${context}`;
