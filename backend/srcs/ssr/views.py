@@ -316,6 +316,10 @@ class LoginView(BaseSSRView):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
+        if request.user.is_authenticated:
+            self.error_message = 'You are already login. You can logout on your profile.'
+            return super().get(request)
+
         # Authenticate user
         user = authenticate(request, username=username, password=password)
         if user is not None:
@@ -344,6 +348,18 @@ class RegisterView(BaseSSRView):
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
+
+        if request.user.is_authenticated:
+            self.error_message = 'You are already login. You can logout on your profile.'
+            return super().get(request)
+
+        if len(username) < 5 or len(username) > 20:
+            self.error_message = 'Username is too short (< 5) or too long (> 20).'
+            return super().get(request)
+
+        if len(password) < 5 or len(password) > 32:
+            self.error_message = 'Username is too short (< 5) or too long (> 32).'
+            return super().get(request)
 
         if User.objects.filter(username=username).exists():
             self.error_message = 'Username already exists.'

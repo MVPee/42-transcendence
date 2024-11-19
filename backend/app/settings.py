@@ -152,6 +152,3 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     "/frontend/static",
 ]
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = "/frontend/media"
