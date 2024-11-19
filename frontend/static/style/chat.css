@@ -7,6 +7,7 @@
 	margin-right: auto;
 	margin-bottom: 2%;
 	box-sizing: border-box;
+	border: 1px solid #2d313c;
 }
 
 #chat-text {
@@ -61,10 +62,10 @@
 	padding: 10px 10px;
 	align-self: center;
 	margin: 10px;
-	background-color: #383838;
+	background-color: #1d2028;
 	overflow-y: scroll;
 	border-radius: 15px;
-	outline: 2px solid hsl(0, 0%, 48%);
+	outline: 2px solid #2d313c;
 	border: 0;
 	color: white;
 }
@@ -96,7 +97,8 @@
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10px;
-	background-color: #1f1f1f;
+	border-top: 1px solid #2d313c;
+	background-color: #16181e;
 	font-family: Arial, sans-serif;
 	font-size: 14px;
 	align-items: center;
