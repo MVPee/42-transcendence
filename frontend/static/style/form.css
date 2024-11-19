@@ -4,6 +4,7 @@
     border-radius: 10px;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
     width: 80%;
+    max-width: 1000px;
   }
 
   .form-group {
@@ -43,7 +44,7 @@
     text-transform: uppercase;
   }
 
-  .btn:hover {
+  .btn-submit:hover {
     color: white;
     background-color: rgb(222, 55, 55);
   }
