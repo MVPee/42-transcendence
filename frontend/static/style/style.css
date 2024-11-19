@@ -36,19 +36,33 @@ a {
 
 a:hover {
     color: rgb(222, 55, 55);
+    text-decoration: none;
 }
 
 .navbar {
+    display: flex;
     position: sticky;
-	max-width: max-content;
     top: 1%;
-    left: 1%;
-	justify-content: space-between;
-	margin-bottom: 1em;
+    margin: 0 auto; /* Center */
+    max-width: auto;
     background-color: #333;
     border: 1px solid rgb(233, 106, 106);
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-link {
+    color: rgb(233, 106, 106);
+    text-decoration: none;
+    border-radius: 5px;
+    background-color: transparent;
+    order: 1;
 }
 
 .footer {
@@ -63,8 +77,19 @@ a:hover {
 	display: flex;
 	flex-direction: column;
     flex: 1;
+    margin-top: 20px;
 }
 
 .d-flex.justify-content-center{
 	gap: 10px;
+}
+
+
+
+@media only screen and (max-width: 600px) {
+    .nav-link#play-link {
+        order: 0;
+        flex-basis: 100%;
+        text-align: center;
+    }
 }

@@ -1,0 +1,55 @@
+.form-card {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+    width: 80%;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #444;
+    color: white;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
+  .form-input:focus {
+    outline: 2px solid #e96a6a;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 10px;
+    background-color: #e96a6a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+
+  .btn:hover {
+    color: white;
+    background-color: rgb(222, 55, 55);
+  }
+
+  .redirect-text {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 0.85rem;
+  }

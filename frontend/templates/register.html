@@ -1,6 +1,6 @@
 {% load static %}
 
-<div class="d-flex justify-content-center">
+<div class="d-flex justify-content-center mb-3">
     <h2 class="little-title-card">Register</h2>
   </div>
 
@@ -15,25 +15,27 @@
 </div>
 
 <div class="d-flex justify-content-center">
-    <form id="register-form" action="/ssr/view/register/" method="POST">
+    <form id="register-form" action="/ssr/view/register/" method="POST" class="form-card">
         {% csrf_token %}
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" minlength="5" maxlength="20" required>
+            <input class="form-input" type="text" id="username" name="username" minlength="5" maxlength="20" required>
         </div>
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
+            <input class="form-input" type="email" id="email" name="email" required>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" minlength="5" maxlength="32" required>
+            <input class="form-input" type="password" id="password" name="password" minlength="5" maxlength="32" required>
         </div>
         <div class="form-group">
             <label for="confirm_password">Confirm Password</label>
-            <input type="password" id="confirm_password" name="confirm_password" minlength="5" maxlength="32" required>
+            <input class="form-input" type="password" id="confirm_password" name="confirm_password" minlength="5" maxlength="32" required>
         </div>
-        <button type="submit">Register</button>
-        <p>Already have an account? <a href="/login" class="link">Login here</a>.</p>
+        <button type="submit" class="btn">Register</button>
+        <p class="redirect-text text-center">
+            Already have an account? <a href="/login" class="link">Login here</a>.
+        </p>
     </form>
 </div>

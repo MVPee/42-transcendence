@@ -14,17 +14,17 @@
   <h3 class="little-title-card">Friends</h3>
 </div>
 
-<div class="d-flex justify-content-center">
+<div class="d-flex flex-column justify-content-center">
   {% if all_friends %}
     {% for friend in all_friends %}
       {% if friend.user1.id == request.user.id %}
-        <p>{{ friend.user2.username }} <a class="link" href="/profile?profile={{ friend.user2.username }}"> Profile </a><a class="link" href="/chat/{{ friend.id }}"> Chat </a></p>
+        <p class="text-center">{{ friend.user2.username }} <a class="link" href="/profile?profile={{ friend.user2.username }}"> Profile </a><a class="link" href="/chat/{{ friend.id }}"> Chat </a></p>
       {% else %}
-        <p>{{ friend.user1.username }} <a class="link" href="/profile?profile={{ friend.user1.username }}"> Profile </a><a class="link" href="/chat/{{ friend.id }}"> Chat </a></p>
+        <p class="text-center">{{ friend.user1.username }} <a class="link" href="/profile?profile={{ friend.user1.username }}"> Profile </a><a class="link" href="/chat/{{ friend.id }}"> Chat </a></p>
       {% endif %}
     {% endfor %}
   {% else %}
-    <p>No friend</p>
+    <p class="text-center">No friend</p>
   {% endif %}
 </div>
 
@@ -32,7 +32,7 @@
   <h3 class="little-title-card">Pending Friend Requests</h3>
 </div>
 
-<div class="d-flex justify-content-center">
+<div class="d-flex flex-column justify-content-center">
   {% if all_pendings %}
     {% for pending in all_pendings %}
       <div class="d-flex justify-content-center">
@@ -49,7 +49,7 @@
       </div>
     {% endfor %}
   {% else %}
-    <p>No pending friend requests</p>
+    <p class="text-center">No pending friend requests</p>
   {% endif %}
 </div>
 
