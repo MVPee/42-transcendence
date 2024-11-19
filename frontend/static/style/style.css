@@ -78,6 +78,7 @@ nav {
 	flex-direction: column;
     flex: 1;
     margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .d-flex.justify-content-center{
