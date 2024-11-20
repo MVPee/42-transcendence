@@ -1,20 +1,20 @@
 {% load static %}
 
-<div class="game-banner d-flex align-items-center justify-content-center mb-3 p-2">
+<div class="vs-card title-card d-flex align-items-center justify-content-center">
     <div class="player-info d-flex align-items-center">
         <img src="{{ matchs.user1.avatar.url }}" class="avatar mr-2" alt="avatar-player1">
         <span class="player-name">{{ matchs.user1.username }}</span>
-        <span id="player-yellow-color"></span>
+        <span id="player-yellow-color" class="mx-3"></span>
     </div>
     <div class="vs-text mx-4">VS</div>
     <div class="player-info d-flex align-items-center">
-        <span id="player-red-color"></span>
+        <span id="player-red-color" class="mx-3"></span>
         <span class="player-name">{{ matchs.user2.username }}</span>
         <img src="{{ matchs.user2.avatar.url }}" class="avatar ml-2" alt="avatar-player2">
     </div>
 </div>
 
-<p id="info" class="text-center mt-5">Player 1 win the game</p>
+<p id="info" class="text-center mt-2">First player to have a four in a row win.</p>
 
 <div class="board-container">
     <table>
@@ -77,7 +77,7 @@
     </table>
 </div>
 
-<p id="turn" class="text-center mt-5">Yellow turn.</p>
+<p id="turn" class="text-center mt-3">Yellow turn.</p>
 
 <style>
     .board-container {
@@ -104,6 +104,13 @@
         }
     }
 
+    @media only screen and (max-width: 600px) {
+        .vs-card {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+
     #player-yellow-color {
         height: 40px;
         width: 40px;
@@ -117,21 +124,6 @@
         background-color: red;
         border: 1px solid transparent;
         border-radius: 100px;
-    }
-
-    .p4-btn {
-        width: 25px;
-        height: 25px;
-        background-color: rgb(184, 42, 42);
-        border: 1px solid transparent;
-        border-radius: 50px;
-    }
-
-    .game-banner {
-        background-color: #333;
-        color: #fff;
-        border-radius: 10px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .avatar {

@@ -50,7 +50,7 @@ th {
     text-align: center;
     width: 85%;
     padding: 10px;
-    margin: 10px;
+    margin: 10px auto;
 }
 
 .little-title-card {
@@ -62,7 +62,7 @@ th {
     text-align: center;
     width: 60%;
     padding: 10px;
-    margin: 10px;
+    margin: 10px auto;
 }
 
 a {

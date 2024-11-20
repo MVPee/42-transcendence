@@ -1,6 +1,6 @@
 {% load static %}
 
-<div class="game-banner d-flex align-items-center justify-content-center mb-3 p-2">
+<div class="vs-card title-card d-flex align-items-center justify-content-center mb-3 p-2">
     <div class="player-info d-flex align-items-center">
         <img src="{{ matchs.user1.avatar.url }}" class="avatar mr-2" alt="avatar-player1">
         <span class="player-name">{{ matchs.user1.username }}</span>
@@ -86,13 +86,6 @@
         right: 10px;
     }
 
-    .game-banner {
-        background-color: #333;
-        color: #fff;
-        border-radius: 10px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
     .avatar {
         width: 50px;
         height: 50px;
@@ -122,6 +115,13 @@
         justify-content: center;
         align-items: center;
         margin-top: 20px;
+    }
+
+    @media only screen and (max-width: 600px) {
+        .vs-card {
+            display: flex;
+            flex-direction: column;
+        }
     }
 
 </style>
