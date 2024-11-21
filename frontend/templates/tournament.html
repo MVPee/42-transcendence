@@ -1,26 +1,22 @@
 {% load static %}
 
-<div class="game-banner d-flex align-items-center justify-content-center mb-3 p-2">
+
+<div class="vs-card title-card d-flex align-items-center justify-content-center mb-3 p-2" id="game-header">
     <div class="player-info d-flex align-items-center">
-        <img src="{{ matchs.user1.avatar.url }}" class="avatar mr-2" alt="avatar-player1">
-        <span class="player-name">{{ matchs.user1.username }}</span>
+        <img src="{{ matchs.user1.avatar.url }}" class="avatar mr-2" alt="avatar-player1" id="player1-image">
+        <span class="player-name" id="player1-name">{{ matchs.user1.username }}</span>
     </div>
+    <div class="vs-text mx-4">VS</div>
     <div class="player-info d-flex align-items-center">
-        <img src="{{ matchs.user2.avatar.url }}" class="avatar ml-2" alt="avatar-player2">
-        <span class="player-name">{{ matchs.user2.username }}</span>
-    </div>
-    <div class="player-info d-flex align-items-center">
-        <img src="{{ matchs.user3.avatar.url }}" class="avatar ml-2" alt="avatar-player2">
-        <span class="player-name">{{ matchs.user3.username }}</span>
-    </div>
-    <div class="player-info d-flex align-items-center">
-        <img src="{{ matchs.user4.avatar.url }}" class="avatar ml-2" alt="avatar-player2">
-        <span class="player-name">{{ matchs.user4.username }}</span>
+        <span class="player-name" id="player2-name">{{ matchs.user2.username }}</span>
+        <img src="{{ matchs.user2.avatar.url }}" class="avatar ml-2" alt="avatar-player2" id="player2-image">
     </div>
 </div>
 
-<div class="position-relative mx-auto" style="width: 600px; height: 400px;">
+<div class="position-relative mx-auto" style="width: 600px; height: 400px;" id="game">
     <canvas id="game-canvas" width="600" height="400"></canvas>
+	<div class="announcements" id="announcements_div">
+	</div>
     <div id="ball"></div>
     <div id="paddle1" class="paddle"></div>
     <div id="paddle2" class="paddle"></div>
@@ -32,6 +28,7 @@
 <p id="info" class="text-center mt-5"></p>
 
 <style>
+	@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
     #game-canvas {
         background-color: #141414;
         border: 2px solid #fff;
@@ -87,6 +84,12 @@
     #score-2 {
         right: 10px;
     }
+	#game{
+		visibility: hidden;
+	}
+	#game-header {
+		visibility: hidden;
+	}
 
     .game-banner {
         background-color: #333;
@@ -118,5 +121,59 @@
         font-weight: bold;
         color: #ff5733;
     }
+
+
+	.announcement_name{
+		font-family: 'Bangers', sans-serif;
+		font-size: 50px;
+		color: #ffffff;
+		text-transform: uppercase;
+		letter-spacing: 5px;
+		animation: slide-in 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+		position: relative;
+	}
+	.announcement_VS{
+		font-family: 'Bangers', sans-serif;
+		font-size: 80px;
+		color: #ff0000;
+		text-transform: uppercase;
+		letter-spacing: 5px;
+		animation: slide-in 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+		font-style: italic;
+		position: relative;
+	}
+	.announcement_victory{
+		font-family: 'Bangers', sans-serif;
+		font-size: 70px;
+		color: #ffd000;
+		text-transform: uppercase;
+		letter-spacing: 5px;
+		animation: slide-in 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+		font-style: italic;
+		position: relative;
+	}
+	.announcements{
+		display: flex;
+		flex-direction: column;
+		flex-wrap: true;
+        position: absolute;
+        left: 50%;
+        top: 50px;
+        transform: translateX(-50%);
+		visibility: visible;
+		z-index: 2;
+	}
+	@keyframes slide-in {
+	from {
+		transform: translateX(-100%);
+		opacity: 0;
+		text-shadow: none;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+		text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+	}
+	}
 
 </style>

@@ -200,18 +200,12 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
 
             #! Handle goal
             if ball_x <= 0:
-                self.add_point_to(1)
+                self.add_point_to(2)
 
                 await self.send_score_update()
 
                 winner = self.check_win()
                 if winner:
-                    await self.channel_layer.group_send(
-                        self.room_group_name,
-                        {
-                            "type": "redirect_remaining_player",
-                        }
-                    )
                     break
                 ball_x = self.BALL_X
                 ball_y = self.BALL_Y
@@ -220,18 +214,12 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                 ball_dy = self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED
 
             elif ball_x + self.BALL_WIDTH >= self.WIDTH:
-                self.add_point_to(2)
+                self.add_point_to(1)
 
                 await self.send_score_update()
 
                 winner = self.check_win()
                 if winner:
-                    await self.channel_layer.group_send(
-                        self.room_group_name,
-                        {
-                            "type": "redirect_remaining_player",
-                        }
-                    )
                     break
                 ball_x = self.BALL_X
                 ball_y = self.BALL_Y
@@ -269,7 +257,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
 
-        if data["type"] == "movement" and data["direction"] in ('up', 'down') and self.is_playing():
+        if data["type"] == "movement" and data["direction"] in ('up', 'down') and self.is_playing() and self.check_win() == 0:
             direction = data["direction"]
             game_state = cache.get(f"game_{self.game_id}_tournament_state")
             now = asyncio.get_event_loop().time()
@@ -304,7 +292,8 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                 )
             else:
                 pass
-
+        else:
+            pass
     async def player_movement(self, event):
         # Send the movement data to client
         await self.send(text_data=json.dumps({
@@ -334,7 +323,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                         "message": f"Player {self.user.username} has disconnected. He have 15 seconds to reconnect."
                     }
                 )
-                asyncio.create_task(self.wait_for_reconnection(disconnect_key, points_awarded_key))
+                asyncio.create_task(self.wait_for_reconnection(disconnect_key))
             else:
                 disconnect_key = f"player_disconnected_{self.game_id}_{self.user}"
                 cache.set(disconnect_key, self.user.username, timeout=None)
@@ -344,7 +333,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    async def wait_for_reconnection(self, disconnect_key, points_awarded_key):
+    async def wait_for_reconnection(self, disconnect_key):
         await asyncio.sleep(15)
 
         #? Protection if the match is finish
@@ -355,14 +344,6 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                 elif self.tournament.user2 == self.user:
                     self.set_points_to(1, 5)
 
-                cache.set(points_awarded_key, True, timeout=None)
-
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                        {
-                            "type": "redirect_remaining_player",
-                        }
-                )
 
     def add_point_to(self, player):
         if player == 1:
@@ -384,10 +365,18 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         return 0
 
 
-    async def redirect_remaining_player(self, event):
+    async def send_update_game_header(self, event):
         await self.send(text_data=json.dumps({
-            "type": "info",
-            "info": "yescfini",
+            "type": "update_game_header",
+            "player1Image": event["player1Image"],
+            "player1Name": event["player1Name"],
+            "player2Image": event["player2Image"],
+            "player2Name": event["player2Name"]
+        }))
+    async def send_announcement(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "announcement",
+            "message": event["message"]
         }))
 
     async def send_info(self, event):
@@ -460,11 +449,16 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                 for player, key in disconnect_keys:
                     cache.delete(key)
                 return players_present
+            message = "Waiting "
+            for i, player in enumerate(players_not_connected):
+                message += player.username
+                if (i == 0 and len(players_not_connected) > 1):
+                    message += " "
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     "type": "send_countdown",
-                    'message': ("Waiting " + ", ".join(player["username"] for player in players_not_connected) + f" {seconds_remaining}s remaining")
+                    'message': (message + f"{seconds_remaining}s remaining")
                 }
             )
             await asyncio.sleep(1)
@@ -472,6 +466,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
 
     async def play_match(self, player1, player2):
         #check if they disconnected, if yes send a message and wait
+        await self.announce_match(player1, player2)
         players_present = await self.wait_game_players(player1, player2)
         if (len(players_present) < 2):
             if (len(players_present) == 1):
@@ -482,11 +477,52 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
 
         #launch game process
         await self.gameProcess()
-        game_state = cache.get(f"game_{self.game_id}_tournament_state")
+        await self.announce_victory(player1, player2)
         if (self.check_win() == 2):
             return player2, player1
         return player1, player2
 
+    async def announce_match(self, player1, player2):
+        await asyncio.sleep(1)
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_announcement",
+                "message": f"{player1.username} VS {player2.username}",
+            }
+        )
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_update_game_header",
+                "player1Image": player1.avatar.url,
+                "player1Name": player1.username,
+                "player2Image": player2.avatar.url,
+                "player2Name": player2.username,
+            }
+        )
+        await asyncio.sleep(7)
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_announcement",
+                "message": "",
+            }
+        )
+    async def announce_victory(self, player1, player2):
+        if (self.check_win() == 2):
+            winner = player2.username
+        else:
+            winner = player1.username
+
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_announcement",
+                "message": f"Victory of {winner}",
+            }
+        )
+        await asyncio.sleep(5)
     async def tournamentProcess(self):
         leaderboard = [
             {"player": self.player1, "score": 0},

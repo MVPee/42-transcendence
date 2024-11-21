@@ -1,6 +1,12 @@
 let ws;
 let wsNotification;
 
+function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
+
 function notificationWebsocket(link) {
     wsNotification = new WebSocket(link);
 
@@ -188,6 +194,50 @@ function pongWebsocket(link, mode) {
             loadContent(`profile`);
             disconnectWebSocket();
         }
+		else if (data.type === "update_game_header")
+		{
+			const header = document.getElementById(`game-header`);
+			header.style.visibility = 'visible'
+			const player1Image = document.getElementById(`player1-image`);
+			const player1Name = document.getElementById(`player1-name`);
+			player1Image.src = data.player1Image;
+			player1Name.textContent = data.player1Name;
+			const player2Image = document.getElementById(`player2-image`);
+			const player2Name = document.getElementById(`player2-name`);
+			player2Image.src = data.player2Image;
+			player2Name.textContent = data.player2Name;
+	
+		}
+		else if (data.type === "announcement")
+		{
+			const game = document.getElementById(`game`);
+			const announcements = document.getElementById(`announcements_div`);
+			removeAllChildNodes(announcements);
+			if (data.message === ""){
+				game.style.visibility = 'visible';
+			}
+			else {
+				let delay = 0;
+				game.style.visibility = 'hidden';
+				let words = data.message.split(" ");
+				words.forEach((word) =>
+				{
+					var span = document.createElement("span");
+					span.textContent = `${word}`;
+					span.className= "announcement_name";
+					if (word === "VS") {
+					  span.className = "announcement_VS";
+					} else if (word === "Victory") {
+					  span.className = "announcement_victory";
+					}
+					span.style.setProperty('--delay', `${delay}s`);
+					announcements.appendChild(span);
+					delay += 0.5;
+				}
+				);
+			}
+
+		}
     };
 
     ws.onclose = () => {
