@@ -212,6 +212,8 @@ function pongWebsocket(link, mode) {
 		{
 			const game = document.getElementById(`game`);
 			const announcements = document.getElementById(`announcements_div`);
+			const header = document.getElementById(`game-header`);
+			header.style.visibility = 'hidden'
 			removeAllChildNodes(announcements);
 			if (data.message === ""){
 				game.style.visibility = 'visible';
