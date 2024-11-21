@@ -353,10 +353,10 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             self.player2_score = points
 
     def check_win(self):
-        #! change back to 2 after testing
-        if self.player1_score >= 1:
+        #! change back to 5 after testing
+        if self.player1_score >= 5:
             return 1
-        elif self.player2_score >= 1:
+        elif self.player2_score >= 5:
             return 2
         return 0
 
@@ -419,7 +419,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         'ball_y': self.BALL_Y,
         'ball_dx': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
         'ball_dy': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
-        'player1': None;
+        'player1': None,
         'player2': None,
         }
         cache.set(f"game_{self.game_id}_tournament_state", reset_game_state)
@@ -456,6 +456,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
 
         players_not_connected = [player for player, key in disconnect_keys if cache.get(key) is not None]
         #* send message
+        await self.notify_players(players_not_connected)
         countdown = 30
         for seconds_remaining in range(countdown, 0, -1):
             players_present = [player for player, key in disconnect_keys if cache.get(key) is None]
@@ -534,6 +535,21 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             }
         )
         await asyncio.sleep(5)
+
+    async def notify_players(self, players_list):
+        for player in players_list:
+            room_group_name = f'notification_{player.id}'
+            try:
+                await self.channel_layer.group_send(
+                    room_group_name,
+                    {
+                        'type': 'notification',
+                        'username': 'system',
+                        'message': f"<a class='btn btn-outline-info' href='https://42.mvpee.be/game/pong/tournament/{self.tournament.id}'> You must play now, join !</a>"
+                    })
+            except:
+                pass
+
 
     def CheckTournamentWinner(self, leaderboard):
         return (max(leaderboard, key=lambda x: int(x['score']))['score'] >= 3)

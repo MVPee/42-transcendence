@@ -185,6 +185,10 @@ function pongWebsocket(link, mode) {
         else if (data.type === "info") {
             const infoDisplay = document.getElementById("info");
             infoDisplay.textContent = data.info;
+			setTimeout(() => {
+				infoDisplay.style.opacity = '0';
+				setTimeout(() => infoDisplay.remove(), 500);
+			}, 5000);
         }
         else if (data.type === "countdown") {
             const infoDisplay = document.getElementById("countdown");

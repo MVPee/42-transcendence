@@ -12,7 +12,7 @@ function showCustomNotification(username, message) {
     notification.style.opacity = '1';
     notification.style.transition = 'opacity 0.5s ease';
 
-    notification.innerText = `${username}: ${message}`;
+    notification.innerHTML= `${username}: ${message}`;
     notificationsContainer.appendChild(notification);
 
     setTimeout(() => {
