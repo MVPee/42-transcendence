@@ -30,7 +30,7 @@ class Matchs(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"2v2 {self.user1.username} && {self.user2.username} ({self.team1_score}) VS ({self.team2_score}) {self.user3.username} && {self.user4.username}: {self.game}"
+        return f"{self.user1.username if self.user1 else 'deleted user'} && {self.user2.username if self.user2 else 'deleted user'} ({self.team1_score}) VS ({self.team2_score}) {self.user3.username if self.user3 else 'deleted user'} && {self.user4.username if self.user4 else 'deleted user'}"
 
     class Meta:
         verbose_name = "Match 2v2"
@@ -50,7 +50,7 @@ class Tournament(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"Winner of the tournament {winner.username}"
+        return f"Winner of the tournament {self.winner.username if self.winner else 'deleted user or no winner yet'}"
 
     class Meta:
         verbose_name = "Tournament 1v1v1v1"
