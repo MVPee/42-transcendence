@@ -38,6 +38,26 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
         self.user = self.scope['user']
         self.room_group_name = f"game_{self.game_id}_1v1"
 
+        try:
+            self.match = await sync_to_async(Match.objects.get)(id=self.game_id)
+        
+            self.player1 = await sync_to_async(lambda: self.match.user1 if self.match.user1 else "Player1")()
+            self.player2 = await sync_to_async(lambda: self.match.user2 if self.match.user2 else "Player2")()
+            
+            user1_score = await sync_to_async(lambda: self.match.user1_score if self.match.user1_score else 0)()
+            user2_score = await sync_to_async(lambda: self.match.user2_score if self.match.user2_score else 0)()
+
+            if self.user != self.player1 and self.user != self.player2:
+                await self.close()
+
+            if user1_score >= 5 or user2_score >= 5:
+                await self.close()
+
+            await self.accept()
+
+        except Match.DoesNotExist:
+            await self.close()
+
         disconnect_key = f"player_disconnected_{self.game_id}"
         was_disconnected = cache.get(disconnect_key) == self.user.username
 
@@ -82,17 +102,6 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
                     }
                 )
                 cache.set(f"game_{self.game_id}_1v1_state", game_state)
-
-        try:
-            self.match = await sync_to_async(Match.objects.get)(id=self.game_id)
-        
-            self.player1 = await sync_to_async(lambda: self.match.user1 if self.match.user1 else "Player1")()
-            self.player2 = await sync_to_async(lambda: self.match.user2 if self.match.user2 else "Player2")()
-            
-            await self.accept()
-
-        except Match.DoesNotExist:
-            await self.close()
 
         game_process_key = f"game_{self.game_id}_process_started"
         if not cache.get(game_process_key):
@@ -316,6 +325,9 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
+        if self.user != self.player1 and self.user != self.player2:
+            return
+
         points_awarded_key = f"points_awarded_{self.game_id}"
         points_awarded = cache.get(points_awarded_key)
 

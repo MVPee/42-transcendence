@@ -38,11 +38,6 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         self.user = self.scope['user']
         self.room_group_name = f"game_{self.game_id}_tournament"
 
-        disconnect_key = f"player_disconnected_{self.game_id}_{self.user}"
-        was_disconnected = cache.get(disconnect_key) == self.user.username
-        self.player1_score = 0
-        self.player2_score = 0
-
         try:
             self.tournament = await sync_to_async(Tournament.objects.get)(id=self.game_id)
         
@@ -51,9 +46,21 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             self.player3 = await sync_to_async(lambda: self.tournament.user3 if self.tournament.user3 else "Player3")()
             self.player4 = await sync_to_async(lambda: self.tournament.user4 if self.tournament.user4 else "Player4")()
             
+            if self.user != self.player1 and self.user != self.player2 and self.user != self.player3 and self.user != self.player4:
+                await self.close()
+
+            winner = await sync_to_async(lambda: self.tournament.winner if self.tournament.winner else None)()
+
+            if winner is not None:
+                await self.close()
 
         except Tournament.DoesNotExist:
             await self.close()
+
+        disconnect_key = f"player_disconnected_{self.game_id}_{self.user}"
+        was_disconnected = cache.get(disconnect_key) == self.user.username
+        self.player1_score = 0
+        self.player2_score = 0
 
         if not cache.get(f"game_{self.game_id}_tournament_state"):
             cache.add(f"game_{self.game_id}_tournament_state", {
@@ -299,6 +306,9 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
+        if self.user != self.player1 and self.user != self.player2 and self.user != self.player3 and self.user != self.player4:
+            return
+
         if hasattr(self, 'tournament'):
 
             if (await self.is_playing()):

@@ -38,6 +38,28 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
         self.user = self.scope['user']
         self.room_group_name = f"game_{self.game_id}_2v2"
 
+        try:
+            self.match = await sync_to_async(Matchs.objects.get)(id=self.game_id)
+        
+            self.player1 = await sync_to_async(lambda: self.match.user1 if self.match.user1 else "Player1")()
+            self.player2 = await sync_to_async(lambda: self.match.user2 if self.match.user2 else "Player2")()
+            self.player3 = await sync_to_async(lambda: self.match.user3 if self.match.user3 else "Player1")()
+            self.player4 = await sync_to_async(lambda: self.match.user4 if self.match.user4 else "Player2")()
+    
+            team1_score = await sync_to_async(lambda: self.match.team1_score if self.match.team1_score else 0)()
+            team2_score = await sync_to_async(lambda: self.match.team1_score if self.match.team1_score else 0)()
+
+            if self.user != self.player1 and self.user != self.player2 and self.user != self.player3 and self.user != self.player4:
+                await self.close()
+
+            if team1_score >= 5 or team2_score >= 5:
+                await self.close()
+
+            await self.accept()
+
+        except Matchs.DoesNotExist:
+            await self.close()
+
         disconnect_key = f"player_disconnected_{self.game_id}"
         was_disconnected = cache.get(disconnect_key) == self.user.username
 
@@ -84,19 +106,6 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
                     }
                 )
                 cache.set(f"game_{self.game_id}_2v2_state", game_state)
-
-        try:
-            self.match = await sync_to_async(Matchs.objects.get)(id=self.game_id)
-        
-            self.player1 = await sync_to_async(lambda: self.match.user1 if self.match.user1 else "Player1")()
-            self.player2 = await sync_to_async(lambda: self.match.user2 if self.match.user2 else "Player2")()
-            self.player3 = await sync_to_async(lambda: self.match.user3 if self.match.user3 else "Player1")()
-            self.player4 = await sync_to_async(lambda: self.match.user4 if self.match.user4 else "Player2")()
-    
-            await self.accept()
-
-        except Matchs.DoesNotExist:
-            await self.close()
 
         game_process_key = f"game_{self.game_id}_process_started"
         if not cache.get(game_process_key):
@@ -357,6 +366,9 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
+        if self.user != self.player1 and self.user != self.player2 and self.user != self.player3 and self.user != self.player4:
+            return
+
         points_awarded_key = f"points_awarded_{self.game_id}"
         points_awarded = cache.get(points_awarded_key)
 
