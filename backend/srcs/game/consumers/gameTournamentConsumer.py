@@ -375,6 +375,12 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             "message": event["message"]
         }))
 
+    async def send_scoreboard(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "scoreboard",
+            "array": event["array"],
+        }))
+
     async def send_info(self, event):
         await self.send(text_data=json.dumps({
             "type": "info",
@@ -535,6 +541,13 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             }
         )
         await asyncio.sleep(5)
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_announcement",
+                "message": "",
+            }
+        )
 
     async def notify_players(self, players_list):
         for player in players_list:
@@ -545,14 +558,54 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                     {
                         'type': 'notification',
                         'username': 'system',
-                        'message': f"<a class='btn btn-outline-info' href='https://42.mvpee.be/game/pong/tournament/{self.tournament.id}'> You must play now, join !</a>"
+                        'message': f"<a class='btn btn-info' href='https://42.mvpee.be/game/pong/tournament/{self.tournament.id}'> You must play now, join !</a>"
                     })
             except:
                 pass
 
 
+    async def show_scoreboard(self, leaderboard, last):
+
+        await asyncio.sleep(1) #wait for all players to be connected
+        serialized_leaderboard = []
+        for entry in leaderboard:
+            player = entry['player']
+            score = entry['score']
+            serialized_leaderboard.append({
+                'player': {
+                    'avatar': {'url': getattr(player.avatar, 'url', None)},
+                    'username': player.username,
+                },
+                'score': score,
+            })
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_scoreboard",
+                "array": json.dumps(serialized_leaderboard),
+            }
+        )
+        await asyncio.sleep(7)
+        if (not last):
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "send_scoreboard",
+                    "array": "",
+                }
+            )
+
     def CheckTournamentWinner(self, leaderboard):
         return (max(leaderboard, key=lambda x: int(x['score']))['score'] >= 3)
+
+    def find_user_position(self, leaderboard, player):
+        for index, curr_player in enumerate(leaderboard):
+            if (curr_player['player'] == player):
+                return (index + 1)
+        return 4
+    @sync_to_async
+    def add_to_db(self, model):
+        model.save()
 
     async def tournamentProcess(self):
         leaderboard = [
@@ -563,10 +616,11 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         ]
         random.shuffle(leaderboard)
         while (not self.CheckTournamentWinner(leaderboard)):
+            leaderboard = sorted(leaderboard, key=lambda x:x['score'], reverse=True) #sort based on wins
+            await self.show_scoreboard(leaderboard, last=False)
             stack = leaderboard.copy()
-            stack.reverse()
             while (len(stack) >= 2):
-                if (stack[0]['score'] == stack[1]['score']):			
+                if (stack[0]['score'] == stack[1]['score']):		
                     #decide which players are going to play
                     game_state = cache.get(f"game_{self.game_id}_tournament_state")
                     game_state['player1'] = stack[0]['player']
@@ -581,14 +635,13 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                     stack.pop(0)
                 else:
                     stack.pop(0)
-            leaderboard = sorted(leaderboard, key=lambda x:x['score']) #sort based on wins
-            
-        # award winners and save into db
-        #* temporary
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "send_announcement",
-                "message": f"1-{leaderboard[0]['player'].username} 2-{leaderboard[1]['player'].username} 3-{leaderboard[2]['player'].username} 4-{leaderboard[3]['player'].username}",
-            }
-        )
+
+        # award winners and save into 
+        leaderboard = sorted(leaderboard, key=lambda x:x['score'], reverse=True) #sort based on wins
+        await self.show_scoreboard(leaderboard, last=True)
+        self.tournament.user1_position = self.find_user_position(leaderboard, self.player1)
+        self.tournament.user2_position = self.find_user_position(leaderboard, self.player2)
+        self.tournament.user3_position = self.find_user_position(leaderboard, self.player3)
+        self.tournament.user4_position = self.find_user_position(leaderboard, self.player4)
+        self.tournament.winner = leaderboard[0]['player']
+        asyncio.create_task(self.add_to_db(model=self.tournament))

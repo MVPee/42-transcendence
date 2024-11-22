@@ -270,8 +270,6 @@ class GameView(BaseSSRView):
         elif (matchMode == 'tournament'):
             self.matchs = Tournament.objects.filter(Q(id=matchId) & Q(user1=request.user) | Q(user2=request.user) | Q(user3=request.user) | Q(user4=request.user)).first()
             if self.matchs is not None and self.matchs.winner is None:
-                # self.page = 'play'
-                # self.error_message = 'tournament is comming but not now bro.'
                 self.page = 'tournament'
                 return super().get(request)
             else:

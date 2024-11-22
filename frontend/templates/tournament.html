@@ -15,6 +15,24 @@
 
 <div class="position-relative mx-auto" style="width: 600px; height: 400px;" id="game">
     <canvas id="game-canvas" width="600" height="400"></canvas>
+	<div class ="scoreboard" id="scoreboard">
+		<div class="d-flex justify-content-center">
+			<h2 class="title-card">Scoreboard Tournament</h2>
+		</div>
+	
+		<div class="d-flex justify-content-center">
+			<table>
+				<thead>
+					<tr>
+						<th class="text-center align-middle">Username</th>
+						<th class="text-center align-middle">Wins</th>
+					</tr>
+				</thead>
+				<tbody id="scoreboard-rows">
+				</tbody>
+			</table>
+		</div>
+	</div>
 	<div class="announcements" id="announcements_div">
 	</div>
     <div id="ball"></div>
@@ -98,6 +116,10 @@
         border-radius: 50%;
         border: 2px solid #fff;
     }
+    .scoreboard-avatar {
+        width: 40px;
+        height: 40px;
+    }
 
     .player-info {
         display: flex;
@@ -128,18 +150,17 @@
 	}
 	.announcement_VS{
 		font-family: 'Bangers', sans-serif;
-		font-size: 80px;
+		font-size: 120px;
 		color: #ff0000;
 		text-transform: uppercase;
 		letter-spacing: 5px;
 		animation: slide-in 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
 		font-style: italic;
 		position: relative;
-		left: 25%;
 	}
 	.announcement_victory{
 		font-family: 'Bangers', sans-serif;
-		font-size: 70px;
+		font-size: 110px;
 		color: #ffd000;
 		text-transform: uppercase;
 		letter-spacing: 5px;
@@ -147,17 +168,27 @@
 		font-style: italic;
 		position: relative;
 	}
+	.announcements, .scoreboard{
+		width: 600px; 
+		height: 400px;
+        position: absolute;
+		left:0%;
+		top:0%;
+		overflow: hidden;
+	}
 	.announcements{
 		display: flex;
 		flex-direction: column;
 		flex-wrap: true;
-        position: absolute;
-        left: 50%;
-        top: 50px;
-        transform: translateX(-50%);
 		visibility: visible;
 		z-index: 2;
+		text-align: center;
 	}
+	.scoreboard {
+		visibility: hidden;
+		z-index: 3;
+	}
+
 	@keyframes slide-in {
 	from {
 		transform: translateX(-100%);

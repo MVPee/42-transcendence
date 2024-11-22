@@ -42,8 +42,8 @@ function chatWebSocket(link) {
 
     ws.onmessage = (event) => {
         console.log(event);
-		const data = JSON.parse(event.data)
-		render_message(data.username, data.message);
+        const data = JSON.parse(event.data)
+        render_message(data.username, data.message);
     };
 
     ws.onclose = () => {
@@ -54,13 +54,13 @@ function chatWebSocket(link) {
         console.error("WebSocket error:", error);
     };
 
-	const submit_button = document.getElementById('submit')
+    const submit_button = document.getElementById('submit')
     submit_button.removeEventListener("click", sendMessage(ws));
-	submit_button.addEventListener("click", sendMessage(ws))
-	const input = document.getElementById('input')
+    submit_button.addEventListener("click", sendMessage(ws))
+    const input = document.getElementById('input')
     input.removeEventListener("keypress", SendOnEnter(ws));
-	input.addEventListener("keypress", SendOnEnter(ws))
-	scrollToBottom();
+    input.addEventListener("keypress", SendOnEnter(ws))
+    scrollToBottom();
 }
 
 function waitingWebSocket(link) {
@@ -185,10 +185,10 @@ function pongWebsocket(link, mode) {
         else if (data.type === "info") {
             const infoDisplay = document.getElementById("info");
             infoDisplay.textContent = data.info;
-			setTimeout(() => {
-				infoDisplay.style.opacity = '0';
-				setTimeout(() => infoDisplay.remove(), 500);
-			}, 5000);
+            setTimeout(() => {
+                infoDisplay.style.opacity = '0';
+                setTimeout(() => infoDisplay.remove(), 500);
+            }, 5000);
         }
         else if (data.type === "countdown") {
             const infoDisplay = document.getElementById("countdown");
@@ -198,52 +198,108 @@ function pongWebsocket(link, mode) {
             loadContent(`profile`);
             disconnectWebSocket();
         }
-		else if (data.type === "update_game_header")
-		{
-			const header = document.getElementById(`game-header`);
-			header.style.visibility = 'visible'
-			const player1Image = document.getElementById(`player1-image`);
-			const player1Name = document.getElementById(`player1-name`);
-			player1Image.src = data.player1Image;
-			player1Name.textContent = data.player1Name;
-			const player2Image = document.getElementById(`player2-image`);
-			const player2Name = document.getElementById(`player2-name`);
-			player2Image.src = data.player2Image;
-			player2Name.textContent = data.player2Name;
-	
-		}
-		else if (data.type === "announcement")
-		{
-			const game = document.getElementById(`game`);
-			const announcements = document.getElementById(`announcements_div`);
-			const header = document.getElementById(`game-header`);
-			header.style.visibility = 'hidden'
-			removeAllChildNodes(announcements);
-			if (data.message === ""){
-				game.style.visibility = 'visible';
-			}
-			else {
-				let delay = 0;
-				game.style.visibility = 'hidden';
-				let words = data.message.split(" ");
-				words.forEach((word) =>
-				{
-					var span = document.createElement("span");
-					span.textContent = `${word}`;
-					span.className= "announcement_name";
-					if (word === "VS") {
-					  span.className = "announcement_VS";
-					} else if (word === "Victory") {
-					  span.className = "announcement_victory";
+        else if (data.type === "update_game_header")
+        {
+            const header = document.getElementById(`game-header`);
+            header.style.visibility = 'visible'
+            const player1Image = document.getElementById(`player1-image`);
+            const player1Name = document.getElementById(`player1-name`);
+            player1Image.src = data.player1Image;
+            player1Name.textContent = data.player1Name;
+            const player2Image = document.getElementById(`player2-image`);
+            const player2Name = document.getElementById(`player2-name`);
+            player2Image.src = data.player2Image;
+            player2Name.textContent = data.player2Name;
+    
+        }
+        else if (data.type === "announcement")
+        {
+            const game = document.getElementById(`game`);
+            const announcements = document.getElementById(`announcements_div`);
+            const header = document.getElementById(`game-header`);
+            // header.style.visibility = 'hidden'
+            removeAllChildNodes(announcements);
+            if (data.message === ""){
+                game.style.visibility = 'visible';
+            }
+            else {
+                let delay = 0;
+                // game.style.visibility = 'hidden';
+                let words = data.message.split(" ");
+                words.forEach((word) =>
+                {
+                    var span = document.createElement("span");
+                    span.textContent = `${word}`;
+                    span.className= "announcement_name";
+                    if (word === "VS") {
+                    span.className = "announcement_VS";
+                    } else if (word === "Victory") {
+                    span.className = "announcement_victory";
+                    }
+                    span.style.setProperty('--delay', `${delay}s`);
+                    announcements.appendChild(span);
+                    delay += 0.5;
+                }
+                );
+            }
+        }
+        else if (data.type === "scoreboard")
+        {
+            const game = document.getElementById(`game`);
+            const header = document.getElementById(`game-header`);
+            const scoreboard = document.getElementById(`scoreboard`);
+            const scoreboardRows = document.getElementById(`scoreboard-rows`);
+            removeAllChildNodes(scoreboardRows);
+            if (data.array === "")
+            {
+				game.style.visibility = 'visible'
+                scoreboard.style.visibility = 'hidden';
+            }
+            else
+            {
+                game.style.visibility = 'hidden';
+                header.style.visibility = 'hidden';
+                scoreboard.style.visibility = 'visible';
+				let array = JSON.parse(data.array);
+				array.forEach((entry, index) =>{
+					let player = entry.player;
+					let score = entry.score;
+					const tr = document.createElement('tr');
+					const td1 = document.createElement('td');
+					const avatar = document.createElement('img');
+					const player_name = document.createElement('a');
+					const crown = document.createElement('img');
+					td1.className="align-middle";
+					avatar.className="scoreboard-avatar";
+					avatar.setAttribute('alt', 'avatar');
+					avatar.setAttribute('src', `${player.avatar.url}`);
+					player_name.textContent = `${player.username}`;
+					player_name.setAttribute('href', `/profile?profile=${player.username}`)
+					player_name.className = "text-white"
+					td1.appendChild(avatar);
+					td1.appendChild(player_name);
+					if (index <= 2)
+					{
+						let crown_link;
+						if (index == 0)
+							crown_link = '/static/assets/gold_crown.png'
+						else if (index == 1)
+							crown_link = '/static/assets/argent_crown.png'
+						else
+							crown_link = '/static/assets/bronze_crown.png'
+						crown.setAttribute('src', `${crown_link}`);
+						crown.className="scoreboard-avatar";
+						td1.appendChild(crown);
 					}
-					span.style.setProperty('--delay', `${delay}s`);
-					announcements.appendChild(span);
-					delay += 0.5;
-				}
-				);
+					const td2 = document.createElement('td');
+					td2.className="align-middle";
+					td2.innerHTML = `${score}`;
+					tr.appendChild(td1);
+					tr.appendChild(td2);
+					scoreboardRows.appendChild(tr);
+				});
 			}
-
-		}
+        }
     };
 
     ws.onclose = () => {
