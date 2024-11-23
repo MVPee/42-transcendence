@@ -7,6 +7,13 @@ function removeAllChildNodes(parent) {
     }
 }
 
+function retriggerAnimation(object)
+{
+	object.style.animation = "none"; // Stop animation
+	void object.offsetHeight;         // Trigger reflow
+	object.style.animation = "";      // Restart animation
+}
+
 function notificationWebsocket(link) {
     wsNotification = new WebSocket(link);
 
@@ -201,7 +208,9 @@ function pongWebsocket(link, mode) {
         else if (data.type === "update_game_header")
         {
             const header = document.getElementById(`game-header`);
+			const game = document.getElementById(`game`);
             header.style.visibility = 'visible'
+			game.style.visibility = 'visible'
             const player1Image = document.getElementById(`player1-image`);
             const player1Name = document.getElementById(`player1-name`);
             player1Image.src = data.player1Image;
@@ -210,21 +219,22 @@ function pongWebsocket(link, mode) {
             const player2Name = document.getElementById(`player2-name`);
             player2Image.src = data.player2Image;
             player2Name.textContent = data.player2Name;
-    
+			retriggerAnimation(player1Name);
+			retriggerAnimation(player2Name);
+			retriggerAnimation(player1Image);
+			retriggerAnimation(player2Image);
         }
         else if (data.type === "announcement")
         {
             const game = document.getElementById(`game`);
             const announcements = document.getElementById(`announcements_div`);
             const header = document.getElementById(`game-header`);
-            // header.style.visibility = 'hidden'
             removeAllChildNodes(announcements);
             if (data.message === ""){
                 game.style.visibility = 'visible';
             }
             else {
                 let delay = 0;
-                // game.style.visibility = 'hidden';
                 let words = data.message.split(" ");
                 words.forEach((word) =>
                 {
@@ -275,7 +285,10 @@ function pongWebsocket(link, mode) {
 					avatar.setAttribute('src', `${player.avatar.url}`);
 					player_name.textContent = `${player.username}`;
 					player_name.setAttribute('href', `/profile?profile=${player.username}`)
-					player_name.className = "text-white"
+					if (index != 0)
+						player_name.className = "text-white"
+					else
+						player_name.className = "text-red"
 					td1.appendChild(avatar);
 					td1.appendChild(player_name);
 					if (index <= 2)
@@ -298,6 +311,7 @@ function pongWebsocket(link, mode) {
 					tr.appendChild(td2);
 					scoreboardRows.appendChild(tr);
 				});
+				retriggerAnimation(scoreboard);
 			}
         }
     };

@@ -103,18 +103,19 @@
         right: 10px;
     }
 
-    .game-banner {
-        background-color: #333;
-        color: #fff;
-        border-radius: 10px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    }
+	#game {
+		visibility: hidden;
+	}
+	#game-header {
+		visibility: hidden;
+	}
 
     .avatar {
         width: 50px;
         height: 50px;
         border-radius: 50%;
         border: 2px solid #fff;
+		animation: pop 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
     }
     .scoreboard-avatar {
         width: 40px;
@@ -130,6 +131,7 @@
         font-size: 1.2rem;
         font-weight: bold;
         color: #c7c7c7;
+		animation: pop 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
     }
 
     .vs-text {
@@ -145,7 +147,7 @@
 		color: #ffffff;
 		text-transform: uppercase;
 		letter-spacing: 5px;
-		animation: slide-in 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+		animation: slide-in-top 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
 		position: relative;
 	}
 	.announcement_VS{
@@ -187,6 +189,7 @@
 	.scoreboard {
 		visibility: hidden;
 		z-index: 3;
+		animation: pop 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
 	}
 
 	@keyframes slide-in {
@@ -199,6 +202,31 @@
 		transform: translateX(0);
 		opacity: 1;
 		text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+	}
+	}
+	@keyframes slide-in-top {
+	from {
+		transform: translateY(-100%);
+		opacity: 0;
+		text-shadow: none;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+		text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+	}
+	}
+	@keyframes pop {
+	0% {
+		opacity: 0;
+		scale: 0.8;
+	}
+	25% {
+		scale: 0.7;
+	}
+	100% {
+		opacity: 1;
+		scale: 1;
 	}
 	}
 
