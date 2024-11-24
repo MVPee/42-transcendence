@@ -3,6 +3,16 @@
 </div>
 
 <div class="d-flex justify-content-center">
+  {% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+  {% endif %}
+
+  {% if success_message %}
+    <p style="color: green;">{{ success_message }}</p>
+  {% endif %}
+</div>
+
+<div class="d-flex justify-content-center">
     <p style="color: red;" class="error_message"></p>
 </div>
 
