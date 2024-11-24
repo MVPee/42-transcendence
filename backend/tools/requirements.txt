@@ -1,6 +1,7 @@
 # Just Django
 Django==5.1.2
 djangorestframework==3.15.2
+requests==2.32.3
 
 # Dependencies for PostgreSQL
 psycopg2==2.9.10

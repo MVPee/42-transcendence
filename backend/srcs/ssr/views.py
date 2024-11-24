@@ -11,6 +11,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
 from django.conf import settings
+import requests
 import os
 
 class BaseSSRView(APIView):
@@ -160,6 +161,19 @@ class PlayView(BaseSSRView):
     """
 
     page = 'play'
+
+    #? Exemple for requests to the api via a view
+    # def get(self, request):
+    #     try:
+    #         response = requests.get("https://42.mvpee.be/api/is_authenticated/", verify=False)
+    #         response.raise_for_status()
+
+    #         data = response.json()
+    #         print(data)
+    #     except requests.exceptions.RequestException as e:
+    #         print(str(e))
+
+    #     return super().get(request)
 
 
 class CommunityView(BaseSSRView):
