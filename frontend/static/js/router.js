@@ -17,8 +17,16 @@ function loadContent(page, queryString = '', addHistory = true) {
                 loadScripts();
             }
             catch (error) {
-                console.error('Error parsing JSON response:', error);
-                document.getElementById('content').innerHTML = `<h1 class="text-center">Error: ${xhr.status}</h1>`;
+                if (xhr.status === 404) {
+                    const contentElement = document.getElementById('content');
+                    contentElement.innerHTML = "<h2 class='title-card'> 404 Not Found </h2>";
+                    contentElement.innerHTML += 
+                    "<div class='d-flex justify-content-center'><img src='/static/favicon.ico' alt='favicon' width='40%' height='auto'></div>";
+                }
+                else {
+                    console.error('Error parsing JSON response:', error);
+                    document.getElementById('content').innerHTML = `<h1 class="text-center">Error: ${xhr.status}</h1>`;
+                }
             }
         }
     };
