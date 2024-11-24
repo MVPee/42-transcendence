@@ -85,7 +85,7 @@ function handleFormSubmission(event) {
                 loadScripts();
                 updateNavbarLinks();
                 
-                handleApiResponse();
+                handleApiResponse(action, data);
             }
             catch (error) {
                 console.error('Error parsing JSON response:', error);
