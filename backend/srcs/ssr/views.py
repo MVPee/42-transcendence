@@ -466,23 +466,6 @@ class SettingsView(BaseSSRView):
         return super().get(request)
 
 
-class LogoutRequest(BaseSSRView):
-    """
-    A view for 'logout'.
-    Inherits from BaseSSRView and sets the page attribute to 'login'.
-    """
-    
-    page = 'login'
-
-    def post(self, request):
-        if request.user.is_authenticated:
-            logout(request)
-            self.success_message = 'Logout successfull.'
-        else:
-            self.error_message = 'You are not authenticated.'
-        return super().get(request)
-
-
 class SettingsRequest(BaseSSRView):
     """
     A view for the 'settings' page.

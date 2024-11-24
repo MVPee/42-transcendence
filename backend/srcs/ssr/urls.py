@@ -15,7 +15,6 @@ urlpatterns = [
     path('view/chat/<int:id>/', ChatView.as_view(), name='Chat_view'),
 
     path('settings/', SettingsRequest.as_view(), name='settings_request'),
-    path('logout/', LogoutRequest.as_view(), name='logout_request'),
     path('friend/', FriendRequest.as_view(), name='friend_request'),
     path('block/', BlockRequest.as_view(), name='block_request'),
 ]
