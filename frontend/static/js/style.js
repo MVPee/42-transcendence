@@ -32,6 +32,3 @@ function updateNavbarLinks() {
     }
     );
 }
-
-// Call updateNavbarLinks on page load
-document.addEventListener("DOMContentLoaded", updateNavbarLinks);
