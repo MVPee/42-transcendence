@@ -1,12 +1,18 @@
-{% load static %}
-
 <div class="d-flex justify-content-center">
 	{% if friend.user1.username == request.user.username %}
-		<h2 class="title-card">Chat with <a class="link" href="/profile?profile={{ friend.user2.username }}">{{ friend.user2.username }}</a>
-		<img src="{{ friend.user2.avatar.url }}" href="/profile?profile={{ friend.user2.username }}" alt="User Avatar" width="50" height="50"/></h2>
+		<h2 class="title-card">Chat with
+			<a href="/profile?profile={{ friend.user2.username }}" onclick="loadContent('profile?profile={{ friend.user2.username }}');">
+				{{ friend.user2.username }}
+			</a>
+			<img src="{{ friend.user2.avatar.url }}" alt="User Avatar" width="50" height="50"/>
+		</h2>
 	{% else %}
-		<h2 class="title-card">Chat with <a class="link" href="/profile?profile={{ friend.user1.username }}">{{ friend.user1.username }}</a>
-		<img src="{{ friend.user1.avatar.url }}" href="/profile?profile={{ friend.user1.username }}" alt="User Avatar" width="50" height="50"/></h2>
+		<h2 class="title-card">Chat with
+			<a href="/profile?profile={{ friend.user1.username }}" onclick="loadContent('profile?profile={{ friend.user1.username }}');">
+				{{ friend.user1.username }}
+			</a>
+			<img src="{{ friend.user1.avatar.url }}" alt="User Avatar" width="50" height="50"/>
+		</h2>
 	{% endif %}
 </div>
 
@@ -24,7 +30,7 @@
 		const div = document.createElement('div');
 		div.className = sender === '{{ user.username }}' ? "chat-bubble message_sender" : "chat-bubble message_receiver";
 		if (context === '1v1')
-			div.innerHTML= `<p>1v1 request by ${sender} <a class="link btn btn-danger" href="/waiting/private/{{ friend.id }}"><b>Join here</b></a>`;
+			div.innerHTML= `<p>1v1 request by ${sender} <a class="btn btn-danger" href="/waiting/private/{{ friend.id }}" onclick="loadContent('waiting/private/{{ friend.id }}');"><b>Join here</b></a>`;
 		else {
 			const p = document.createElement('p'); //sanitize XSS
 			const tempElement = document.createElement("textarea"); //clean the output

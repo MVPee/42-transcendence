@@ -3,15 +3,29 @@
 <div class="d-flex justify-content-center">
 	{% if user.avatar %}
 		{% if user.username == request.user.username %}
-			<h2 class="title-card"><img src="{{ user.avatar.url }}" alt="User Avatar" width="50" height="50"/>My Profile <a class="link bi bi-gear" href="/settings"></a></h2>
+			<h2 class="title-card">
+				<img src="{{ user.avatar.url }}" alt="User Avatar" width="50" height="50"/>
+				My Profile 
+				<a class="bi bi-gear" href="/settings" onclick="loadContent('settings')"></a>
+			</h2>
 		{% else %}
-			<h2 class="title-card"><img src="{{ user.avatar.url }}" alt="User Avatar" width="50" height="50"/>{{ user.username }}'s profile</h2>
+			<h2 class="title-card">
+				<img src="{{ user.avatar.url }}" alt="User Avatar" width="50" height="50"/>
+				{{ user.username }}'s profile
+			</h2>
 		{% endif %}
 	{% else %}
 		{% if user.username == request.user.username %}
-			<h2 class="title-card"><img src="/media/avatars/profile.png" alt="User Avatar" width="50" height="50"/>My Profile <a class="link bi bi-gear" href="/settings"></a></h2>
+			<h2 class="title-card">
+				<img src="/media/avatars/profile.png" alt="User Avatar" width="50" height="50"/>
+				My Profile 
+				<a class="bi bi-gear" href="/settings" onclick="loadContent('settings')"></a>
+			</h2>
 		{% else %}
-			<h2 class="title-card"><img src="/media/avatars/profile.png" alt="User Avatar" width="50" height="50"/>{{ user.username }}'s profile</h2>
+			<h2 class="title-card">
+				<img src="/media/avatars/profile.png" alt="User Avatar" width="50" height="50"/>
+				{{ user.username }}'s profile
+			</h2>
 		{% endif %}
 	{% endif %}
 </div>
@@ -36,7 +50,7 @@
 		{% endif %}
 	{% endif %}
 	{% if friend %}
-		<a href="/chat/{{ friend.id }}" class="link btn btn-info mb-2">Chat</a>
+		<a href="/chat/{{ friend.id }}" onclick="loadContent('chat/{{ friend.id }}')"class="btn btn-info mb-2">Chat</a>
 	{% endif %}
 
 	<p>{{ user.elo }} <img src="{% static 'assets/elo.png' %}" alt="elo" width="25" height="25"> </p>
@@ -137,21 +151,21 @@
 							<tr>
 								<td>
 									{% if match.user1_score > match.user2_score %}
-										<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+										<a href="/profile?profile={{ match.user1.username }}" onclick="loadContent('profile?profile={{ match.user1.username }}')">{{ match.user1.username }}</a>
 									{% else %}
-										<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+										<a href="/profile?profile={{ match.user2.username }}" onclick="loadContent('profile?profile={{ match.user2.username }}')">{{ match.user2.username }}</a>
 									{% endif %}
 								</td>
 								<td>{{ match.created_at|date:"F j, Y, g:i a" }}</td>
 								<td>
 									{% if match.user1 %}
-										<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+										<a href="/profile?profile={{ match.user1.username }}" onclick="loadContent('profile?profile={{ match.user1.username }}')">{{ match.user1.username }}</a>
 									{% else %}
 										Deleted User
 									{% endif %}
 									<b>VS</b>
 									{% if match.user2 %}
-										<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+										<a href="/profile?profile={{ match.user2.username }}" onclick="loadContent('profile?profile={{ match.user2.username }}')">{{ match.user2.username }}</a>
 									{% else %}
 										Deleted User
 									{% endif %}
@@ -192,25 +206,25 @@
 							<tr>
 								<td>
 									{% if match.team1_score > match.team2_score %}
-										<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
-										<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+										<a href="/profile?profile={{ match.user1.username }}" onclick="loadContent('profile?profile={{ match.user1.username }}')"> {{ match.user1.username }} </a>
+										<a href="/profile?profile={{ match.user2.username }}" onclick="loadContent('profile?profile={{ match.user2.username }}')"> {{ match.user2.username }} </a>
 									{% else %}
-										<a href="/profile?profile={{ match.user3.username }}" class="link">{{ match.user3.username }}</a>
-										<a href="/profile?profile={{ match.user4.username }}" class="link">{{ match.user4.username }}</a>
+										<a href="/profile?profile={{ match.user3.username }}" onclick="loadContent('profile?profile={{ match.user3.username }}')"> {{ match.user3.username }} </a>
+										<a href="/profile?profile={{ match.user4.username }}" onclick="loadContent('profile?profile={{ match.user4.username }}')"> {{ match.user4.username }} </a>
 									{% endif %}
 								</td>
 								<td>{{ match.created_at|date:"F j, Y, g:i a" }}</td>
 								<td>
 									{% if match.user1 and match.user2 %}
-										<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
-										<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+										<a href="/profile?profile={{ match.user1.username }}" onclick="loadContent('profile?profile={{ match.user1.username }}')"> {{ match.user1.username }} </a>
+										<a href="/profile?profile={{ match.user2.username }}" onclick="loadContent('profile?profile={{ match.user2.username }}')"> {{ match.user2.username }} </a>
 									{% else %}
 										Deleted User
 									{% endif %}
 									<b>VS</b>
 									{% if match.user3 and match.user4 %}
-										<a href="/profile?profile={{ match.user3.username }}" class="link">{{ match.user3.username }}</a>
-										<a href="/profile?profile={{ match.user4.username }}" class="link">{{ match.user4.username }}</a>
+										<a href="/profile?profile={{ match.user3.username }}" onclick="loadContent('profile?profile={{ match.user3.username }}')"> {{ match.user3.username }} </a>
+										<a href="/profile?profile={{ match.user4.username }}" onclick="loadContent('profile?profile={{ match.user4.username }}')"> {{ match.user4.username }} </a>
 									{% else %}
 										Deleted User
 									{% endif %}
@@ -221,7 +235,7 @@
 					</tbody>
 				</table>
 			{% else %}
-				<p>No match history available.</p>
+				<p>No data available.</p>
 			{% endif %}
 		</div>
 	</div>
@@ -256,21 +270,21 @@
 						<tr>
 							<td>
 								{% if match.user1_score > match.user2_score %}
-									<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+									<a href="/profile?profile={{ match.user1.username }}" onclick="loadContent('profile?profile={{ match.user1.username }}')"> {{ match.user1.username }} </a>
 								{% else %}
-									<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+									<a href="/profile?profile={{ match.user2.username }}" onclick="loadContent('profile?profile={{ match.user2.username }}')"> {{ match.user2.username }} </a>
 								{% endif %}
 							</td>
 							<td>{{ match.created_at|date:"F j, Y, g:i a" }}</td>
 							<td>
 								{% if match.user1 %}
-									<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+									<a href="/profile?profile={{ match.user1.username }}" onclick="loadContent('profile?profile={{ match.user1.username }}')"> {{ match.user1.username }} </a>
 								{% else %}
 									Deleted User
 								{% endif %}
 								<b>VS</b>
 								{% if match.user2 %}
-									<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+									<a href="/profile?profile={{ match.user2.username }}" onclick="loadContent('profile?profile={{ match.user2.username }}')"> {{ match.user2.username }} </a>
 								{% else %}
 									Deleted User
 								{% endif %}
@@ -312,21 +326,21 @@
 							<tr>
 								<td>
 									{% if match.user1_score > match.user2_score %}
-										<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+										<a href="/profile?profile={{ match.user1.username }}" onclick="loadContent('profile?profile={{ match.user1.username }}')"> {{ match.user1.username }} </a>
 									{% else %}
-										<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+										<a href="/profile?profile={{ match.user2.username }}" onclick="loadContent('profile?profile={{ match.user2.username }}')"> {{ match.user2.username }} </a>
 									{% endif %}
 								</td>
 								<td>{{ match.created_at|date:"F j, Y, g:i a" }}</td>
 								<td>
 									{% if match.user1 %}
-										<a href="/profile?profile={{ match.user1.username }}" class="link">{{ match.user1.username }}</a>
+										<a href="/profile?profile={{ match.user1.username }}" onclick="loadContent('profile?profile={{ match.user1.username }}')"> {{ match.user1.username }} </a>
 									{% else %}
 										Deleted User
 									{% endif %}
 									<b>VS</b>
 									{% if match.user2 %}
-										<a href="/profile?profile={{ match.user2.username }}" class="link">{{ match.user2.username }}</a>
+										<a href="/profile?profile={{ match.user2.username }}" onclick="loadContent('profile?profile={{ match.user2.username }}')"> {{ match.user2.username }} </a>
 									{% else %}
 										Deleted User
 									{% endif %}

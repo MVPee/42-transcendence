@@ -19,13 +19,13 @@
                     {% if user == request.user %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-red" href="/profile?profile={{ user.username }}"><b>{{ user.username }}</b></a>
+                            <a class="text-red" href="/profile?profile={{ user.username }}" onclick="loadContent('profile?profile={{ user.username }}');"><b>{{ user.username }}</b></a>
                             <img src="{% static 'assets/gold_crown.png' %}" alt="Gold Crown" style="width: 50px; height: 50px;">
                         </td>
                     {% else %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-white" href="/profile?profile={{ user.username }}">{{ user.username }}</a>
+                            <a class="text-white" href="/profile?profile={{ user.username }}" onclick="loadContent('profile?profile={{ user.username }}');">{{ user.username }}</a>
                             <img src="{% static 'assets/gold_crown.png' %}" alt="Gold Crown" style="width: 50px; height: 50px;">
                         </td>    
                     {% endif %}
@@ -33,13 +33,13 @@
                     {% if user == request.user %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-red" href="/profile?profile={{ user.username }}"><b>{{ user.username }}</b></a>
+                            <a class="text-red" href="/profile?profile={{ user.username }}" onclick="loadContent('profile?profile={{ user.username }}');"><b>{{ user.username }}</b></a>
                             <img src="{% static 'assets/argent_crown.png' %}" alt="Argent Crown" style="width: 50px; height: 50px;">
                         </td>    
                     {% else %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-white" href="/profile?profile={{ user.username }}">{{ user.username }}</a>
+                            <a class="text-white" href="/profile?profile={{ user.username }}" onclick="loadContent('profile?profile={{ user.username }}');">{{ user.username }}</a>
                             <img src="{% static 'assets/argent_crown.png' %}" alt="Argent Crown" style="width: 50px; height: 50px;">
                         </td>    
                     {% endif %}
@@ -47,13 +47,13 @@
                     {% if user == request.user %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-red" href="/profile?profile={{ user.username }}"><b>{{ user.username }}</b></a>
+                            <a class="text-red" href="/profile?profile={{ user.username }}" onclick="loadContent('profile?profile={{ user.username }}');"><b>{{ user.username }}</b></a>
                             <img src="{% static 'assets/bronze_crown.png' %}" alt="Bronze Crown" style="width: 50px; height: 50px;">
                         </td>    
                     {% else %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-white" href="/profile?profile={{ user.username }}">{{ user.username }}</a>
+                            <a class="text-white" href="/profile?profile={{ user.username }}" onclick="loadContent('profile?profile={{ user.username }}');">{{ user.username }}</a>
                             <img src="{% static 'assets/bronze_crown.png' %}" alt="Bronze Crown" style="width: 50px; height: 50px;">
                         </td>    
                     {% endif %}
@@ -61,12 +61,12 @@
                     {% if user == request.user %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-red" href="/profile/{{ user.username }}"><b>{{ user.username }}</b></a>
+                            <a class="text-red" href="/profile?profile={{ user.username }}" onclick="loadContent('profile?profile={{ user.username }}');"><b>{{ user.username }}</b></a>
                         </td>    
                     {% else %}
                         <td class="align-middle">
                             <img src="{{ user.avatar.url }}" alt="avatar" width="50px" height="50px">
-                            <a class="text-white" href="/profile/{{ user.username }}">{{ user.username }}</a>
+                            <a class="text-white" href="/profile?profile={{ user.username }}" onclick="loadContent('profile?profile={{ user.username }}');">{{ user.username }}</a>
                         </td>    
                     {% endif %}
                 {% endif %}

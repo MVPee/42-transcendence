@@ -92,8 +92,6 @@ function waitingWebSocket(link) {
                 listItem.textContent = player;
                 playerList.appendChild(listItem);
             });
-            const playerCount = document.getElementById("count");
-            playerCount.innerHTML = count;
         }
         else if (data.type === "redirect") {
             console.log(data.id);

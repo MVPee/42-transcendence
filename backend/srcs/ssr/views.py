@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.core.files.images import get_image_dimensions
 from rest_framework.response import Response
+from rest_framework import status
 from django.shortcuts import render
 from rest_framework.views import APIView
 from srcs.user.models import CustomUser as User
@@ -110,7 +111,7 @@ class BaseSSRView(APIView):
         """
     
         if not self.page or self.page not in self.pages_config:
-            return Response({'html': "<p>404: NOT FOUND</p>"})
+            return Response({'html': "<p>404: NOT FOUND</p>"}, status=status.HTTP_404_NOT_FOUND)
 
         page_config = self.pages_config[self.page]
         
@@ -144,12 +145,12 @@ class BaseSSRView(APIView):
             page_config = self.pages_config['login']
             self.context['error_message'] = 'You need to login to have access to this page.'
             html_content = render(request, page_config['template'], self.context).content.decode("utf-8")
-            return Response({'html': html_content})
+            return Response({'html': html_content}, status=status.HTTP_403_FORBIDDEN)
         else:
             html_content = render(request, page_config['template'], self.context).content.decode("utf-8")
 
         # print(html_content)  #* DEBUG
-        return Response({'html': html_content})
+        return Response({'html': html_content}, status=status.HTTP_200_OK)
 
 
 class PlayView(BaseSSRView):
@@ -397,8 +398,11 @@ class ProfileView(BaseSSRView):
 
         #? /profile/?profile=exemple
         profile = request.GET.get('profile')
-        # print("profile:", profile) #* Debug
+        if profile and profile[-1] == '/':
+            profile = profile[:-1]
         user = User.objects.filter(username=profile).first()
+        # print("profile:", profile) #* Debug
+        # print(user) #* Debug
         if user is None:
             user = request.user
 
