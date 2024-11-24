@@ -1,21 +1,18 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
-from django.http import JsonResponse
+from rest_framework.response import Response
 from django.shortcuts import render
-from django.views import View
+from rest_framework.views import APIView
 from srcs.user.models import CustomUser as User
 from srcs.community.models import Blocked, Friend, Messages
 from srcs.game.models import Match, Matchs, Tournament
 from django.utils import timezone
 from datetime import timedelta
-from urllib.parse import urlparse
 from django.db.models import Q
 from django.conf import settings
-import redis
 import os
 
-class BaseSSRView(View):
+class BaseSSRView(APIView):
     """
     A base Server Side Rendering view that serves different pages as JSON responses,
     with optional authentication requirements.
@@ -113,7 +110,7 @@ class BaseSSRView(View):
         """
     
         if not self.page or self.page not in self.pages_config:
-            return JsonResponse({'html': "<p>404: NOT FOUND</p>"})
+            return Response({'html': "<p>404: NOT FOUND</p>"})
 
         page_config = self.pages_config[self.page]
         
@@ -147,12 +144,12 @@ class BaseSSRView(View):
             page_config = self.pages_config['login']
             self.context['error_message'] = 'You need to login to have access to this page.'
             html_content = render(request, page_config['template'], self.context).content.decode("utf-8")
-            return JsonResponse({'html': html_content})
+            return Response({'html': html_content})
         else:
             html_content = render(request, page_config['template'], self.context).content.decode("utf-8")
 
         # print(html_content)  #* DEBUG
-        return JsonResponse({'html': html_content})
+        return Response({'html': html_content})
 
 
 class PlayView(BaseSSRView):
@@ -276,7 +273,6 @@ class GameView(BaseSSRView):
                 self.page = 'play'
                 self.error_message = 'You can\'t have access to this party.'
                 return super().get(request)
-
 
 
 class ChatView(BaseSSRView):
