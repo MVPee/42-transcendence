@@ -3,17 +3,11 @@
 </div>
 
 <div class="d-flex justify-content-center">
-  {% if error_message %}
-    <p style="color: red;">{{ error_message }}</p>
-  {% endif %}
-
-  {% if success_message %}
-    <p style="color: green;">{{ success_message }}</p>
-  {% endif %}
+    <p style="color: red;" class="error_message"></p>
 </div>
 
 <div class="d-flex justify-content-center">
-  <form id="login-form" action="/ssr/view/login/" method="POST" class="form-card">
+  <form id="login-form" action="/api/login/" method="POST" class="form-card">
     {% csrf_token %}
     <div class="form-group">
       <label for="username">Username</label>
@@ -25,7 +19,7 @@
     </div>
     <button type="submit" class="btn-submit">Login</button>
     <p class="redirect-text text-center">
-      Don't have an account? <a href="/register" onclick="loadContent('register')">>Register here</a>.
+      Don't have an account? <a href="/register" onclick="loadContent('register')">Register here</a>.
     </p>
   </form>
 </div>

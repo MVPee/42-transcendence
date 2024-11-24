@@ -36,6 +36,24 @@ function loadContent(page, queryString = '', addHistory = true) {
     xhr.send();
 }
 
+function handleApiResponse(action, data) {
+    if (action === '/api/logout/')
+        loadContent('login');
+    else if (action === '/api/login/') {
+        if (data.login) loadContent('profile');
+        else displayErrorMessage(data.error_message);
+    }
+    else if (action === '/api/register/') {
+        if (data.register) loadContent('profile');
+        else displayErrorMessage(data.error_message);
+    }
+}
+
+function displayErrorMessage(errorMessage) {
+    const errorMessages = document.getElementsByClassName('error_message');
+    Array.from(errorMessages).forEach(element => { element.innerHTML = errorMessage; });
+}
+
 function handleFormSubmission(event) {
     const form = event.target;
     const action = form.getAttribute('action');
@@ -61,10 +79,13 @@ function handleFormSubmission(event) {
                 const data = JSON.parse(xhr.responseText);
 
                 const contentElement = document.getElementById('content');
-                contentElement.innerHTML = data.html;
+                if (data.html)
+                    contentElement.innerHTML = data.html;
 
                 loadScripts();
                 updateNavbarLinks();
+                
+                handleApiResponse();
             }
             catch (error) {
                 console.error('Error parsing JSON response:', error);
@@ -74,9 +95,7 @@ function handleFormSubmission(event) {
     };
 
     xhr.send(formData);
-    if (action === '/api/logout/')
-        loadContent('login');
-}
+}   
 
 function loadScripts() {
     let scripts = document.getElementById('content').getElementsByTagName('script');
