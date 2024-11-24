@@ -74,6 +74,8 @@ function handleFormSubmission(event) {
     };
 
     xhr.send(formData);
+    if (action === '/api/logout/')
+        loadContent('login');
 }
 
 function loadScripts() {

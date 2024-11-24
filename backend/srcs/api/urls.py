@@ -4,4 +4,5 @@ from .views import *
 
 urlpatterns = [
     path('is_authenticated/', views.is_authenticated, name='is_authenticated'),
+    path('logout/', views.logout, name='logout'),
 ]

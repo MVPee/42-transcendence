@@ -61,7 +61,7 @@
 	{% if user.username != 'AI.' %}
 
 		{% if user.username == request.user.username %}
-			<form action="/ssr/logout/" method="post" id="logout-link">
+			<form action="/api/logout/" method="post" id="logout-link">
 				{% csrf_token %}
 				<button type="submit" class="btn btn-danger">logout</button>
 			</form>
