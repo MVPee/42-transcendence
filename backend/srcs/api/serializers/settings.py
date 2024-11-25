@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.core.files.images import get_image_dimensions
+from django.core.validators import EmailValidator
 
 class SettingsSerializer(serializers.Serializer):
     action = serializers.CharField(required=True)
@@ -26,4 +27,14 @@ class SettingsSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Avatar dimensions should be between 50x50 pixels and 256x256 pixels.')
 
             return value
+        return value
+
+    def validate_value(self, value):
+        action = self.initial_data.get('action', None)
+        if action == 'email':
+            email_validator = EmailValidator()
+            try:
+                email_validator(value)
+            except Exception as e:
+                raise serializers.ValidationError("Only valid email allowed.")
         return value
