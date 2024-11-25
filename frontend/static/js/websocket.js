@@ -94,8 +94,7 @@ function waitingWebSocket(link) {
             });
         }
         else if (data.type === "redirect") {
-            console.log(data.id);
-            loadContent(`game/${data.game}/${data.mode}/${data.id}`);
+            loadContent(event, `game/${data.game}/${data.mode}/${data.id}`);
             disconnectWebSocket();
         }
     };
@@ -137,7 +136,7 @@ function puissance4Websocket(link) {
             td.style.backgroundColor = data.color;
         }
         else if (data.type === "redirect") {
-            loadContent(`profile`);
+            loadContent(event, `profile`);
             disconnectWebSocket();
         }
     };
@@ -200,7 +199,7 @@ function pongWebsocket(link, mode) {
             infoDisplay.textContent = data.message;
         }
         else if (data.type === "redirect") {
-            loadContent(`profile`);
+            loadContent(event, `profile`);
             disconnectWebSocket();
         }
         else if (data.type === "update_game_header")
