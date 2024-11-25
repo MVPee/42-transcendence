@@ -1,40 +1,31 @@
 function loadContent(page, queryString = '', addHistory = true) {
+    const contentElement = document.getElementById('content');
     event.preventDefault();
     if (queryString && !queryString.startsWith('?'))
         queryString = '?' + queryString;
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', `/ssr/view/${page}/${queryString}`, true);
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            try {
-                const data = JSON.parse(xhr.responseText);
-
-                const contentElement = document.getElementById('content');
-                contentElement.innerHTML = data.html;
-
-                checkWebsocketPage(page, queryString);
-                loadScripts();
-            }
-            catch (error) {
-                if (xhr.status === 404) {
-                    const contentElement = document.getElementById('content');
-                    contentElement.innerHTML = "<h2 class='title-card'> 404 Not Found </h2>";
-                    contentElement.innerHTML += 
-                    "<div class='d-flex justify-content-center'><img src='/static/favicon.ico' alt='favicon' width='40%' height='auto'></div>";
-                }
-                else {
-                    console.error('Error parsing JSON response:', error);
-                    document.getElementById('content').innerHTML = `<h1 class="text-center">Error: ${xhr.status}</h1>`;
-                }
-            }
+    fetch(`/ssr/view/${page}/${queryString}`, {
+        credentials: 'same-origin',
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 404)
+                contentElement.innerHTML = `<h1 class="text-center p-5"> Code error: ${response.status}</h1>`;
+            throw new Error('Network response was not ok');
         }
-    };
-
-    if (addHistory) history.pushState({ page: page, query: queryString }, '', `/${page}${queryString}`);
-    else history.replaceState({ page: page, query: queryString }, '', `/${page}${queryString}`);
-    xhr.send();
+        return response.json();
+    })
+    .then(data => {
+        contentElement.innerHTML = data.html;
+        checkWebsocketPage(page, queryString);
+        loadScripts();
+        if (addHistory) history.pushState({ page: page, query: queryString }, '', `/${page}${queryString}`);
+        else history.replaceState({ page: page, query: queryString }, '', `/${page}${queryString}`);
+    })
+    .catch(error => console.error('Error loading content:', error));
 }
+
+
 
 function handleApiResponse(action, data) {
     if (action === '/api/logout/')
@@ -88,7 +79,6 @@ function handleFormSubmission(event) {
                 handleApiResponse(action, data);
             }
             catch (error) {
-                console.error('Error parsing JSON response:', error);
                 document.getElementById('content').innerHTML = '<h1>Error loading content</h1>';
             }
         }
