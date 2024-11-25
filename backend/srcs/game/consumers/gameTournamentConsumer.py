@@ -6,6 +6,7 @@ import json
 from ..models import Tournament
 from django.contrib.auth import get_user_model
 import random
+import os
 
 User = get_user_model()
 
@@ -592,7 +593,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                     {
                         'type': 'notification',
                         'username': 'system',
-                        'message': f"<a class='btn btn-info' href='https://42.mvpee.be/game/pong/tournament/{self.tournament.id}'> You must play now, join !</a>"
+                        'message': f"<a class='btn btn-info' href='https://{os.getenv('DOMAIN', 'localhost')}/game/pong/tournament/{self.tournament.id}'> You must play now, join !</a>"
                     })
             except:
                 pass
