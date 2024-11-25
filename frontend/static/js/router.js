@@ -1,3 +1,16 @@
+function loadScripts() {
+    let scripts = document.getElementById('content').getElementsByTagName('script');
+    
+    for (let i = 0; i < scripts.length; i++) {
+        let script = document.createElement('script');
+        script.type = scripts[i].type || 'text/javascript';
+        if (scripts[i].src) script.src = scripts[i].src;
+        else script.innerHTML = scripts[i].innerHTML;
+        document.body.appendChild(script);
+    }
+}
+
+
 function loadContent(page, queryString = '', addHistory = true) {
     const contentElement = document.getElementById('content');
     event.preventDefault();
@@ -26,7 +39,6 @@ function loadContent(page, queryString = '', addHistory = true) {
 }
 
 
-
 function handleApiResponse(action, data) {
     if (action === '/api/logout/')
         loadContent('login');
@@ -40,10 +52,12 @@ function handleApiResponse(action, data) {
     }
 }
 
+
 function displayErrorMessage(errorMessage) {
     const errorMessages = document.getElementsByClassName('error_message');
     Array.from(errorMessages).forEach(element => { element.innerHTML = errorMessage; });
 }
+
 
 function handleFormSubmission(event) {
     const form = event.target;
@@ -85,19 +99,8 @@ function handleFormSubmission(event) {
     };
 
     xhr.send(formData);
-}   
+} 
 
-function loadScripts() {
-    let scripts = document.getElementById('content').getElementsByTagName('script');
-    
-    for (let i = 0; i < scripts.length; i++) {
-        let script = document.createElement('script');
-        script.type = scripts[i].type || 'text/javascript';
-        if (scripts[i].src) script.src = scripts[i].src;
-        else script.innerHTML = scripts[i].innerHTML;
-        document.body.appendChild(script);
-    }
-}
 
 document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener('submit', function(event) {
