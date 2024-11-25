@@ -14,6 +14,7 @@ import os
 
 API_KEY = os.getenv('API_KEY', '')
 
+
 @api_view(['GET'])
 def is_authenticated(request):
     """
@@ -24,6 +25,7 @@ def is_authenticated(request):
     """
     is_authenticated = request.user.is_authenticated
     return Response({'is_authenticated': is_authenticated}, status=status.HTTP_200_OK)
+
 
 @api_view(['POST'])
 def logout(request):
@@ -37,6 +39,7 @@ def logout(request):
         auth_logout(request)
         return Response({'logout': True, "success_message": "Logout successfull."}, status=status.HTTP_200_OK)
     return Response({"logout": True, "error_message": "Already logout."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 def login(request):
@@ -73,6 +76,7 @@ def login(request):
         'login': False,
         'error_message': 'Invalid username or password.'
     }, status=status.HTTP_401_UNAUTHORIZED)
+
 
 @api_view(['POST'])
 def register(request):
@@ -127,6 +131,7 @@ def register(request):
             'register': False,
             'error_message': f'An error occurred: {str(e)}'
         }, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -190,94 +195,3 @@ def settings(request):
     else:
         error_messages = [f"{', '.join(errors)}" for field, errors in serializer.errors.items()]
         return Response({'error_message': error_messages}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def friend(request):
-    profile = request.data.get('profile')
-    action = request.data.get('type')
-
-    if not profile or not action:
-        return Response({'error_message': 'Profile and type are required.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    user_instance = User.objects.filter(username=profile).first()
-    if not user_instance:
-        return Response({'error_message': f'User {profile} does not exist. Maybee reload the profile page.'}, status=status.HTTP_404_NOT_FOUND)
-
-    if user_instance == request.user:
-        return Response({'error_message': 'You cannot perform this action on yourself.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    friend = Friend.objects.filter(Q(user1=request.user, user2=user_instance) | Q(user1=user_instance, user2=request.user)).first()
-    block = Blocked.objects.filter(Q(user1=request.user, user2=user_instance) | Q(user1=user_instance, user2=request.user)).first()
-
-    if action == 'add':
-        if block:
-            return Response({'error_message': f"You cannot send a friend request to {profile} due to a block."}, status=status.HTTP_403_FORBIDDEN)
-
-        if friend:
-            if friend.status:
-                return Response({'error_message': f'You are already friends with {profile}.'}, status=status.HTTP_400_BAD_REQUEST)
-            elif friend.user1 == request.user:
-                return Response({'error_message': f'A friend request was already sent to {profile}.'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                friend.status = True
-                friend.save()
-                return Response({"profile": profile, 'success_message': f'You and {profile} are now friends!'}, status=status.HTTP_200_OK)
-        else:
-            Friend.objects.create(user1=request.user, user2=user_instance, status=False)
-            return Response({"profile": profile, 'success_message': f'Friend request sent to {profile}.'}, status=status.HTTP_200_OK)
-
-    elif action == 'remove':
-        if not friend:
-            return Response({'error_message': f"{profile} is not in your friend list."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if friend.status:
-            friend.delete()
-            return Response({"profile": profile, 'success_message': f"{profile} has been removed from your friends."}, status=status.HTTP_200_OK)
-        elif friend.user1 == request.user:
-            friend.delete()
-            return Response({"profile": profile, 'success_message': f"{profile}'s friend request successfully canceled."}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error_message': f"No pending friend request to {profile}."}, status=status.HTTP_400_BAD_REQUEST)
-
-    else:
-        return Response({'error_message': 'Invalid action. Must be "add" or "remove".'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def block(request):
-    profile = request.data.get('profile')
-    type = request.data.get('type')
-
-    if not profile or not type:
-        return Response({'error_message': 'Profile and type are required.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    user_instance = User.objects.filter(username=profile).first()
-    if not user_instance:
-        return Response({'error_message': f'User {profile} does not exist. Maybee reload the profile page.'}, status=status.HTTP_404_NOT_FOUND)
-
-    if user_instance == request.user:
-        return Response({'error_message': 'You cannot block yourself.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if type == 'add':
-        existing_block = Blocked.objects.filter(user1=request.user, user2=user_instance).first()
-        if existing_block:
-            return Response({'error_message': f'{profile} is already blocked.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        Blocked.objects.create(user1=request.user, user2=user_instance)
-
-        Friend.objects.filter(Q(user1=request.user, user2=user_instance) | Q(user1=user_instance, user2=request.user)).delete()
-
-        return Response({"profile": profile, 'success_message': f'Successfully blocked {profile}.'}, status=status.HTTP_200_OK)
-
-    elif type == 'remove':
-        existing_block = Blocked.objects.filter(user1=request.user, user2=user_instance).first()
-        if not existing_block:
-            return Response({'error_message': f'{profile} is not blocked.'}, status=status.HTTP_400_BAD_REQUEST)
-        existing_block.delete()
-        return Response({"profile": profile, 'success_message': f'{profile} is no longer blocked.'}, status=status.HTTP_200_OK)
-
-    else:
-        return Response({'error_message': 'Invalid type. Must be "add" or "remove".'}, status=status.HTTP_400_BAD_REQUEST)

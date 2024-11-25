@@ -6,6 +6,7 @@ import os
 
 API_KEY = os.getenv('API_KEY', '')
 
+
 @api_view(['GET'])
 @permission_classes([APIKey])
 def check_api_key(request):
