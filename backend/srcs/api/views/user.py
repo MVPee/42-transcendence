@@ -195,3 +195,39 @@ def settings(request):
     else:
         error_messages = [f"{', '.join(errors)}" for field, errors in serializer.errors.items()]
         return Response({'error_message': error_messages}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_user_by_id(request, id):
+    user = User.objects.filter(id=id).first()
+    if user is None:
+        return Response({"error": "No user with this ID."}, status=404)
+    data = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "avatar": user.avatar.url,
+        "elo": user.elo,
+        "language": user.language,
+        "last_connection": user.last_connection,
+        "created_at": user.created_at,
+    }
+    return Response(data, status=200)
+
+
+@api_view(['GET'])
+def get_user_by_username(request, username):
+    user = User.objects.filter(username=username).first()
+    if user is None:
+        return Response({"error": "No user with this username."}, status=404)
+    data = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "avatar": user.avatar.url,
+        "elo": user.elo,
+        "language": user.language,
+        "last_connection": user.last_connection,
+        "created_at": user.created_at,
+    }
+    return Response(data, status=200)

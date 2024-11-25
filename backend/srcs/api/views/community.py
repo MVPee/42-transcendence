@@ -28,6 +28,41 @@ def get_friendship(request, pk):
 
 
 @api_view(['GET'])
+def get_friendship_by_users(request, user1, user2):
+    """
+        api/friendship/<int:user1>/<int:user2>/
+    """
+    user1_instance = get_object_or_404(User, id=user1)
+    user2_instance = get_object_or_404(User, id=user2)
+    
+    try:
+        friendship = Friend.objects.get(
+            (Q(user1=user1_instance) & Q(user2=user2_instance)) | 
+            (Q(user1=user2_instance) & Q(user2=user1_instance))
+        )
+        data = {
+            "id": friendship.id,
+            "user1": {
+                "id": friendship.user1.id,
+                "username": friendship.user1.username,
+                "email": friendship.user1.email,
+            },
+            "user2": {
+                "id": friendship.user2.id,
+                "username": friendship.user2.username,
+                "email": friendship.user2.email,
+            },
+            "status": friendship.status,
+            "created_at": friendship.created_at
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+    except Friend.DoesNotExist:
+        return Response({ 'error': 'friendship doesn\'t exists.' }, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
 def check_friendship(request, user1, user2):
     """
         api/check_friendship/<int:user1>/<int:user2>/
@@ -179,3 +214,17 @@ def block(request):
 
     else:
         return Response({'error_message': 'Invalid type. Must be "add" or "remove".'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def has_blocked(request, user1_id, user2_id):
+    """
+        An API who check if user1 has blocked user2
+    """
+    user1_instance = User.objects.filter(id=user1_id).first()
+    user2_instance = User.objects.filter(id=user2_id).first()
+    if user1_instance is None or user2_instance is None:
+        return Response({'blocked': False, 'error': 'Bad user id.'}, status=status.HTTP_404_NOT_FOUND)
+    blocked = Blocked.objects.filter(user1=user1_instance, user2=user2_instance).first()
+    if blocked:
+        return Response({'blocked': True}, status=status.HTTP_200_OK)
+    return Response({'blocked': False}, status=status.HTTP_200_OK)
