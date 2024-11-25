@@ -34,7 +34,7 @@ def logout(request):
     if request.user.is_authenticated:
         auth_logout(request)
         return Response({'logout': True, "success_message": "Logout successfull."}, status=status.HTTP_200_OK)
-    return Response({"logout": True, "error_message": "Already logout."}, status=400)
+    return Response({"logout": True, "error_message": "Already logout."}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def login(request):
