@@ -22,14 +22,14 @@
       {% if friend.user1.id == request.user.id %}
         <p class="text-center">
           {{ friend.user2.username }}
-          <a href="/profile?profile={{ friend.user2.username }}" onclick="loadContent('profile?profile={{ friend.user2.username }}');"> Profile </a>
-          <a href="/chat/{{ friend.id }}" onclick="loadContent('chat/{{ friend.id }}');"> Chat </a>
+          <a href="/profile?profile={{ friend.user2.username }}" onclick="loadContent(event, 'profile?profile={{ friend.user2.username }}');"> Profile </a>
+          <a href="/chat/{{ friend.id }}" onclick="loadContent(event, 'chat/{{ friend.id }}');"> Chat </a>
         </p>
       {% else %}
         <p class="text-center">
           {{ friend.user1.username }}
-          <a href="/profile?profile={{ friend.user1.username }}" onclick="loadContent('profile?profile={{ friend.user1.username }}');"> Profile </a>
-          <a href="/chat/{{ friend.id }}" onclick="loadContent('chat/{{ friend.id }}');"> Chat </a>
+          <a href="/profile?profile={{ friend.user1.username }}" onclick="loadContent(event, 'profile?profile={{ friend.user1.username }}');"> Profile </a>
+          <a href="/chat/{{ friend.id }}" onclick="loadContent(event, 'chat/{{ friend.id }}');"> Chat </a>
         </p>
       {% endif %}
     {% endfor %}
@@ -48,7 +48,7 @@
       <div class="d-flex justify-content-center">
         <p>
             {{ pending.user1.username }}
-            <a href="/profile?profile={{ pending.user1.username }}" onclick="loadContent('profile?profile={{ pending.user1.username }}');">Profile</a>
+            <a href="/profile?profile={{ pending.user1.username }}" onclick="loadContent(event, 'profile?profile={{ pending.user1.username }}');">Profile</a>
         </p>
         <form action="/ssr/friend/" method="post" class="d-inline">
           {% csrf_token %}
@@ -77,7 +77,7 @@
 
 {% if all_users %}
   {% for user in all_users %}
-      <p class="text-center">{{ user.username }} <a href="/profile?profile={{ user.username }}" onclick="loadContent('profile?profile={{ user.username }}')"> Profile </a></p>
+      <p class="text-center">{{ user.username }} <a href="/profile?profile={{ user.username }}" onclick="loadContent(event, 'profile?profile={{ user.username }}')"> Profile </a></p>
   {% endfor %}
 {% else %}
   <p class="text-center">No result</p>

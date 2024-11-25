@@ -11,9 +11,9 @@ function loadScripts() {
 }
 
 
-function loadContent(page, queryString = '', addHistory = true) {
+function loadContent(event = null, page, queryString = '', addHistory = true) {
     const contentElement = document.getElementById('content');
-    event.preventDefault();
+    if (event) event.preventDefault();
     if (queryString && !queryString.startsWith('?'))
         queryString = '?' + queryString;
 
@@ -39,15 +39,15 @@ function loadContent(page, queryString = '', addHistory = true) {
 }
 
 
-function handleApiResponse(action, data) {
+function handleApiResponse(event, action, data) {
     if (action === '/api/logout/')
-        loadContent('login');
+        loadContent(event, 'login');
     else if (action === '/api/login/') {
-        if (data.login) loadContent('profile');
+        if (data.login) loadContent(event, 'profile');
         else displayErrorMessage(data.error_message);
     }
     else if (action === '/api/register/') {
-        if (data.register) loadContent('profile');
+        if (data.register) loadContent(event, 'profile');
         else displayErrorMessage(data.error_message);
     }
 }
@@ -90,9 +90,10 @@ function handleFormSubmission(event) {
                 loadScripts();
                 updateNavbarLinks();
                 
-                handleApiResponse(action, data);
+                handleApiResponse(event, action, data);
             }
             catch (error) {
+                console.log(error);
                 document.getElementById('content').innerHTML = '<h1>Error loading content</h1>';
             }
         }
@@ -111,9 +112,9 @@ document.addEventListener("DOMContentLoaded", function () {
     
     window.addEventListener("popstate", function (event) {
         if (event.state && event.state.page)
-        loadContent(event.state.page, event.state.query || '', false);
+        loadContent(event, event.state.page, event.state.query || '', false);
     });
     
     updateNavbarLinks();
-    loadContent(location.pathname.replace('/', '') || 'play', location.search, false);
+    loadContent(null, location.pathname.replace('/', '') || 'play', location.search, false);
 });
