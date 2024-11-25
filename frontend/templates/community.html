@@ -50,7 +50,7 @@
             {{ pending.user1.username }}
             <a href="/profile?profile={{ pending.user1.username }}" onclick="loadContent(event, 'profile?profile={{ pending.user1.username }}');">Profile</a>
         </p>
-        <form action="/ssr/friend/" method="post" class="d-inline">
+        <form action="/api/friend/" method="post" class="d-inline">
           {% csrf_token %}
           <input type="hidden" name="profile" value="{{ pending.user1.username }}">
           <input type="hidden" name="type" value="add">

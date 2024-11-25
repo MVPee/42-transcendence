@@ -39,6 +39,9 @@
 		<p style="color: green;">{{ success_message }}</p>
 	{% endif %}
 
+	<p style="color: green; display:none;" class="success_message"></p>
+	<p style="color: red; display:none;" class="error_message"></p>
+
 	<p>{{ user.username }}</p>
 	{% if user_status %}
 		{% if user_status == "Online" %}
@@ -70,7 +73,7 @@
 
 			{% if not blocked %}
 				{% if not friend %}
-					<form action="/ssr/friend/" method="post">
+					<form action="/api/friend/" method="post">
 						{% csrf_token %}
 						<input type="hidden" name="profile" value="{{ user.username }}">
 						{% if friend_request %}
@@ -82,7 +85,7 @@
 						{% endif %}
 					</form>
 				{% else %}
-					<form action="/ssr/friend/" method="post">
+					<form action="/api/friend/" method="post">
 						{% csrf_token %}
 						<input type="hidden" name="type" value="remove">
 						<input type="hidden" name="profile" value="{{ user.username }}">
@@ -94,15 +97,15 @@
 
 			{% if not blocked %}
 				{% if not friend %}
-					<form action="/ssr/block/" method="post">
+					<form action="/api/block/" method="post">
 						{% csrf_token %}
 						<input type="hidden" name="type" value="add">
 						<input type="hidden" name="profile" value="{{ user.username }}">
 						<button type="submit" class="btn btn-outline-danger">Block Request</button>
 					</form>
 				{% endif %}
-			{% else %}
-				<form action="/ssr/block/" method="post">
+			{% else %}	
+				<form action="/api/block/" method="post">
 					{% csrf_token %}
 					<input type="hidden" name="type" value="remove">
 					<input type="hidden" name="profile" value="{{ user.username }}">

@@ -42,8 +42,8 @@ function loadContent(event = null, page, queryString = '', addHistory = true) {
 function displayErrorMessage(errorMessage=null, successMessage=null) {
     const errorMessages = document.getElementsByClassName('error_message');
     const successMessages = document.getElementsByClassName('success_message');
-    Array.from(errorMessages).forEach(element => { element.innerHTML = ''; });
-    Array.from(successMessages).forEach(element => { element.innerHTML = ''; });
+    Array.from(errorMessages).forEach(element => { element.innerHTML = ''; element.style.display='inline';});
+    Array.from(successMessages).forEach(element => { element.innerHTML = ''; element.style.display='inline';});
     if (errorMessage) Array.from(errorMessages).forEach(element => { element.innerHTML = errorMessage; });
     if (successMessage) Array.from(successMessages).forEach(element => { element.innerHTML = successMessage; });
 }
@@ -62,6 +62,14 @@ function handleApiResponse(event, action, data) {
     }
     else if (action === '/api/settings/')
         displayErrorMessage(data.error_message, data.success_message);
+    else if (action === '/api/block/') {
+        if (data.profile) loadContent(event, 'profile', `profile=${data.profile}`, false);
+        else displayErrorMessage(data.error_message, data.success_message);
+    }
+    else if (action === '/api/friend/') {
+        if (data.profile) loadContent(event, 'profile', `profile=${data.profile}`, false);
+        else displayErrorMessage(data.error_message, data.success_message);
+    }
 }
 
 

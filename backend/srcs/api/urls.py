@@ -11,6 +11,8 @@ urlpatterns = [
     path('login/', user.login, name='login'),
     path('register/', user.register, name='register'),
     path('settings/', user.settings, name='change_settings'),
+    path('block/', user.block, name='block_request'),
+    path('friend/', user.friend, name='friend_request'),
 
     path('check_friendship/<int:user1>/<int:user2>/', community.check_friendship, name="validate_friendship"),
     path('friendship/<int:pk>/', community.get_friendship, name="get_friendship"),
