@@ -1,16 +1,17 @@
 from django.urls import path
-from . import views
-from .views import *
+import srcs.api.views.community as community
+import srcs.api.views.user as user
+import srcs.api.views.others as others
 
 urlpatterns = [
-    path('check_api_key/', views.check_api_key, name='check_api_key'),
-    path('is_authenticated/', views.is_authenticated, name='is_authenticated'),
+    path('check_api_key/', others.check_api_key, name='check_api_key'),
 
-    path('logout/', views.logout, name='logout'),
-    path('login/', views.login, name='login'),
-    path('register/', views.register, name='register'),
+    path('is_authenticated/', user.is_authenticated, name='is_authenticated'),
+    path('logout/', user.logout, name='logout'),
+    path('login/', user.login, name='login'),
+    path('register/', user.register, name='register'),
 
-    path('check_friendship/<int:user1>/<int:user2>/', views.check_friendship, name="validate_friendship"),
-    path('friendship/<int:pk>/', views.get_friendship, name="get_friendship"),
-    path('message/add/', views.add_message, name="add_message"),
+    path('check_friendship/<int:user1>/<int:user2>/', community.check_friendship, name="validate_friendship"),
+    path('friendship/<int:pk>/', community.get_friendship, name="get_friendship"),
+    path('message/add/', community.add_message, name="add_message"),
 ]
