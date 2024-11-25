@@ -146,7 +146,7 @@ class BaseSSRView(APIView):
             page_config = self.pages_config['login']
             self.context['error_message'] = 'You need to login to have access to this page.'
             html_content = render(request, page_config['template'], self.context).content.decode("utf-8")
-            return Response({'html': html_content}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'html': html_content}, status=status.HTTP_200_OK)
         else:
             html_content = render(request, page_config['template'], self.context).content.decode("utf-8")
 

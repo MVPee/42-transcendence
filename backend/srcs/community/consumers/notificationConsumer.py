@@ -1,5 +1,4 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-from ..models import Friend, Messages
 from django.db.models import Q
 from asgiref.sync import sync_to_async
 import json

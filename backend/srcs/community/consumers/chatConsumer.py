@@ -1,18 +1,37 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-from ..models import Friend, Messages
-from django.db.models import Q
 from asgiref.sync import sync_to_async
+from django.db.models import Q
+import aiohttp
 import json
+import ssl
+import os
 
 class ChatConsumer(AsyncWebsocketConsumer):
+
+    DOMAIN = os.getenv('DOMAIN', 'localhost')
+    API_KEY = os.getenv('API_KEY', None)
+
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+
     async def connect(self):
 
         self.id = self.scope['url_route']['kwargs']['id']
         self.room_group_name = f'chat_{self.id}'
         self.user = self.scope['user']
         
-        is_valid = await self.validate_friendship()
-        if not is_valid:
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+
+        self.friendship = await self.get_friendship()
+        if not self.friendship:
+            await self.close()
+            return
+
+        self.friend_user = await self.get_friend_user()
+        if not self.friend_user:
             await self.close()
             return
 
@@ -45,39 +64,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """
         Send a notification to the other user in the friendship.
         """
-        friend_user = await self.get_friend_user()
-        if friend_user:
-            await self.channel_layer.group_send(
-                f'notification_{friend_user.id}',  # Friend's private notification group
-                {
-                    'type': 'notification',
-                    'username': self.user.username,
-                    'message': f"{message}",
-                }
-            )
+        
+        await self.channel_layer.group_send(
+            f'notification_{self.friend_user}',  # Friend's private notification group
+            {
+                'type': 'notification',
+                'username': self.user.username,
+                'message': f"{message}",
+            }
+        )
 
     @sync_to_async
     def get_friend_user(self):
         """
         Get the other user in the friendship.
         """
-        friendship = self.get_friendship()
-        if friendship:
-            if friendship.user1.id == self.user.id:
-                return friendship.user2
-            return friendship.user1
-        return None
-
-    @sync_to_async
-    def validate_friendship(self):
-        """
-        Validates whether the connected user is a friend in the chat.
-        Returns True if valid, False otherwise.
-        """
-        if not self.user.is_authenticated:
-            return False
-
-        return self.get_friendship() != None
+        if self.friendship["user1"] == self.user.id:
+            return self.friendship["user2"]
+        return self.friendship["user1"]
         
     async def chatroom_message(self, event):
         message = event['message']
@@ -87,24 +91,36 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message': message,
         }))
 
-    @sync_to_async
-    def add_chatdb(self, message):
+    async def add_chatdb(self, message):
         if len(message) <= 100:
-            friendship = self.get_friendship()
-            new_message = Messages.objects.create(friend_id=friendship, sender_id=self.user, context=message)
-            new_message.save()
+            url = f"https://{self.DOMAIN}/api/message/add/"
+            payload = {
+                "friendship": self.friendship['id'],
+                "sender": self.user.id,
+                "message": message,
+                "X-Api-Key": self.API_KEY
+            }
 
-    def get_friendship(self):
-        # Assuming 'id' corresponds to a Friend relationship
-        try:
-            friend = Friend.objects.filter(
-                (Q(user1=self.user.id) | Q(user2=self.user.id)),
-                id=self.id,
-                status=True
-            ).first()
-            return friend
-        except Friend.DoesNotExist:
+            connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+
+            async with aiohttp.ClientSession(connector=connector) as session:
+                async with session.post(url, json=payload) as response:
+                    # if response.status == 201: print("Message saved successfully!") #* DEBUG
+                    # else: print(f"Failed to save message. Status code: {response.status}") #* DEBUG
+                    pass
+
+    async def get_friendship(self):
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        url = f"https://{self.DOMAIN}/api/friendship/{self.id}/"
+
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.get(url) as response:
+                if response.status == 200: data = await response.json()
+                else: return None
+
+        if data['user1'] != self.user.id and data['user2'] != self.user.id:
             return None
+        return data
 
     async def notification(self, event):
         """

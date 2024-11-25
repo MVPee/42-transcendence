@@ -14,7 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+DOMAIN = os.getenv('DOMAIN', 'localhost')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -26,11 +26,11 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = [
-	'42.mvpee.be',
+	DOMAIN
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-	'https://42.mvpee.be',
+	f'https://{DOMAIN}',
 ]
 
 # Application definition
