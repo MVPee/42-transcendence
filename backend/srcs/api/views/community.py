@@ -1,10 +1,11 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from srcs.user.models import CustomUser as User
 from srcs.community.models import Friend, Blocked, Messages
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from srcs.api.permissions import APIKey
 import os
 
 API_KEY = os.getenv('API_KEY', '')
@@ -44,6 +45,7 @@ def check_friendship(request, user1, user2):
         return Response({ 'success': False }, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
+@permission_classes([APIKey])
 def add_message(request):
     """
         api/message/add/

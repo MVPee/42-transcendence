@@ -98,7 +98,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "friendship": self.friendship['id'],
                 "sender": self.user.id,
                 "message": message,
-                "X-Api-Key": self.API_KEY
+                "X-API-KEY": self.API_KEY
             }
 
             connector = aiohttp.TCPConnector(ssl=self.ssl_context)

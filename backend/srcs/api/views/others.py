@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from srcs.api.permissions import APIKey
 from rest_framework.response import Response
 from rest_framework import status
 import os
@@ -6,6 +7,7 @@ import os
 API_KEY = os.getenv('API_KEY', '')
 
 @api_view(['GET'])
+@permission_classes([APIKey])
 def check_api_key(request):
     """
     This api is an exemple function for how can we create private api via api key in .env
@@ -16,8 +18,4 @@ def check_api_key(request):
     Returns:
         Response: has_apiKey (true/false)
     """
-    api_key = request.headers.get('X-Api-Key')
-
-    if api_key == API_KEY:
-        return Response({'has_api_key': True}, status=status.HTTP_200_OK)
-    return Response({'has_api_key': False}, status=status.HTTP_401_UNAUTHORIZED)
+    return Response({'has_api_key': True}, status=status.HTTP_200_OK)

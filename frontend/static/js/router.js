@@ -39,23 +39,29 @@ function loadContent(event = null, page, queryString = '', addHistory = true) {
 }
 
 
+function displayErrorMessage(errorMessage=null, successMessage=null) {
+    const errorMessages = document.getElementsByClassName('error_message');
+    const successMessages = document.getElementsByClassName('success_message');
+    Array.from(errorMessages).forEach(element => { element.innerHTML = ''; });
+    Array.from(successMessages).forEach(element => { element.innerHTML = ''; });
+    if (errorMessage) Array.from(errorMessages).forEach(element => { element.innerHTML = errorMessage; });
+    if (successMessage) Array.from(successMessages).forEach(element => { element.innerHTML = successMessage; });
+}
+
+
 function handleApiResponse(event, action, data) {
     if (action === '/api/logout/')
         loadContent(event, 'login');
     else if (action === '/api/login/') {
         if (data.login) loadContent(event, 'profile');
-        else displayErrorMessage(data.error_message);
+        else displayErrorMessage(data.error_message, data.success_message);
     }
     else if (action === '/api/register/') {
         if (data.register) loadContent(event, 'profile');
-        else displayErrorMessage(data.error_message);
+        else displayErrorMessage(data.error_message, data.success_message);
     }
-}
-
-
-function displayErrorMessage(errorMessage) {
-    const errorMessages = document.getElementsByClassName('error_message');
-    Array.from(errorMessages).forEach(element => { element.innerHTML = errorMessage; });
+    else if (action === '/api/settings/')
+        displayErrorMessage(data.error_message, data.success_message);
 }
 
 

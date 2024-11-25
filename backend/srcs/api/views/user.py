@@ -1,8 +1,13 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.files.images import get_image_dimensions
 from django.contrib.auth import logout as auth_logout, authenticate, login as auth_login
 from srcs.user.models import CustomUser as User
+from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
+from srcs.api.serializers.settings import SettingsSerializer
 import os
 
 API_KEY = os.getenv('API_KEY', '')
@@ -120,3 +125,66 @@ def register(request):
             'register': False,
             'error_message': f'An error occurred: {str(e)}'
         }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def settings(request):
+    serializer = SettingsSerializer(data=request.data)
+
+    if serializer.is_valid():
+        action = serializer.validated_data['action']
+        value = serializer.validated_data.get('value')
+        avatar = serializer.validated_data.get('avatar')
+        user = request.user
+
+        # Handle avatar update
+        if action == 'avatar' and avatar:
+
+            # Delete old avatar
+            if user.avatar.name != 'avatars/profile.png':
+                old_avatar_path = os.path.join('/frontend/media', user.avatar.name)
+                if os.path.isfile(old_avatar_path):
+                    os.remove(old_avatar_path)
+
+            user.avatar = avatar
+            user.save()
+            return Response({'success_message': 'Avatar updated successfully.'})
+
+        # Handle username update
+        elif action == 'username' and value:
+            if User.objects.filter(username=value).exclude(id=user.id).exists():
+                return Response({'error_message': 'Username already taken.'}, status=status.HTTP_400_BAD_REQUEST)
+            elif user.username == value:
+                return Response({'error_message': 'You need to use your keyboard to change your username.'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                user.username = value
+                user.save()
+                return Response({'success_message': f'Username updated successfully to {value}'})
+
+        # Handle email update
+        elif action == 'email' and value:
+            if User.objects.filter(email=value).exclude(id=user.id).exists():
+                return Response({'error_message': 'Email already taken.'}, status=status.HTTP_400_BAD_REQUEST)
+            elif user.email == value:
+                return Response({'error_message': 'You need to use your keyboard to change your email.'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                user.email = value
+                user.save()
+                return Response({'success_message': f'Email updated successfully to {value}'})
+
+        # Handle language update
+        elif action == 'language' and value:
+            if user.language == value:
+                return Response({'error_message': 'You need to use your mouse to change your language.'}, status=status.HTTP_400_BAD_REQUEST)
+            elif value in ['EN', 'FR', 'DE']:
+                user.language = value
+                user.save()
+                return Response({'success_message': 'Language updated successfully.'})
+            else:
+                return Response({'error_message': 'Invalid language selection.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response({'error_message': 'Invalid action or missing value.'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        error_messages = [f"{', '.join(errors)}" for field, errors in serializer.errors.items()]
+        return Response({'error_message': error_messages}, status=status.HTTP_400_BAD_REQUEST)

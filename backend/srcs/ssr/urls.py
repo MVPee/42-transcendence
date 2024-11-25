@@ -14,7 +14,6 @@ urlpatterns = [
     path('view/game/<str:game>/<str:mode>/<int:id>/', GameView.as_view(), name='game_view'),
     path('view/chat/<int:id>/', ChatView.as_view(), name='Chat_view'),
 
-    path('settings/', SettingsRequest.as_view(), name='settings_request'),
     path('friend/', FriendRequest.as_view(), name='friend_request'),
     path('block/', BlockRequest.as_view(), name='block_request'),
 ]
