@@ -89,10 +89,6 @@ def add_message(request):
     """
         api/message/add/
     """
-    api_key = request.data.get('X-Api-Key')
-    if api_key != API_KEY:
-        return Response({'success': False, 'error': 'Bad API_KEY.'}, status=status.HTTP_401_UNAUTHORIZED)
-
     try:
         friendship_id = request.data.get('friendship')
         sender_id = request.data.get('sender')

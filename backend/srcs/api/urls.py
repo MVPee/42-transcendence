@@ -2,6 +2,7 @@ from django.urls import path
 import srcs.api.views.community as community
 import srcs.api.views.user as user
 import srcs.api.views.others as others
+import srcs.api.views.game as game
 
 urlpatterns = [
     path('check_api_key/', others.check_api_key, name='check_api_key'),
@@ -21,4 +22,7 @@ urlpatterns = [
     path('block/', community.block, name='block_request'),
     path('has_blocked/<int:user1_id>/<int:user2_id>/', community.has_blocked, name='has_blocked'),
     path('friend/', community.friend, name='friend_request'),
+
+    path('game/1v1/add/', game.create_1v1_game, name='create_1v1_game'),
+    path('game/2v2/add/', game.create_2v2_game, name='create_2v2_game'),
 ]
