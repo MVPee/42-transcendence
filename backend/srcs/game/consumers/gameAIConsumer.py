@@ -41,8 +41,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
 
-    http_session = None
-
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
         self.user = self.scope['user']
@@ -52,12 +50,15 @@ class GameAIConsumer(AsyncWebsocketConsumer):
 
         url = f"https://{self.DOMAIN}/api/game/1v1/{self.game_id}/"
 
-        async with self.http_session.get(url) as response:
-            if response.status == 200: self.match = await response.json()
-            else:
-                await self.close()
-                return
-    
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.get(url) as response:
+                if response.status == 200: self.match = await response.json()
+                else:
+                    await self.close()
+                    return
+        await session.close()
+        
         self.player1 = self.match['user1']
         self.player2 = self.match['user2']
         
@@ -434,6 +435,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
 
         if self.http_session:
             await self.http_session.close()
+
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -472,11 +474,11 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             "score": self.match[f'user{player}_score'] + 1
         }
 
-        async with self.http_session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
-            if response.status == 200: self.match = await response.json()
-            else:
-                data = await response.json()
-                print(data['error'])
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200: self.match = await response.json()
+        await session.close()
 
     async def set_points_to(self, player, points):
         if player == 1: id = self.player1['id']
@@ -490,9 +492,11 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             "score": points
         }
 
-        async with self.http_session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
-            if response.status == 200: self.match = await response.json()
-            else: return
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200: self.match = await response.json()
+        await session.close()
 
     async def check_win(self):
         if 'user1_score' not in self.match or 'user2_score' not in self.match:
@@ -515,14 +519,16 @@ class GameAIConsumer(AsyncWebsocketConsumer):
 
         url_add = f"https://{self.DOMAIN}/api/users/{win_id}/elo/add/50/"
         url_rm = f"https://{self.DOMAIN}/api/users/{lose_id}/elo/remove/25/"
-
-        async with self.http_session.get(url_add, headers={"X-API-KEY": self.API_KEY}) as response:
-            if response.status == 200: self.match = await response.json()
-            else: return
         
-        async with self.http_session.get(url_rm, headers={"X-API-KEY": self.API_KEY}) as response:
-            if response.status == 200: self.match = await response.json()
-            else: return
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.get(url_add, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200:
+                    self.match = await response.json()
+
+            async with session.get(url_rm, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200:
+                    self.match = await response.json()
 
     async def redirect_remaining_player(self, event):
         await self.send(text_data=json.dumps({
