@@ -3,14 +3,20 @@ import json
 from django.utils import timezone
 from asgiref.sync import sync_to_async
 from django.db.models import Q
-from srcs.community.models import Friend
-from ..models import Match, Matchs, Tournament
 from django.contrib.auth import get_user_model
+import aiohttp, os, ssl, json
 
 User = get_user_model()
 
 class WaitingConsumer(AsyncWebsocketConsumer):
     rooms = {}
+
+    DOMAIN = os.getenv('DOMAIN', 'localhost')
+    API_KEY = os.getenv('API_KEY', None)
+
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
 
     async def connect(self):
         websocket_url = self.scope['path']
@@ -98,46 +104,112 @@ class WaitingConsumer(AsyncWebsocketConsumer):
 
     async def redirect_all_players(self):
         '''
-            Redirect players in their game room
+            Redirect players in their game room after created it
         '''
         print(f'Redirecting players in {self.room_group_name}')
+
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
 
         player_usernames = list(WaitingConsumer.rooms.get(self.room_group_name, []))
         
         if self.GAME == 'private':
             self.GAME = 'pong'
             self.MODE = '1v1'
-            user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
-            user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
-            match = await sync_to_async(Match.objects.create)(game="private_1v1", user1=user1, user2=user2, created_at=timezone.now())
-
+            url = f"https://{self.DOMAIN}/api/game/1v1/add/"
+            data = {
+                "title": 'private_1v1',
+                "user1_username": player_usernames[0],
+                "user2_username": player_usernames[1]
+            }
+            async with aiohttp.ClientSession(connector=connector) as session:
+                async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                    if response.status == 200: match = await response.json()
+                    else:
+                        self.close()
+                        return
+            
         if self.GAME == 'pong':
             if self.MODE == '1v1':
-                user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
-                user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
-                match = await sync_to_async(Match.objects.create)(game="pong_1v1", user1=user1, user2=user2, created_at=timezone.now())
+                url = f"https://{self.DOMAIN}/api/game/1v1/add/"
+                data = {
+                    "title": 'pong_1v1',
+                    "user1_username": player_usernames[0],
+                    "user2_username": player_usernames[1]
+                }
+                async with aiohttp.ClientSession(connector=connector) as session:
+                    async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                        if response.status == 200: match = await response.json()
+                        else:
+                            self.close()
+                            return
             elif self.MODE == '2v2':
-                user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
-                user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
-                user3 = await sync_to_async(User.objects.get)(username=player_usernames[2])
-                user4 = await sync_to_async(User.objects.get)(username=player_usernames[3])
-                match = await sync_to_async(Matchs.objects.create)(game="pong_2v2", user1=user1, user2=user2, user3=user3, user4=user4, created_at=timezone.now())
+                url = f"https://{self.DOMAIN}/api/game/2v2/add/"
+
+                data = {
+                    "title": 'pong_2v2',
+                    "user1_username": player_usernames[0],
+                    "user2_username": player_usernames[1],
+                    "user3_username": player_usernames[2],
+                    "user4_username": player_usernames[3]
+                }
+                async with aiohttp.ClientSession(connector=connector) as session:
+                    async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                        if response.status == 200: match = await response.json()
+                        else:
+                            self.close()
+                            return
             elif self.MODE == 'AI':
-                user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
-                ai = await sync_to_async(User.objects.get)(username="AI.")
-                match = await sync_to_async(Match.objects.create)(game="pong_ai", user1=user1, user2=ai, created_at=timezone.now())
-            if self.MODE == 'tournament':
-                user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
-                user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
-                user3 = await sync_to_async(User.objects.get)(username=player_usernames[2])
-                user4 = await sync_to_async(User.objects.get)(username=player_usernames[3])
-                match = await sync_to_async(Tournament.objects.create)(user1=user1, user2=user2, user3=user3, user4=user4, created_at=timezone.now())
+                url = f"https://{self.DOMAIN}/api/game/1v1/add/"
+                data = {
+                    "title": 'pong_ai',
+                    "user1_username": player_usernames[0],
+                    "user2_username": 'AI.'
+                }
+                async with aiohttp.ClientSession(connector=connector) as session:
+                    async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                        if response.status == 200: match = await response.json()
+                        else:
+                            self.close()
+                            return
+            elif self.MODE == 'tournament':
+                url = f"https://{self.DOMAIN}/api/game/2v2/add/"
+                data = {
+                    "title": 'tournament',
+                    "user1_username": player_usernames[0],
+                    "user2_username": player_usernames[1],
+                    "user3_username": player_usernames[2],
+                    "user4_username": player_usernames[3]
+                }
+                async with aiohttp.ClientSession(connector=connector) as session:
+                    async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                        if response.status == 200: match = await response.json()
+                        else:
+                            self.close()
+                            return
+            else:
+                self.close()
+                return
 
         elif self.GAME == 'puissance4':
             if self.MODE == '1v1':
-                user1 = await sync_to_async(User.objects.get)(username=player_usernames[0])
-                user2 = await sync_to_async(User.objects.get)(username=player_usernames[1])
-                match = await sync_to_async(Match.objects.create)(game="puissance4_1v1", user1=user1, user2=user2, created_at=timezone.now())
+                url = f"https://{self.DOMAIN}/api/game/1v1/add/"
+                data = {
+                    "title": 'puissance4_1v1',
+                    "user1_username": player_usernames[0],
+                    "user2_username": player_usernames[1],
+                }
+                async with aiohttp.ClientSession(connector=connector) as session:
+                    async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                        if response.status == 200: match = await response.json()
+                        else:
+                            self.close()
+                            return
+            else:
+                self.close()
+                return
+        else:
+            self.close()
+            return
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -145,7 +217,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
                 "type": "broadcast_redirect",
                 "game": self.GAME,
                 "mode": self.MODE,
-                "id": match.id
+                "id": match['id']
             }
         )
 
@@ -160,10 +232,18 @@ class WaitingConsumer(AsyncWebsocketConsumer):
             "id": event["id"]
         }))
 
-    @sync_to_async
-    def get_friendship(self):
-        return Friend.objects.filter(
-            (Q(user1=self.user.id) | Q(user2=self.user.id)),
-            id=self.MODE,
-            status=True
-        ).first()
+    async def get_friendship(self):
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        url = f"https://{self.DOMAIN}/api/friendship/{self.MODE}/"
+
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.get(url) as response:
+                if response.status == 200: data = await response.json()
+                else: return None
+
+        if data['status'] == False:
+            return None
+
+        if data['user1'] != self.user.id and data['user2'] != self.user.id:
+            return None
+        return data
