@@ -7,5 +7,5 @@ class APIKey(BasePermission):
     Custom permission to check if a valid API key is provided.
     """
     def has_permission(self, request, view):
-        api_key = request.headers.get('X-API-KEY') or request.query_params.get('api_key')
+        api_key = request.headers.get('X-API-KEY') or request.COOKIES.get('X-API-KEY')
         return api_key == os.getenv('API_KEY', '')

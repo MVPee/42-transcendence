@@ -8,8 +8,12 @@ urlpatterns = [
     path('check_api_key/', others.check_api_key, name='check_api_key'),
 
     path('is_authenticated/', user.is_authenticated, name='is_authenticated'),
+
     path('users/<int:id>/', user.get_user_by_id, name='get_user_by_id'),
     path('users/<str:username>/', user.get_user_by_username, name='get_user_by_username'),
+    path('users/<int:id>/elo/add/<int:nbr>', user.add_elo, name='add_elo_to_user'),
+    path('users/<int:id>/elo/remove/<int:nbr>', user.remove_elo, name='remove_elo_to_user'),
+
     path('logout/', user.logout, name='logout'),
     path('login/', user.login, name='login'),
     path('register/', user.register, name='register'),
@@ -32,4 +36,8 @@ urlpatterns = [
 
     path('game/1v1/add/', game.create_1v1_game, name='create_1v1_game'),
     path('game/2v2/add/', game.create_2v2_game, name='create_2v2_game'),
+
+    path('game/1v1/score/set/', game.game_1v1_set_score, name='game_1v1_set_score'),
+    path('game/2v2/score/set/', game.game_2v2_set_score, name='game_1v1_set_score'),
+    path('game/tournament/position/set/', game.tournament_set_position, name='tournament_set_position'),
 ]

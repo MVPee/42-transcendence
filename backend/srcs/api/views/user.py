@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from srcs.api.permissions import APIKey
 from rest_framework import status
 from django.core.files.images import get_image_dimensions
 from django.contrib.auth import logout as auth_logout, authenticate, login as auth_login
@@ -10,6 +11,7 @@ from django.conf import settings
 from srcs.community.models import Friend, Blocked
 from django.db.models import Q
 from srcs.api.serializers.settings import SettingsSerializer
+from srcs.api.serializers.user import UserSerializer
 import os
 
 API_KEY = os.getenv('API_KEY', '')
@@ -231,3 +233,32 @@ def get_user_by_username(request, username):
         "created_at": user.created_at,
     }
     return Response(data, status=200)
+
+
+@api_view(['GET'])
+@permission_classes([APIKey])
+def add_elo(request, id, nbr):
+    user_instance = User.objects.filter(id=id).first()
+    if user_instance is None:
+        return Response({"error": "User not found"}, status=400)
+
+    user_instance.elo += nbr
+    user_instance.save()
+
+    serializer = UserSerializer(user_instance)
+    return Response(serializer.data, status=200)
+
+
+@api_view(['GET'])
+@permission_classes([APIKey])
+def remove_elo(request, id, nbr):
+    user_instance = User.objects.filter(id=id).first()
+    if user_instance is None:
+        return Response({"error": "User not found"}, status=400)
+
+    user_instance.elo -= nbr
+    if user_instance.elo < 0: user_instance.elo = 0
+    user_instance.save()
+
+    serializer = UserSerializer(user_instance)
+    return Response(serializer.data, status=200)
