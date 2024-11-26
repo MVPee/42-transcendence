@@ -23,6 +23,13 @@ urlpatterns = [
     path('has_blocked/<int:user1_id>/<int:user2_id>/', community.has_blocked, name='has_blocked'),
     path('friend/', community.friend, name='friend_request'),
 
+    path('game/1v1/', game.all_1v1_game, name='all_1v1_game'),
+    path('game/2v2/', game.all_2v2_game, name='all_2v2_game'),
+    path('game/tournament/', game.all_tournament_game, name='all_tournament_game'),
+    path('game/1v1/<int:id>/', game.get_1v1_game, name='get_1v1_game'),
+    path('game/2v2/<int:id>/', game.get_2v2_game, name='get_2v2_game'),
+    path('game/tournament/<int:id>/', game.get_tournament_game, name='get_tournament_game'),
+
     path('game/1v1/add/', game.create_1v1_game, name='create_1v1_game'),
     path('game/2v2/add/', game.create_2v2_game, name='create_2v2_game'),
 ]

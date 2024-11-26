@@ -4,8 +4,105 @@ from srcs.game.models import Match, Matchs, Tournament
 from srcs.user.models import CustomUser as User
 from rest_framework.response import Response
 from rest_framework import status
+from srcs.api.serializers.match import MatchSerializer, MatchsSerializer, TournamentSerializer
 import os
     
+
+
+
+@api_view(['GET'])
+def all_1v1_game(request):
+    """
+    Retrieve details of all 1v1 game match
+    Endpoint: api/game/1v1/<int:id>/
+    """
+    try:
+        matchs = Match.objects.all()
+    except Match.DoesNotExist:
+        return Response({"error": "No match found"}, status=404)
+    
+    serializer = MatchSerializer(matchs, many=True)
+    return Response(serializer.data, status=200)
+
+
+@api_view(['GET'])
+def all_2v2_game(request):
+    """
+    Retrieve details of all 2v2 game match
+    Endpoint: api/game/2v2/
+    """
+    try:
+        match = Matchs.objects.all()
+    except Matchs.DoesNotExist:
+        return Response({"error": "no 2v2 match found"}, status=404)
+    
+    serializer = MatchsSerializer(match, many=True)
+    return Response(serializer.data, status=200)
+
+
+@api_view(['GET'])
+def all_tournament_game(request):
+    """
+    Retrieve details of all tournament match
+    Endpoint: api/game/tournament/
+    """
+    try:
+        match = Tournament.objects.all()
+    except Tournament.DoesNotExist:
+        return Response({"error": "No tournament found"}, status=404)
+    
+    serializer = TournamentSerializer(match, many=True)
+    return Response(serializer.data, status=200)
+
+
+
+
+@api_view(['GET'])
+def get_1v1_game(request, id):
+    """
+    Retrieve details of a specific game match.
+    Endpoint: api/game/1v1/<int:id>/
+    """
+    try:
+        match = Match.objects.get(id=id)
+    except Match.DoesNotExist:
+        return Response({"error": "Match 1v1 not found"}, status=404)
+    
+    serializer = MatchSerializer(match)
+    return Response(serializer.data, status=200)
+
+
+@api_view(['GET'])
+def get_2v2_game(request, id):
+    """
+    Retrieve details of a specific game match.
+    Endpoint: api/game/2v2/<int:id>/
+    """
+    try:
+        match = Matchs.objects.get(id=id)
+    except Matchs.DoesNotExist:
+        return Response({"error": "Match 2v2 not found"}, status=404)
+    
+    serializer = MatchsSerializer(match)
+    return Response(serializer.data, status=200)
+
+
+@api_view(['GET'])
+def get_tournament_game(request, id):
+    """
+    Retrieve details of a specific game match.
+    Endpoint: api/game/tournament/<int:id>/
+    """
+    try:
+        match = Tournament.objects.get(id=id)
+    except Tournament.DoesNotExist:
+        return Response({"error": "Tournament not found"}, status=404)
+    
+    serializer = TournamentSerializer(match)
+    return Response(serializer.data, status=200)
+
+
+
 
 @api_view(['POST'])
 @permission_classes([APIKey])
