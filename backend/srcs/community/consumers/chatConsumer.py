@@ -104,7 +104,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             connector = aiohttp.TCPConnector(ssl=self.ssl_context)
 
             async with aiohttp.ClientSession(connector=connector) as session:
-                async with session.post(url, json=payload) as response:
+                async with session.post(url, json=payload, headers={"X-API-KEY": self.API_KEY}) as response:
                     # if response.status == 201: print("Message saved successfully!") #* DEBUG
                     # else: print(f"Failed to save message. Status code: {response.status}") #* DEBUG
                     pass
@@ -117,6 +117,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             async with session.get(url) as response:
                 if response.status == 200: data = await response.json()
                 else: return None
+
+        if data['status'] == False:
+            return None
 
         if data['user1'] != self.user.id and data['user2'] != self.user.id:
             return None
