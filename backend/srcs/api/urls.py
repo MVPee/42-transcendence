@@ -38,6 +38,6 @@ urlpatterns = [
     path('game/2v2/add/', game.create_2v2_game, name='create_2v2_game'),
 
     path('game/1v1/score/set/', game.game_1v1_set_score, name='game_1v1_set_score'),
-    path('game/2v2/score/set/', game.game_2v2_set_score, name='game_1v1_set_score'),
+    path('game/2v2/score/set/', game.game_2v2_set_score, name='game_2v2_set_score'),
     path('game/tournament/position/set/', game.tournament_set_position, name='tournament_set_position'),
 ]

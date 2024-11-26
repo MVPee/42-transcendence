@@ -196,8 +196,7 @@ def game_2v2_set_score(request):
     player_id = request.data.get('player_id')
     score = request.data.get('score')
 
-    print(id)
-    game = Matchs.objects.get(id=game_id)
+    game = Matchs.objects.filter(id=game_id).first()
     if game is None:
         return Response({"error": "Game not found."}, status=400)
 

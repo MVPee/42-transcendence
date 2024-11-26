@@ -238,6 +238,9 @@ def get_user_by_username(request, username):
 @api_view(['GET'])
 @permission_classes([APIKey])
 def add_elo(request, id, nbr):
+    """
+        /api/users/<int:id>/elo/add/<int:nbr>
+    """
     user_instance = User.objects.filter(id=id).first()
     if user_instance is None:
         return Response({"error": "User not found"}, status=400)
@@ -252,6 +255,9 @@ def add_elo(request, id, nbr):
 @api_view(['GET'])
 @permission_classes([APIKey])
 def remove_elo(request, id, nbr):
+    """
+        /api/users/<int:id>/elo/remove/<int:nbr>
+    """
     user_instance = User.objects.filter(id=id).first()
     if user_instance is None:
         return Response({"error": "User not found"}, status=400)
