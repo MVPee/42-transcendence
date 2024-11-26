@@ -103,6 +103,8 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
                         "player": self.user.username,
                         "player1PaddleY": game_state['player1PaddleY'],
                         "player2PaddleY": game_state['player2PaddleY'],
+                        "player3PaddleY": game_state['player3PaddleY'],
+                        "player4PaddleY": game_state['player4PaddleY'],
                     }
                 )
                 cache.set(f"game_{self.game_id}_2v2_state", game_state)
