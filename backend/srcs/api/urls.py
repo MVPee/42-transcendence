@@ -11,8 +11,8 @@ urlpatterns = [
 
     path('users/<int:id>/', user.get_user_by_id, name='get_user_by_id'),
     path('users/<str:username>/', user.get_user_by_username, name='get_user_by_username'),
-    path('users/<int:id>/elo/add/<int:nbr>', user.add_elo, name='add_elo_to_user'),
-    path('users/<int:id>/elo/remove/<int:nbr>', user.remove_elo, name='remove_elo_to_user'),
+    path('users/<int:id>/elo/add/<int:nbr>/', user.add_elo, name='add_elo_to_user'),
+    path('users/<int:id>/elo/remove/<int:nbr>/', user.remove_elo, name='remove_elo_to_user'),
 
     path('logout/', user.logout, name='logout'),
     path('login/', user.login, name='login'),
