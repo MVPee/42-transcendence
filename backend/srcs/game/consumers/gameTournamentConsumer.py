@@ -67,8 +67,6 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        await self.accept()
-
         disconnect_key = f"player_disconnected_{self.game_id}_{self.user}"
         was_disconnected = cache.get(disconnect_key) == self.user.username
         self.player1_score = 0
@@ -92,6 +90,8 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+
+        await self.accept()
 
         game_state = cache.get(f"game_{self.game_id}_tournament_state")
         if was_disconnected:
@@ -404,7 +404,6 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             return 2
         return 0
 
-
     async def send_update_game_header(self, event):
         await self.send(text_data=json.dumps({
             "type": "update_game_header",
@@ -413,6 +412,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             "player2Image": event["player2Image"],
             "player2Name": event["player2Name"]
         }))
+
     async def send_announcement(self, event):
         await self.send(text_data=json.dumps({
             "type": "announcement",
