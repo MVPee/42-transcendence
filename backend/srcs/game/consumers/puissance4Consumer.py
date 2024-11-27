@@ -1,16 +1,18 @@
-import json
-import asyncio
-from ..models import Match
-from django.db.models import Q
-from django.core.cache import cache
-from asgiref.sync import sync_to_async
-from srcs.community.models import Friend
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.core.cache import cache
+import json, asyncio, ssl, aiohttp, os
 
 class Puissance4Consumer(AsyncWebsocketConsumer):
 
     YELLOW = 1
     RED = 2
+
+    DOMAIN = os.getenv('DOMAIN', 'localhost')
+    API_KEY = os.getenv('API_KEY', None)
+
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
 
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
@@ -24,6 +26,8 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
             cache.set(f"game_{self.game_id}_puissance4_state", {
                 'table': [[None for _ in range(6)] for _ in range(7)],
                 'turn': 'yellow',
+                'pause': False,
+                'finish': False
             })
     
         cache.delete(disconnect_key)
@@ -66,17 +70,36 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
 
                 cache.set(f"game_{self.game_id}_puissance4_state", game_state)
         
-        try:
-            self.match = await sync_to_async(Match.objects.get)(id=self.game_id)
+        url = f"https://{self.DOMAIN}/api/game/1v1/{self.game_id}/"
+
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.get(url) as response:
+                if response.status == 200: self.match = await response.json()
+                else:
+                    await self.close()
+                    return
         
-            self.player1 = await sync_to_async(lambda: self.match.user1 if self.match.user1 else "Player1")()
-            self.player2 = await sync_to_async(lambda: self.match.user2 if self.match.user2 else "Player2")()
-            
-            await self.accept()
-        except Match.DoesNotExist:
+        self.player1 = self.match['user1']
+        self.player2 = self.match['user2']
+        
+        user1_score = self.match['user1_score']
+        user2_score = self.match['user2_score']
+
+        if self.user.id != self.player1['id'] and self.user.id != self.player2['id']:
             await self.close()
+            return
+
+        if user1_score >= 1 or user2_score >= 1:
+            await self.close()
+            return
+
+        await self.accept()
 
     async def disconnect(self, close_code):
+        if self.user.id != self.player1['id'] and self.user.id != self.player2['id']:
+            return
+
         points_awarded_key = f"points_awarded_{self.game_id}"
         points_awarded = cache.get(points_awarded_key)
 
@@ -111,10 +134,10 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
         #? Protection if the match is finish
         if await self.check_win() == 0:
             if cache.get(disconnect_key) == self.user.username:
-                if self.match.user1 == self.user:
+                if self.player1['id'] == self.user.id:
                     await self.set_points_to(2, 1)
                     await self.set_win_to(2)
-                elif self.match.user2 == self.user:
+                elif self.player2['id'] == self.user.id:
                     await self.set_points_to(1, 1)
                     await self.set_win_to(1)
 
@@ -131,7 +154,7 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
         if text_data.isnumeric() and int(text_data) >= 0 and int(text_data) <= 7:
             column = int(text_data)
             game_state = cache.get(f"game_{self.game_id}_puissance4_state")
-            if game_state['turn'] == 'yellow' and self.user == self.player1 and game_state['table'][column][0] is None:
+            if game_state['turn'] == 'yellow' and self.user.id == self.player1['id'] and game_state['table'][column][0] is None:
                 for row in range(5, -1, -1):
                     if game_state['table'][column][row] is None:
                         game_state['table'][column][row] = self.YELLOW
@@ -147,7 +170,7 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
                         )
                         break
 
-            elif game_state['turn'] == 'red' and self.user == self.player2 and game_state['table'][column][0] is None:
+            elif game_state['turn'] == 'red' and self.user.id == self.player2['id'] and game_state['table'][column][0] is None:
                 for row in range(5, -1, -1):
                     if game_state['table'][column][row] is None:
                         game_state['table'][column][row] = self.RED
@@ -273,34 +296,65 @@ class Puissance4Consumer(AsyncWebsocketConsumer):
             "turn": event["message"]
         }))
 
-    @sync_to_async
-    def set_points_to(self, player, points):
-        if player == 1: 
-            self.match.user1_score = points
-        elif player == 2: 
-            self.match.user2_score = points
-        self.match.save()
+    async def set_points_to(self, player, points):
+            game_state = cache.get(f"game_{self.game_id}_puissance4_state")
+            if game_state['finish'] == True:
+                return
 
-    @sync_to_async
-    def check_win(self):
-        if self.match.user1_score >= 1:
+            if player == 1: id = self.player1['id']
+            elif player == 2: id = self.player2['id']
+
+            url = f"https://{self.DOMAIN}/api/game/1v1/score/set/"
+
+            data = {
+                "id": self.game_id,
+                "player_id": id,
+                "score": points
+            }
+
+            connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+            async with aiohttp.ClientSession(connector=connector) as session:
+                async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                    if response.status == 200: self.match = await response.json()
+
+    async def check_win(self):
+        game_state = cache.get(f"game_{self.game_id}_puissance4_state")
+        if game_state['finish'] == True:
+            return
+
+        if self.match['user1_score'] >= 1:
             return 1
-        elif self.match.user2_score >= 1:
+        elif self.match['user2_score'] >= 1:
             return 2
         return 0
-    
-    @sync_to_async
-    def set_win_to(self, player):
+
+    async def set_win_to(self, player):
+        game_state = cache.get(f"game_{self.game_id}_puissance4_state")
+        if game_state['finish'] == False:
+            game_state['finish'] = True
+        else:
+            return
+        cache.set(f"game_{self.game_id}_puissance4_state", game_state)
+
         if player == 1:
-            self.match.user1.elo += 50
-            self.match.user2.elo -= 25
-            if self.match.user2.elo < 0: self.match.user2.elo = 0
+            win_id = self.player1['id']
+            lose_id = self.player2['id']
         elif player == 2:
-            self.match.user2.elo += 50
-            self.match.user1.elo -= 25
-            if self.match.user1.elo < 0: self.match.user1.elo = 0
-        self.match.user1.save()
-        self.match.user2.save()
+            win_id = self.player2['id']
+            lose_id = self.player1['id']
+
+        url_add = f"https://{self.DOMAIN}/api/users/{win_id}/elo/add/50/"
+        url_rm = f"https://{self.DOMAIN}/api/users/{lose_id}/elo/remove/25/"
+        
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.get(url_add, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200:
+                    self.match = await response.json()
+
+            async with session.get(url_rm, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200:
+                    self.match = await response.json()
 
     async def redirect_remaining_player(self, event):
         await self.send(text_data=json.dumps({
