@@ -1,8 +1,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.contrib.auth import get_user_model
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
-from ..models import Matchs
-from django.contrib.auth import get_user_model
 import random, json, aiohttp, asyncio, ssl, os
 
 User = get_user_model()
