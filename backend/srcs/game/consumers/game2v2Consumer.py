@@ -1,6 +1,5 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
-from asgiref.sync import sync_to_async
 from django.core.cache import cache
 import random, json, aiohttp, asyncio, ssl, os
 
@@ -475,27 +474,6 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
         elif self.match['team2_score'] >= 5:
             return 2
         return 0
-
-    @sync_to_async
-    def set_win_to(self, team):
-        if team == 1:
-            self.match.user1.elo += 50
-            self.match.user2.elo += 50
-            self.match.user3.elo -= 25
-            self.match.user4.elo -= 25
-        elif team == 2:
-            self.match.user1.elo -= 25
-            self.match.user2.elo -= 25
-            self.match.user3.elo += 50
-            self.match.user4.elo += 50
-
-        if self.match.user1.elo < 0: self.match.user1.elo = 0
-        if self.match.user2.elo < 0: self.match.user2.elo = 0
-        if self.match.user3.elo < 0: self.match.user3.elo = 0
-        if self.match.user4.elo < 0: self.match.user4.elo = 0
-
-        self.match.user1.save()
-        self.match.user2.save()
 
     async def set_win_to(self, team):
         game_state = cache.get(f"game_{self.game_id}_2v2_state")
