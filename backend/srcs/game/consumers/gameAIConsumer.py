@@ -1,11 +1,7 @@
-import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
-from asgiref.sync import sync_to_async
-from django.core.cache import cache
-import json
-from ..models import Match
 from django.contrib.auth import get_user_model
-import os, ssl, json, random, aiohttp
+from django.core.cache import cache
+import os, ssl, json, random, aiohttp, asyncio
 
 User = get_user_model()
 
@@ -57,7 +53,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 else:
                     await self.close()
                     return
-        await session.close()
         
         self.player1 = self.match['user1']
         self.player2 = self.match['user2']
@@ -87,6 +82,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                 'ball_dx': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
                 'ball_dy': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
                 'paused': False,
+                'finish': False,
             })
 
         cache.delete(disconnect_key)
@@ -446,10 +442,10 @@ class GameAIConsumer(AsyncWebsocketConsumer):
         await asyncio.sleep(15)
 
         if cache.get(disconnect_key) == self.user.username:
-            if self.match.user1 == self.user:
+            if self.player1['id'] == self.user.id:
                 await self.set_points_to(2, 5)
                 await self.set_win_to(2)
-            elif self.match.user2 == self.user:
+            elif self.player2['id'] == self.user.id:
                 await self.set_points_to(1, 5)
                 await self.set_win_to(1)
 
@@ -478,9 +474,12 @@ class GameAIConsumer(AsyncWebsocketConsumer):
         async with aiohttp.ClientSession(connector=connector) as session:
             async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
                 if response.status == 200: self.match = await response.json()
-        await session.close()
 
     async def set_points_to(self, player, points):
+        game_state = cache.get(f"game_{self.game_id}_ai_state")
+        if game_state['finish'] == True:
+            return
+
         if player == 1: id = self.player1['id']
         elif player == 2: id = self.player2['id']
 
@@ -496,20 +495,27 @@ class GameAIConsumer(AsyncWebsocketConsumer):
         async with aiohttp.ClientSession(connector=connector) as session:
             async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
                 if response.status == 200: self.match = await response.json()
-        await session.close()
+        
 
     async def check_win(self):
-        if 'user1_score' not in self.match or 'user2_score' not in self.match:
-            await self.close()
+        game_state = cache.get(f"game_{self.game_id}_ai_state")
+        if game_state['finish'] == True:
             return
 
-        if self.match.get('user1_score', 5) >= 5:
+        if self.match['user1_score'] >= 5:
             return 1
-        elif self.match.get('user2_score', 5) >= 5:
+        elif self.match['user2_score'] >= 5:
             return 2
         return 0
 
     async def set_win_to(self, player):
+        game_state = cache.get(f"game_{self.game_id}_ai_state")
+        if game_state['finish'] == False:
+            game_state['finish'] = True
+        else:
+            return
+        cache.set(f"game_{self.game_id}_ai_state", game_state)
+
         if player == 1:
             win_id = self.player1['id']
             lose_id = self.player2['id']
@@ -529,6 +535,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             async with session.get(url_rm, headers={"X-API-KEY": self.API_KEY}) as response:
                 if response.status == 200:
                     self.match = await response.json()
+        
 
     async def redirect_remaining_player(self, event):
         await self.send(text_data=json.dumps({
