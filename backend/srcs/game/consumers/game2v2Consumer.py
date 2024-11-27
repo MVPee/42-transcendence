@@ -1,11 +1,9 @@
-import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
-import json
 from ..models import Matchs
 from django.contrib.auth import get_user_model
-import random
+import random, json, aiohttp, asyncio, ssl, os
 
 User = get_user_model()
 
@@ -33,32 +31,45 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
     PADDLE_MAX_HEIGHT = 400 - PADDLE_HEIGHT
     PADDLE_MIN_HEIGHT = 0
 
+    DOMAIN = os.getenv('DOMAIN', 'localhost')
+    API_KEY = os.getenv('API_KEY', None)
+
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
         self.user = self.scope['user']
         self.room_group_name = f"game_{self.game_id}_2v2"
 
-        try:
-            self.match = await sync_to_async(Matchs.objects.get)(id=self.game_id)
+        url = f"https://{self.DOMAIN}/api/game/2v2/{self.game_id}/"
+
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.get(url) as response:
+                if response.status == 200: self.match = await response.json()
+                else:
+                    await self.close()
+                    return
         
-            self.player1 = await sync_to_async(lambda: self.match.user1 if self.match.user1 else "Player1")()
-            self.player2 = await sync_to_async(lambda: self.match.user2 if self.match.user2 else "Player2")()
-            self.player3 = await sync_to_async(lambda: self.match.user3 if self.match.user3 else "Player1")()
-            self.player4 = await sync_to_async(lambda: self.match.user4 if self.match.user4 else "Player2")()
-    
-            team1_score = await sync_to_async(lambda: self.match.team1_score if self.match.team1_score else 0)()
-            team2_score = await sync_to_async(lambda: self.match.team1_score if self.match.team1_score else 0)()
+        self.player1 = self.match['user1']
+        self.player2 = self.match['user2']
+        self.player3 = self.match['user3']
+        self.player4 = self.match['user4']
+        
+        team1_score = self.match['team1_score']
+        team2_score = self.match['team2_score']
 
-            if self.user != self.player1 and self.user != self.player2 and self.user != self.player3 and self.user != self.player4:
-                await self.close()
-
-            if team1_score >= 5 or team2_score >= 5:
-                await self.close()
-
-            await self.accept()
-
-        except Matchs.DoesNotExist:
+        if self.user.id != self.player1['id'] and self.user.id != self.player2['id'] and self.user.id != self.player3['id'] and self.user.id != self.player4['id']:
             await self.close()
+            return
+
+        if team1_score >= 5 or team2_score >= 5:
+            await self.close()
+            return
+
+        await self.accept()
 
         disconnect_key = f"player_disconnected_{self.game_id}"
         was_disconnected = cache.get(disconnect_key) == self.user.username
@@ -74,6 +85,7 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
                 'ball_dx': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
                 'ball_dy': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
                 'paused': False,
+                'finish': False
             })
 
         cache.delete(disconnect_key)
@@ -316,25 +328,25 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
             if time_since_last_move >= min_time_between_moves:
                 move_distance = self.PADDLE_SPEED
 
-                if self.user == self.player1:
+                if self.user.id == self.player1['id']:
                     proposed_new_y = game_state['player1PaddleY'] + (move_distance if direction == "down" else -move_distance)
                     proposed_new_y = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, proposed_new_y))
                     ally_y = game_state['player2PaddleY']
                     if not self.paddles_overlap(proposed_new_y, ally_y):
                         game_state['player1PaddleY'] = proposed_new_y
-                elif self.user == self.player2:
+                elif self.user.id == self.player2['id']:
                     proposed_new_y = game_state['player2PaddleY'] + (move_distance if direction == "down" else -move_distance)
                     proposed_new_y = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, proposed_new_y))
                     ally_y = game_state['player1PaddleY']
                     if not self.paddles_overlap(proposed_new_y, ally_y):
                         game_state['player2PaddleY'] = proposed_new_y
-                elif self.user == self.player3:
+                elif self.user.id == self.player3['id']:
                     proposed_new_y = game_state['player3PaddleY'] + (move_distance if direction == "down" else -move_distance)
                     proposed_new_y = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, proposed_new_y))
                     ally_y = game_state['player4PaddleY']
                     if not self.paddles_overlap(proposed_new_y, ally_y):
                         game_state['player3PaddleY'] = proposed_new_y
-                elif self.user == self.player4:
+                elif self.user.id == self.player4['id']:
                     proposed_new_y = game_state['player4PaddleY'] + (move_distance if direction == "down" else -move_distance)
                     proposed_new_y = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, proposed_new_y))
                     ally_y = game_state['player3PaddleY']
@@ -368,7 +380,7 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
-        if self.user != self.player1 and self.user != self.player2 and self.user != self.player3 and self.user != self.player4:
+        if self.user.id != self.player1['id'] and self.user.id != self.player2['id'] and self.user.id != self.player3['id'] and self.user.id != self.player4['id']:
             return
 
         points_awarded_key = f"points_awarded_{self.game_id}"
@@ -405,10 +417,10 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
         #? Protection if the match is finish
         if await self.check_win() == 0:
             if cache.get(disconnect_key) == self.user.username:
-                if self.match.user1 == self.user or self.match.user2 == self.user:
+                if self.player1['id'] == self.user.id or self.player2['id'] == self.user.id:
                     await self.set_points_to(2, 5)
                     await self.set_win_to(2)
-                elif self.match.user3 == self.user or self.match.user4 == self.user:
+                elif self.player3['id'] == self.user.id or self.player4['id'] == self.user.id:
                     await self.set_points_to(1, 5)
                     await self.set_win_to(1)
 
@@ -421,38 +433,58 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
                         }
                 )
 
-    @sync_to_async
-    def add_point_to(self, player):
-        if player == 1:
-            self.match.team1_score += 1
-        elif player == 2:
-            self.match.team2_score += 1
-        self.match.save()
+    async def add_point_to(self, team):
 
-    @sync_to_async
-    def set_points_to(self, player, points):
-        if player == 1: 
-            self.match.team1_score = points
-        elif player == 2: 
-            self.match.team2_score = points
-        self.match.save()
+        url = f"https://{self.DOMAIN}/api/game/2v2/score/set/"
 
-    @sync_to_async
-    def check_win(self):
-        if self.match.team1_score >= 5:
+        data = {
+            "id": self.game_id,
+            "team": team,
+            "score": self.match[f'team{team}_score'] + 1
+        }
+
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200: self.match = await response.json()
+
+    async def set_points_to(self, team, points):
+        game_state = cache.get(f"game_{self.game_id}_2v2_state")
+        if game_state['finish'] == True:
+            return
+
+        url = f"https://{self.DOMAIN}/api/game/2v2/score/set/"
+
+        data = {
+            "id": self.game_id,
+            "team": team,
+            "score": points
+        }
+
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200: self.match = await response.json()
+
+    async def check_win(self):
+        game_state = cache.get(f"game_{self.game_id}_2v2_state")
+        if game_state['finish'] == True:
+            return
+
+        if self.match['team1_score'] >= 5:
             return 1
-        elif self.match.team2_score >= 5:
+        elif self.match['team2_score'] >= 5:
             return 2
         return 0
 
     @sync_to_async
-    def set_win_to(self, player):
-        if player == 1:
+    def set_win_to(self, team):
+        if team == 1:
             self.match.user1.elo += 50
             self.match.user2.elo += 50
             self.match.user3.elo -= 25
             self.match.user4.elo -= 25
-        elif player == 2:
+        elif team == 2:
             self.match.user1.elo -= 25
             self.match.user2.elo -= 25
             self.match.user3.elo += 50
@@ -465,6 +497,45 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
 
         self.match.user1.save()
         self.match.user2.save()
+
+    async def set_win_to(self, team):
+        game_state = cache.get(f"game_{self.game_id}_2v2_state")
+        if game_state['finish'] == False:
+            game_state['finish'] = True
+        else:
+            return
+        cache.set(f"game_{self.game_id}_2v2_state", game_state)
+
+        if team == 1:
+            win_id1 = self.player1['id']
+            win_id2 = self.player2['id']
+            lose_id1 = self.player3['id']
+            lose_id2 = self.player4['id']
+        elif team == 2:
+            win_id1 = self.player3['id']
+            win_id2 = self.player4['id']
+            lose_id1 = self.player1['id']
+            lose_id2 = self.player2['id']
+
+        url_add1 = f"https://{self.DOMAIN}/api/users/{win_id1}/elo/add/50/"
+        url_add2 = f"https://{self.DOMAIN}/api/users/{win_id2}/elo/add/50/"
+        url_rm1 = f"https://{self.DOMAIN}/api/users/{lose_id1}/elo/remove/25/"
+        url_rm2 = f"https://{self.DOMAIN}/api/users/{lose_id2}/elo/remove/25/"
+        
+        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.get(url_add1, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200:
+                    self.match = await response.json()
+            async with session.get(url_add2, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200:
+                    self.match = await response.json()
+            async with session.get(url_rm1, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200:
+                    self.match = await response.json()
+            async with session.get(url_rm2, headers={"X-API-KEY": self.API_KEY}) as response:
+                if response.status == 200:
+                    self.match = await response.json()
 
     async def redirect_remaining_player(self, event):
         await self.send(text_data=json.dumps({
@@ -488,8 +559,8 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 "type": "update_score",
-                "player1_score": self.match.team1_score,
-                "player2_score": self.match.team2_score,
+                "player1_score": self.match['team1_score'],
+                "player2_score": self.match['team2_score']
             }
         )
 
