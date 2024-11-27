@@ -1,5 +1,3 @@
-from django.contrib.auth import authenticate, login, logout
-from django.core.files.images import get_image_dimensions
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import render
@@ -10,9 +8,7 @@ from srcs.game.models import Match, Matchs, Tournament
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
-from django.conf import settings
 import requests
-import os
 
 class BaseSSRView(APIView):
     """
