@@ -86,7 +86,7 @@ ASGI_APPLICATION = 'app.asgi.application'
 
 WSGI_APPLICATION = 'app.wsgi.application'
 
-AUTH_USER_MODEL = 'user.CustomUser'
+AUTH_USER_MODEL = 'api.CustomUser'
 
 
 # Database

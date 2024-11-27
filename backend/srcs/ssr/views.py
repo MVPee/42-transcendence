@@ -2,9 +2,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import render
 from rest_framework.views import APIView
-from srcs.user.models import CustomUser as User
-from srcs.community.models import Blocked, Friend, Messages
-from srcs.game.models import Match, Matchs, Tournament
+from srcs.api.models import CustomUser as User, Blocked, Friend, Messages, Match, Matchs, Tournament
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q

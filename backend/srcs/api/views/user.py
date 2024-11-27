@@ -5,11 +5,8 @@ from srcs.api.permissions import APIKey
 from rest_framework import status
 from django.core.files.images import get_image_dimensions
 from django.contrib.auth import logout as auth_logout, authenticate, login as auth_login
-from srcs.user.models import CustomUser as User
+from srcs.api.models import CustomUser as User, Friend, Blocked
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
-from srcs.community.models import Friend, Blocked
-from django.db.models import Q
 from srcs.api.serializers.settings import SettingsSerializer
 from srcs.api.serializers.user import UserSerializer
 import os

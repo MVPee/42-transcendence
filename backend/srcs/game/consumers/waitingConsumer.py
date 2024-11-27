@@ -1,8 +1,5 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
-from django.utils import timezone
-from asgiref.sync import sync_to_async
-from django.db.models import Q
 from django.contrib.auth import get_user_model
 import aiohttp, os, ssl, json
 

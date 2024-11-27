@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from srcs.user.models import CustomUser as User
+from srcs.api.models import CustomUser as User
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from srcs.game.models import Match, Matchs, Tournament
+from srcs.api.models import Match, Matchs, Tournament
 from srcs.api.serializers.user import UserSerializer
 
 

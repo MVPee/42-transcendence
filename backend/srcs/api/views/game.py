@@ -1,7 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from srcs.api.permissions import APIKey
-from srcs.game.models import Match, Matchs, Tournament
-from srcs.user.models import CustomUser as User
+from srcs.api.models import CustomUser as User, Match, Matchs, Tournament
 from rest_framework.response import Response
 from rest_framework import status
 from srcs.api.serializers.match import MatchSerializer, MatchsSerializer, TournamentSerializer
