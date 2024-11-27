@@ -214,13 +214,38 @@ def game_2v2_set_score(request):
 
 @api_view(['POST'])
 @permission_classes([APIKey])
-def tournament_set_position(request):
+def update_tournament(request):
     """
-        api/tournament/position/set/
+        api/tournament/update/
         {
-            "id": 2, #? GAME_ID
-            "player_id": 1, #?PLAYER_ID
-            "score": 1231 #?SCORE FOR THE TEAM
+            "tournament_id": 17,
+            "player1_position": 4,
+            "player2_position": 2,
+            "player3_position": 1,
+            "player4_position": 3,
+            "winner_id": 1
         }
     """
-    return Response(status=400)
+    tournament_id = request.data.get('tournament_id')
+    player1_position = request.data.get('player1_position')
+    player2_position = request.data.get('player2_position')
+    player3_position = request.data.get('player3_position')
+    player4_position = request.data.get('player4_position')
+    winner_id = request.data.get('winner_id')
+
+    winner_instance = User.objects.filter(id=winner_id).first()
+    if winner_instance is None:
+        return Response({"error": "Winner not found."}, status=400)
+    tournament = Tournament.objects.filter(id=tournament_id).first()
+    if tournament is None:
+        return Response({"error": "Tournament not found."}, status=400)
+
+    tournament.user1_position = player1_position
+    tournament.user2_position = player2_position
+    tournament.user3_position = player3_position
+    tournament.user4_position = player4_position
+    tournament.winner = winner_instance
+    tournament.save()
+
+    serialize = TournamentSerializer(tournament)
+    return Response(serialize.data , status=200)

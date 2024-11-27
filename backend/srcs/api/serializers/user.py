@@ -4,4 +4,4 @@ from srcs.user.models import CustomUser as User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'elo', 'created_at']
+        fields = ['id', 'username', 'elo', 'avatar', 'created_at']
