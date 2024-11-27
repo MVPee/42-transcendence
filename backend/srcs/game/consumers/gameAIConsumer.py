@@ -42,8 +42,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
         self.user = self.scope['user']
         self.room_group_name = f"game_{self.game_id}_ai"
 
-        self.http_session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=self.ssl_context))
-
         url = f"https://{self.DOMAIN}/api/game/1v1/{self.game_id}/"
 
         connector = aiohttp.TCPConnector(ssl=self.ssl_context)
@@ -428,9 +426,6 @@ class GameAIConsumer(AsyncWebsocketConsumer):
 
             if await self.check_win() == 0:
                 asyncio.create_task(self.wait_for_reconnection(disconnect_key, points_awarded_key))
-
-        if self.http_session:
-            await self.http_session.close()
 
         await self.channel_layer.group_discard(
             self.room_group_name,
