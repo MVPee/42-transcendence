@@ -188,21 +188,21 @@ def game_2v2_set_score(request):
         api/game/2v2/score/set/
         {
             "id": 2, #? GAME_ID
-            "player_id": 1, #?PLAYER_ID
+            "team": 1, #?PLAYER_ID
             "score": 1231 #?SCORE FOR THE TEAM
         }
     """
     game_id = request.data.get('id')
-    player_id = request.data.get('player_id')
+    team = request.data.get('team')
     score = request.data.get('score')
 
     game = Matchs.objects.filter(id=game_id).first()
     if game is None:
         return Response({"error": "Game not found."}, status=400)
 
-    if game.user1.id == player_id or game.user2.id == player_id:
+    if team == 1:
         game.team1_score = score
-    elif game.user3.id == player_id or game.user4.id == player_id:
+    elif team == 2:
         game.team2_score = score
     else:
         return Response({"error": "User not found."}, status=400)
@@ -223,4 +223,4 @@ def tournament_set_position(request):
             "score": 1231 #?SCORE FOR THE TEAM
         }
     """
-    return Reponse(status=400)
+    return Response(status=400)
