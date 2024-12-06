@@ -1,7 +1,12 @@
+import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
-from django.contrib.auth import get_user_model
+from asgiref.sync import sync_to_async
 from django.core.cache import cache
-import os, random, ssl, aiohttp, asyncio, json
+import json
+from ..models import Tournament
+from django.contrib.auth import get_user_model
+import random
+import os
 
 User = get_user_model()
 
@@ -29,43 +34,29 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
     PADDLE_MAX_HEIGHT = 400 - PADDLE_HEIGHT
     PADDLE_MIN_HEIGHT = 0
 
-    DOMAIN = os.getenv('DOMAIN', 'localhost')
-    API_KEY = os.getenv('API_KEY', None)
-
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['id']
         self.user = self.scope['user']
         self.room_group_name = f"game_{self.game_id}_tournament"
 
-        print(self.game_id)
-        url = f"https://{self.DOMAIN}/api/game/tournament/{self.game_id}/"
-        print(url)
-
-        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
-        async with aiohttp.ClientSession(connector=connector) as session:
-            async with session.get(url) as response:
-                if response.status == 200: self.tournament = await response.json()
-                else:
-                    await self.close()
-                    return
-
-        self.player1 = self.tournament['user1']
-        self.player2 = self.tournament['user2']
-        self.player3 = self.tournament['user3']
-        self.player4 = self.tournament['user4']
+        try:
+            self.tournament = await sync_to_async(Tournament.objects.get)(id=self.game_id)
         
-        winner = self.tournament['winner']
-        if winner is not None:
-            await self.close()
-            return
+            self.player1 = await sync_to_async(lambda: self.tournament.user1 if self.tournament.user1 else "Player1")()
+            self.player2 = await sync_to_async(lambda: self.tournament.user2 if self.tournament.user2 else "Player2")()
+            self.player3 = await sync_to_async(lambda: self.tournament.user3 if self.tournament.user3 else "Player3")()
+            self.player4 = await sync_to_async(lambda: self.tournament.user4 if self.tournament.user4 else "Player4")()
+            
+            if self.user != self.player1 and self.user != self.player2 and self.user != self.player3 and self.user != self.player4:
+                await self.close()
 
-        if self.user.id != self.player1['id'] and self.user.id != self.player2['id'] and self.user.id != self.player3['id'] and self.user.id != self.player4['id']:
+            winner = await sync_to_async(lambda: self.tournament.winner if self.tournament.winner else None)()
+
+            if winner is not None:
+                await self.close()
+
+        except Tournament.DoesNotExist:
             await self.close()
-            return
 
         disconnect_key = f"player_disconnected_{self.game_id}_{self.user}"
         was_disconnected = cache.get(disconnect_key) == self.user.username
@@ -82,8 +73,8 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             'ball_dy': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
             'player1': self.player1,
             'player2': self.player2,
-            'finish': False
         })
+
         cache.delete(disconnect_key)
 
         await self.channel_layer.group_add(
@@ -92,7 +83,6 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
-
         game_state = cache.get(f"game_{self.game_id}_tournament_state")
         if was_disconnected:
             await self.send(text_data=json.dumps({
@@ -113,10 +103,10 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 "type": "send_update_game_header",
-                "player1Image": game_state['player1']['avatar'],
-                "player1Name": game_state['player1']['username'],
-                "player2Image": game_state['player2']['avatar'],
-                "player2Name": game_state['player2']['username'],
+                "player1Image": game_state['player1'].avatar.url,
+                "player1Name": game_state['player1'].username,
+                "player2Image": game_state['player2'].avatar.url,
+                "player2Name": game_state['player2'].username,
             }
         )
         if was_disconnected and self.is_playing():
@@ -132,7 +122,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                 game_state['paused'] = False
                 cache.set(f"game_{self.game_id}_tournament_state", game_state)
 
-        
+
         game_process_key = f"game_{self.game_id}_process_started"
         if not cache.get(game_process_key):
             cache.set(game_process_key, True)
@@ -281,6 +271,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             )
 
             await asyncio.sleep(0.02)
+        cache.set(f"game_{self.game_id}_tournament_state", game_state)
 
     async def update_ball_position(self, event):
         await self.send(text_data=json.dumps({
@@ -291,6 +282,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
+
         if data["type"] == "movement" and data["direction"] in ('up', 'down') and self.is_playing() and self.check_win() == 0:
             direction = data["direction"]
             game_state = cache.get(f"game_{self.game_id}_tournament_state")
@@ -303,10 +295,10 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             if time_since_last_move >= min_time_between_moves:
                 move_distance = self.PADDLE_SPEED
 
-                if game_state['player1']['id'] == self.user.id:
+                if game_state['player1'] == self.user:
                     game_state['player1PaddleY'] += move_distance if direction == "down" else -move_distance
                     game_state['player1PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player1PaddleY']))
-                elif game_state['player2']['id'] == self.user.id:
+                elif game_state['player2'] == self.user:
                     game_state['player2PaddleY'] += move_distance if direction == "down" else -move_distance
                     game_state['player2PaddleY'] = max(self.PADDLE_MIN_HEIGHT, min(self.PADDLE_MAX_HEIGHT, game_state['player2PaddleY']))
 
@@ -328,7 +320,6 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                 pass
         else:
             pass
-
     async def player_movement(self, event):
         # Send the movement data to client
         await self.send(text_data=json.dumps({
@@ -340,12 +331,12 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
-        if self.user.id != self.player1['id'] and self.user.id != self.player2['id'] and self.user.id != self.player3['id'] and self.user.id != self.player4['id']:
+        if self.user != self.player1 and self.user != self.player2 and self.user != self.player3 and self.user != self.player4:
             return
 
         if hasattr(self, 'tournament'):
 
-            if self.is_playing():
+            if (await self.is_playing()):
                 disconnect_key = f"player_disconnected_{self.game_id}_{self.user}"
                 cache.set(disconnect_key, self.user.username, timeout=20)
                 # Set the game to paused
@@ -378,9 +369,9 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         await asyncio.sleep(15)
 
         if cache.get(disconnect_key) == self.user.username:
-            if self.player1['id'] == self.user.id:
+            if self.tournament.user1 == self.user:
                 self.set_points_to(2, 5)
-            elif self.player2['id'] == self.user.id:
+            elif self.tournament.user2 == self.user:
                 self.set_points_to(1, 5)
 
 
@@ -398,11 +389,12 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
 
     def check_win(self):
         #! change back to 5 after testing
-        if self.player1_score >= 1:
+        if self.player1_score >= 5:
             return 1
-        elif self.player2_score >= 1:
+        elif self.player2_score >= 5:
             return 2
         return 0
+
 
     async def send_update_game_header(self, event):
         await self.send(text_data=json.dumps({
@@ -412,7 +404,6 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             "player2Image": event["player2Image"],
             "player2Name": event["player2Name"]
         }))
-
     async def send_announcement(self, event):
         await self.send(text_data=json.dumps({
             "type": "announcement",
@@ -454,27 +445,23 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             "player2_score": event["player2_score"],
         }))
 
-    async def is_playing(self):
+    @sync_to_async
+    def is_playing(self):
         game_state = cache.get(f"game_{self.game_id}_tournament_state")
-        if game_state is not None:
-            if game_state['finish'] == True:
-                return False
-
-            if self.user.id == game_state['player1']['id'] or self.user.id == game_state['player2']['id']:
-                return True
+        if game_state and (self.user == game_state['player1'] or self.user == game_state['player2']):
+            return True
         return False
 
     async def reset_game_state(self):
         reset_game_state = {
-            'player1PaddleY': self.HEIGHT / 2 - self.PADDLE_HEIGHT / 2,
-            'player2PaddleY': self.HEIGHT / 2 - self.PADDLE_HEIGHT / 2,
-            'ball_x': self.BALL_X,
-            'ball_y': self.BALL_Y,
-            'ball_dx': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
-            'ball_dy': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
-            'player1': None,
-            'player2': None,
-            'finish': False,
+        'player1PaddleY': self.HEIGHT / 2 - self.PADDLE_HEIGHT / 2,
+        'player2PaddleY': self.HEIGHT / 2 - self.PADDLE_HEIGHT / 2,
+        'ball_x': self.BALL_X,
+        'ball_y': self.BALL_Y,
+        'ball_dx': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
+        'ball_dy': self.BALL_SPEED if random.choice([True, False]) else -self.BALL_SPEED,
+        'player1': None,
+        'player2': None,
         }
         cache.set(f"game_{self.game_id}_tournament_state", reset_game_state)
         self.player1_score = 0
@@ -535,7 +522,6 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             self.set_points_to(1, 5)
         else: 
             self.set_points_to(2, 5)
-
     async def play_match(self, player1, player2):
         #check if they disconnected, if yes send a message and wait
         await self.announce_match(player1, player2)
@@ -555,17 +541,17 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 "type": "send_announcement",
-                "message": f"{player1['username']} VS {player2['username']}",
+                "message": f"{player1.username} VS {player2.username}",
             }
         )
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 "type": "send_update_game_header",
-                "player1Image": player1['avatar'],
-                "player1Name": player1['username'],
-                "player2Image": player2['avatar'],
-                "player2Name": player2['username']
+                "player1Image": player1.avatar.url,
+                "player1Name": player1.username,
+                "player2Image": player2.avatar.url,
+                "player2Name": player2.username,
             }
         )
         await asyncio.sleep(7)
@@ -578,9 +564,9 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         )
     async def announce_victory(self, player1, player2):
         if (self.check_win() == 2):
-            winner = player2['username']
+            winner = player2.username
         else:
-            winner = player1['username']
+            winner = player1.username
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -600,20 +586,21 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
 
     async def notify_players(self, players_list):
         for player in players_list:
-            room_group_name = f"notification_{player['id']}"
+            room_group_name = f'notification_{player.id}'
             try:
                 await self.channel_layer.group_send(
                     room_group_name,
                     {
                         'type': 'notification',
                         'username': 'system',
-                        'message': f"<a class='btn btn-info' href='https://{os.getenv('DOMAIN', 'localhost')}/game/pong/tournament/{self.game_id}'> You must play now, join !</a>"
+                        'message': f"<a class='btn btn-info' href='https://{os.getenv('DOMAIN', 'localhost')}/game/pong/tournament/{self.tournament.id}'> You must play now, join !</a>"
                     })
             except:
                 pass
 
 
     async def show_scoreboard(self, leaderboard, last):
+
         leaderboard = sorted(leaderboard, key=lambda x:x['score'], reverse=True) #sort based on wins
         await asyncio.sleep(1) #wait for all players to be connected
         serialized_leaderboard = []
@@ -622,8 +609,8 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             score = entry['score']
             serialized_leaderboard.append({
                 'player': {
-                    'avatar': player['avatar'],
-                    'username': player['username'],
+                    'avatar': {'url': getattr(player.avatar, 'url', None)},
+                    'username': player.username,
                 },
                 'score': score,
             })
@@ -652,6 +639,10 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
             if (curr_player['player'] == player):
                 return (index + 1)
         return 4
+
+    @sync_to_async
+    def add_to_db(self, model):
+        model.save()
 
     async def tournamentProcess(self):
         leaderboard = [
@@ -683,50 +674,10 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                     stack.pop(0)
 
         # award winners and save into 
-
-        game_state = cache.get(f"game_{self.game_id}_tournament_state")
-        if game_state['finish'] == False:
-            game_state['finish'] = True
-        else:
-            return
-        cache.set(f"game_{self.game_id}_tournament_state", game_state)
-
         await self.show_scoreboard(leaderboard, last=True)
-        player1_position = self.find_user_position(leaderboard, self.player1)
-        player2_position = self.find_user_position(leaderboard, self.player2)
-        player3_position = self.find_user_position(leaderboard, self.player3)
-        player4_position = self.find_user_position(leaderboard, self.player4)
-        winner = leaderboard[0]['player']['id']
-
-        data = {
-            "tournament_id": self.game_id,
-            "player1_position": player1_position,
-            "player2_position": player2_position,
-            "player3_position": player3_position,
-            "player4_position": player4_position,
-            "winner_id": winner 
-        }
-
-        url = f"https://{self.DOMAIN}/api/game/tournament/update/"
-
-        connector = aiohttp.TCPConnector(ssl=self.ssl_context)
-        async with aiohttp.ClientSession(connector=connector) as session:
-            async with session.post(url, json=data, headers={"X-API-KEY": self.API_KEY}) as response:
-                if response.status == 200: self.tournament = await response.json()
-                else:
-                    error = await response.json()
-                    print(error['error'])
-
-        await self.send_redirect()
-
-    async def send_redirect(self):
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "redirect_remaining_player",
-            }
-        )
-
-    # Handler pour le type redirect_remaining_player
-    async def redirect_remaining_player(self, event):
-        await self.send(text_data=json.dumps({"type": "redirect"}))
+        self.tournament.user1_position = self.find_user_position(leaderboard, self.player1)
+        self.tournament.user2_position = self.find_user_position(leaderboard, self.player2)
+        self.tournament.user3_position = self.find_user_position(leaderboard, self.player3)
+        self.tournament.user4_position = self.find_user_position(leaderboard, self.player4)
+        self.tournament.winner = leaderboard[0]['player']
+        asyncio.create_task(self.add_to_db(model=self.tournament))

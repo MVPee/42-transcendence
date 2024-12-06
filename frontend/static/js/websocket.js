@@ -279,7 +279,7 @@ function pongWebsocket(link, mode) {
 					td1.className="align-middle";
 					avatar.className="scoreboard-avatar";
 					avatar.setAttribute('alt', 'avatar');
-					avatar.setAttribute('src', `${player.avatar}`);
+					avatar.setAttribute('src', `${player.avatar.url}`);
 					player_name.textContent = `${player.username}`;
 					player_name.setAttribute('href', `/profile?profile=${player.username}`)
 					if (index != 0)
