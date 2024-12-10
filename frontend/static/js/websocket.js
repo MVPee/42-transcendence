@@ -229,6 +229,7 @@ function pongWebsocket(link, mode) {
             const game = document.getElementById(`game`);
             const announcements = document.getElementById(`announcements_div`);
             const header = document.getElementById(`game-header`);
+
             removeAllChildNodes(announcements);
             if (data.message === ""){
                 game.style.visibility = 'visible';
@@ -236,37 +237,58 @@ function pongWebsocket(link, mode) {
             else {
                 let delay = 0;
                 let words = data.message.split(" ");
-                words.forEach((word) =>
-                {
+                words.forEach((word) => {
                     var span = document.createElement("span");
                     span.textContent = `${word}`;
                     span.className= "announcement_name";
-                    if (word === "VS") {
-                    span.className = "announcement_VS";
-                    } else if (word === "Victory") {
-                    span.className = "announcement_victory";
-                    }
+                    if (word === "VS")
+                        span.className = "announcement_VS";
+                    else if (word === "Victory")
+                        span.className = "announcement_victory";
                     span.style.setProperty('--delay', `${delay}s`);
                     announcements.appendChild(span);
                     delay += 0.5;
                 }
                 );
             }
+
+            let multi = 1; // Default scale multiplier
+            if (windowWidth < 700) multi = windowWidth / 700;
+
+            const announcements_name = document.querySelector(".announcement_name");
+            const announcements_vs = document.querySelector(".announcement_VS");
+            const announcements_victory = document.querySelector(".announcement_victory");
+
+            if (announcements_name) {
+                announcements_name.style.fontSize = `${50 * multi}px`;
+                announcements_name.style.letterSpacing = `${5 * multi}px`;
+            }
+
+            if (announcements_vs) {
+                announcements_vs.style.fontSize = `${120 * multi}px`;
+                announcements_vs.style.letterSpacing = `${5 * multi}px`;
+            }
+
+            if (announcements_victory) {
+                announcements_victory.style.fontSize = `${110 * multi}px`;
+                announcements_victory.style.letterSpacing = `${5 * multi}px`;
+            }
         }
         else if (data.type === "scoreboard") {
             const game = document.getElementById(`game`);
+            const phoneButton = document.getElementById('phone-button');
             const header = document.getElementById(`game-header`);
             const scoreboard = document.getElementById(`scoreboard`);
             const scoreboardRows = document.getElementById(`scoreboard-rows`);
             removeAllChildNodes(scoreboardRows);
-            if (data.array === "")
-            {
+            if (data.array === "") {
 				game.style.visibility = 'visible'
+                phoneButton.style.visibility = 'visible'
                 scoreboard.style.visibility = 'hidden';
             }
-            else
-            {
+            else {
                 game.style.visibility = 'hidden';
+                phoneButton.style.visibility = 'hidden'
                 header.style.visibility = 'hidden';
                 scoreboard.style.visibility = 'visible';
 				let array = JSON.parse(data.array);
