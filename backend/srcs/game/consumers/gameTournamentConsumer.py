@@ -331,49 +331,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
-        if self.user != self.player1 and self.user != self.player2 and self.user != self.player3 and self.user != self.player4:
-            return
-
-        if hasattr(self, 'tournament'):
-
-            if (await self.is_playing()):
-                disconnect_key = f"player_disconnected_{self.game_id}_{self.user}"
-                cache.set(disconnect_key, self.user.username, timeout=20)
-                # Set the game to paused
-                game_state = cache.get(f"game_{self.game_id}_tournament_state")
-                if game_state:
-                    game_state['paused'] = True
-                    cache.set(f"game_{self.game_id}_tournament_state", game_state)
-
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        "type": "send_info",
-                        "message": f"Player {self.user.username} has disconnected. He has 15 seconds to reconnect."
-                    }
-                )
-                asyncio.create_task(self.wait_for_reconnection(disconnect_key))
-            else:
-                disconnect_key = f"player_disconnected_{self.game_id}_{self.user}"
-                cache.set(disconnect_key, self.user.username, timeout=None)
-
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-
-    async def wait_for_reconnection(self, disconnect_key):
-        if self.check_win() != 0:
-            return
-    
-        await asyncio.sleep(15)
-
-        if cache.get(disconnect_key) == self.user.username:
-            if self.tournament.user1 == self.user:
-                self.set_points_to(2, 5)
-            elif self.tournament.user2 == self.user:
-                self.set_points_to(1, 5)
-
+        pass
 
     def add_point_to(self, player):
         if player == 1:

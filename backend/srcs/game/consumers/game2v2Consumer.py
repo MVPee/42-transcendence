@@ -378,58 +378,7 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
-        if self.user.id != self.player1['id'] and self.user.id != self.player2['id'] and self.user.id != self.player3['id'] and self.user.id != self.player4['id']:
-            return
-
-        points_awarded_key = f"points_awarded_{self.game_id}"
-        points_awarded = cache.get(points_awarded_key)
-
-        if not points_awarded and hasattr(self, 'match'):
-            disconnect_key = f"player_disconnected_{self.game_id}"
-            cache.set(disconnect_key, self.user.username, timeout=20)
-
-            # Set the game to paused
-            game_state = cache.get(f"game_{self.game_id}_2v2_state")
-            if game_state:
-                game_state['paused'] = True
-                cache.set(f"game_{self.game_id}_2v2_state", game_state)
-
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "send_info",
-                    "message": f"Player {self.user.username} has disconnected. He have 15 seconds to reconnect."
-                }
-            )
-
-            asyncio.create_task(self.wait_for_reconnection(disconnect_key, points_awarded_key))
-
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-
-    async def wait_for_reconnection(self, disconnect_key, points_awarded_key):
-        await asyncio.sleep(15)
-
-        #? Protection if the match is finish
-        if await self.check_win() == 0:
-            if cache.get(disconnect_key) == self.user.username:
-                if self.player1['id'] == self.user.id or self.player2['id'] == self.user.id:
-                    await self.set_points_to(2, 5)
-                    await self.set_win_to(2)
-                elif self.player3['id'] == self.user.id or self.player4['id'] == self.user.id:
-                    await self.set_points_to(1, 5)
-                    await self.set_win_to(1)
-
-                cache.set(points_awarded_key, True, timeout=None)
-
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                        {
-                            "type": "redirect_remaining_player",
-                        }
-                )
+        pass
 
     async def add_point_to(self, team):
 
