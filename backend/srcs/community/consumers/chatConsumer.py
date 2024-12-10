@@ -49,6 +49,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             text_data_json = json.loads(text_data)
             message = text_data_json['message']
+            if len(message) > 100  or len(message) == 0:
+                return
             username = self.user.username
             await self.channel_layer.group_send(self.room_group_name,{
                 'type': 'chatroom_message',
