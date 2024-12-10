@@ -99,16 +99,17 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                     "player2PaddleY": game_state['player2PaddleY'],
                 }
             ))
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "send_update_game_header",
-                "player1Image": game_state['player1'].avatar.url,
-                "player1Name": game_state['player1'].username,
-                "player2Image": game_state['player2'].avatar.url,
-                "player2Name": game_state['player2'].username,
-            }
-        )
+        if game_state['player1'] and game_state['player2']:
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "send_update_game_header",
+                    "player1Image": game_state['player1'].avatar.url,
+                    "player1Name": game_state['player1'].username,
+                    "player2Image": game_state['player2'].avatar.url,
+                    "player2Name": game_state['player2'].username,
+                }
+            )
         if was_disconnected and self.is_playing():
             await self.channel_layer.group_send(
                 self.room_group_name,
