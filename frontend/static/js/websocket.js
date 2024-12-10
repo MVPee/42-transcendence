@@ -162,6 +162,10 @@ function pongWebsocket(link, mode) {
 
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        
+        let multi = 1;
+        const windowWidth = window.outerWidth || screen.width;
+        if (windowWidth < 700) multi = windowWidth / 700;
 
         if (data.type === "player_movement") {
             const paddle1 = document.getElementById("paddle1");
@@ -172,13 +176,13 @@ function pongWebsocket(link, mode) {
                 paddle3.style.top = `${data.player3PaddleY}px`;
                 paddle4.style.top = `${data.player4PaddleY}px`;
             }
-            paddle1.style.top = `${data.player1PaddleY}px`;
-            paddle2.style.top = `${data.player2PaddleY}px`;
+            paddle1.style.top = `${data.player1PaddleY * multi}px`;
+            paddle2.style.top = `${data.player2PaddleY * multi}px`;
         }
         else if (data.type === "update_ball_position") {
             const ball = document.getElementById("ball");
-            ball.style.left = `${data.ball_x}px`;
-            ball.style.top = `${data.ball_y}px`;
+            ball.style.left = `${data.ball_x * multi}px`;
+            ball.style.top = `${data.ball_y * multi}px`;
         }
         else if (data.type === "update_score") {
             const score1 = document.getElementById("score-1");
@@ -221,8 +225,7 @@ function pongWebsocket(link, mode) {
 			retriggerAnimation(player1Image);
 			retriggerAnimation(player2Image);
         }
-        else if (data.type === "announcement")
-        {
+        else if (data.type === "announcement") {
             const game = document.getElementById(`game`);
             const announcements = document.getElementById(`announcements_div`);
             const header = document.getElementById(`game-header`);
@@ -250,8 +253,7 @@ function pongWebsocket(link, mode) {
                 );
             }
         }
-        else if (data.type === "scoreboard")
-        {
+        else if (data.type === "scoreboard") {
             const game = document.getElementById(`game`);
             const header = document.getElementById(`game-header`);
             const scoreboard = document.getElementById(`scoreboard`);
@@ -288,8 +290,7 @@ function pongWebsocket(link, mode) {
 						player_name.className = "text-red"
 					td1.appendChild(avatar);
 					td1.appendChild(player_name);
-					if (index <= 2)
-					{
+					if (index <= 2) {
 						let crown_link;
 						if (index == 0)
 							crown_link = '/static/assets/gold_crown.png'

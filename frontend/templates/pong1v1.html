@@ -10,7 +10,7 @@
     </div>
 </div>
 
-<div class="position-relative mx-auto" style="width: 600px; height: 400px;">
+<div class="position-relative mx-auto">
     <canvas id="game-canvas" width="600" height="400"></canvas>
     <div id="ball"></div>
     <div id="paddle1" class="paddle"></div>
@@ -121,34 +121,62 @@
         padding: 20px;
         max-width: 150px;
     }
-
-    @media only screen and (max-width: 625px) {
-        .vs-card {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .position-relative {
-            margin: 0 auto;
-            position: relative;
-            top: 300px;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(90deg);
-        }
-
-        .button-container {
-            margin-top: 220px;
-            flex-direction:row;
-        }
-
-        .phone-rotate {
-            transform: rotate(90deg);
-        }
-    }
-
 </style>
 
 <script>
+    function resizeCanvasAndElements() {
+        const canvas = document.getElementById("game-canvas");
+        const ball = document.getElementById("ball");
+        const paddle1 = document.getElementById("paddle1");
+        const paddle2 = document.getElementById("paddle2");
+        const score1 = document.getElementById("score-1");
+        const score2 = document.getElementById("score-2");
+        const windowWidth = window.outerWidth || screen.width;
+
+        let multi = 1; // Default scale multiplier
+        if (windowWidth < 700) multi = windowWidth / 700;
+
+        // Resize canvas
+        canvas.width = 600 * multi;
+        canvas.height = 400 * multi;
+
+        // console.log(`Canvas resized: ${canvas.width}px x ${canvas.height}px`); //* DEBUG
+
+        // Scale ball
+        ball.style.width = `${10 * multi}px`;
+        ball.style.height = `${10 * multi}px`;
+        ball.style.top = `${195 * multi}px`;
+        ball.style.left = `${295 * multi}px`;
+
+        // Scale paddles
+        const paddleHeight = 80 * multi;
+        const paddleWidth = 10 * multi;
+
+        paddle1.style.width = `${paddleWidth}px`;
+        paddle1.style.height = `${paddleHeight}px`;
+        paddle1.style.left = `${30 * multi}px`;
+        paddle1.style.top = `${160 * multi}px`;
+
+        paddle2.style.width = `${paddleWidth}px`;
+        paddle2.style.height = `${paddleHeight}px`;
+        paddle2.style.right = `${30 * multi}px`;
+        paddle2.style.top = `${160 * multi}px`;
+
+        // Adjust scores
+        score1.style.fontSize = `${24 * multi}px`;
+        score2.style.fontSize = `${24 * multi}px`;
+        score1.style.top = `${10 * multi}px`;
+        score1.style.left = `${10 * multi}px`;
+        score2.style.top = `${10 * multi}px`;
+        score2.style.right = `${10 * multi}px`;
+    }
+
+    // Initial resize
+    resizeCanvasAndElements();
+
+    // Resize elements on window resize
+    window.addEventListener("resize", resizeCanvasAndElements);
+
     phoneUp = document.getElementById("phone-up");
     phoneDown = document.getElementById("phone-down");
 
