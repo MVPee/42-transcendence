@@ -173,8 +173,8 @@ function pongWebsocket(link, mode) {
             if (mode === '2v2') {
                 const paddle3 = document.getElementById("paddle3");
                 const paddle4 = document.getElementById("paddle4");
-                paddle3.style.top = `${data.player3PaddleY}px`;
-                paddle4.style.top = `${data.player4PaddleY}px`;
+                paddle3.style.top = `${data.player3PaddleY * multi}px`;
+                paddle4.style.top = `${data.player4PaddleY * multi}px`;
             }
             paddle1.style.top = `${data.player1PaddleY * multi}px`;
             paddle2.style.top = `${data.player2PaddleY * multi}px`;
