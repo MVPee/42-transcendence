@@ -10,7 +10,7 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
 
     PADDLE_SPEED = 8
 
-    BALL_SPEED = 0
+    BALL_SPEED = 6
 
     HEIGHT = 400
     WIDTH = 600
