@@ -9,7 +9,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
 
     ACCELERATION_FACTOR = 1.05
 
-    PADDLE_SPEED = 8
+    PADDLE_SPEED = 6
 
     BALL_SPEED = 6
 
@@ -186,8 +186,8 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                         }
                     )
                 cache.set(f"game_{self.game_id}_ai_state", game_state)
-                #await asyncio.sleep(0.02) #? 20 ms like player
-                await asyncio.sleep(random.uniform(0.02, 0.03)) #? 20 ms like player at best, sometimes slower
+                await asyncio.sleep(0.01) #? 20 ms like player
+                # await asyncio.sleep(random.uniform(0.02, 0.03)) #? 20 ms like player at best, sometimes slower
 
     async def countdown(self):
         await self.channel_layer.group_send(
@@ -366,9 +366,9 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             last_move_time = game_state.get(f'last_move_time_{self.user.username}', 0)
             time_since_last_move = now - last_move_time
 
-            min_time_between_moves = 0.01  # 20 ms like in js
+            min_time_between_moves = 0.009  # 10 ms like in js
 
-            if time_since_last_move >= min_time_between_moves:
+            if time_since_last_move > min_time_between_moves:
                 move_distance = self.PADDLE_SPEED
 
                 game_state['player1PaddleY'] += move_distance if direction == "down" else -move_distance

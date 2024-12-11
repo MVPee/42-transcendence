@@ -8,7 +8,7 @@ User = get_user_model()
 class Game2v2Consumer(AsyncWebsocketConsumer):
     ACCELERATION_FACTOR = 1.05
 
-    PADDLE_SPEED = 8
+    PADDLE_SPEED = 6
 
     BALL_SPEED = 6
 
@@ -321,9 +321,9 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
             last_move_time = game_state.get(f'last_move_time_{self.user.username}', 0)
             time_since_last_move = now - last_move_time
 
-            min_time_between_moves = 0.01  # 10 ms
+            min_time_between_moves = 0.009  # 10 ms
 
-            if time_since_last_move >= min_time_between_moves:
+            if time_since_last_move > min_time_between_moves:
                 move_distance = self.PADDLE_SPEED
 
                 if self.user.id == self.player1['id']:
