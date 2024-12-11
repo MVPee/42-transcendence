@@ -66,6 +66,12 @@ def login(request):
             'error_message': 'Username and password are required.'
         }, status=status.HTTP_400_BAD_REQUEST)
     
+    if username == 'AI.':
+        return Response({
+            'login': False,
+            'error_message': 'Are you a robot?'
+        }, status=status.HTTP_401_UNAUTHORIZED)
+
     user = authenticate(request, username=username, password=password)
     if user is not None:
         auth_login(request, user)
@@ -204,17 +210,8 @@ def get_user_by_id(request, id):
     user = User.objects.filter(id=id).first()
     if user is None:
         return Response({"error": "No user with this ID."}, status=404)
-    data = {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "avatar": user.avatar.url,
-        "elo": user.elo,
-        "language": user.language,
-        "last_connection": user.last_connection,
-        "created_at": user.created_at,
-    }
-    return Response(data, status=200)
+    serializer = UserSerializer(user)
+    return Response(serializer.data, status=200)
 
 
 @api_view(['GET'])
@@ -222,17 +219,8 @@ def get_user_by_username(request, username):
     user = User.objects.filter(username=username).first()
     if user is None:
         return Response({"error": "No user with this username."}, status=404)
-    data = {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "avatar": user.avatar.url,
-        "elo": user.elo,
-        "language": user.language,
-        "last_connection": user.last_connection,
-        "created_at": user.created_at,
-    }
-    return Response(data, status=200)
+    serializer = UserSerializer(user)
+    return Response(serializer.data, status=200)
 
 
 @api_view(['GET'])
