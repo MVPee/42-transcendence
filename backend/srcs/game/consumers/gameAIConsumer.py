@@ -186,8 +186,8 @@ class GameAIConsumer(AsyncWebsocketConsumer):
                         }
                     )
                 cache.set(f"game_{self.game_id}_ai_state", game_state)
-                await asyncio.sleep(0.01) #? 20 ms like player
-                # await asyncio.sleep(random.uniform(0.02, 0.03)) #? 20 ms like player at best, sometimes slower
+                await asyncio.sleep(0.01) #? 10 ms like player
+                # await asyncio.sleep(random.uniform(0.02, 0.03)) #? 10 ms like player at best, sometimes slower
 
     async def countdown(self):
         await self.channel_layer.group_send(
