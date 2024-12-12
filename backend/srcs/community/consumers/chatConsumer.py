@@ -58,7 +58,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'message': message,
             })
             await self.add_chatdb(message)
-            await self.send_notification_to_friend(message)
         except json.JSONDecodeError:
             print(text_data)
 
@@ -107,7 +106,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.post(url, json=payload, headers={"X-API-KEY": self.API_KEY}) as response:
-                    # if response.status == 201: print("Message saved successfully!") #* DEBUG
+                    if response.status == 201: await self.send_notification_to_friend(message)
                     # else: print(f"Failed to save message. Status code: {response.status}") #* DEBUG
                     pass
 
