@@ -90,8 +90,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                 'ball_x': game_state['ball_x'],
                 'ball_y': game_state['ball_y'],
             }))
-            await self.send(text_data=json.dumps(
-                {
+            await self.send(text_data=json.dumps({
                     "type": "player_movement",
                     "player": "Tournament",
                     "direction": "None",
@@ -99,29 +98,22 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                     "player2PaddleY": game_state['player2PaddleY'],
                 }
             ))
-        if game_state['player1'] and game_state['player2']:
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "send_update_game_header",
-                    "player1Image": game_state['player1'].avatar.url,
-                    "player1Name": game_state['player1'].username,
-                    "player2Image": game_state['player2'].avatar.url,
-                    "player2Name": game_state['player2'].username,
-                }
-            )
-        if was_disconnected and self.is_playing():
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "send_info",
-                    "message": f"Player {self.user.username} has reconnected."
-                }
-            )
-            # Resume the game
-            if game_state:
-                game_state['paused'] = False
-                cache.set(f"game_{self.game_id}_tournament_state", game_state)
+            if (game_state['player1'] and game_state['player2']):
+                await self.send(text_data=json.dumps({
+                        "type": "update_game_header",
+                        "player1Image": game_state['player1'].avatar.url,
+                        "player1Name": game_state['player1'].username,
+                        "player2Image": game_state['player2'].avatar.url,
+                        "player2Name": game_state['player2'].username,
+                    }))
+            if self.is_playing():
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "send_info",
+                        "message": f"Player {self.user.username} has reconnected."
+                    }
+                )
 
 
         game_process_key = f"game_{self.game_id}_process_started"
@@ -332,7 +324,18 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
-        pass
+        if self.user != self.player1 and self.user != self.player2 and self.user != self.player3 and self.user != self.player4:
+            return
+
+        if hasattr(self, 'tournament'):
+            disconnect_key = f"player_disconnected_{self.game_id}_{self.user}"
+            cache.set(disconnect_key, self.user.username, timeout=None)
+
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
 
     def add_point_to(self, player):
         if player == 1:
@@ -477,6 +480,13 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                 }
             )
             await asyncio.sleep(1)
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "send_countdown",
+                'message': ""
+            }
+        )
         if (players_not_connected.count(player2) > 0):
             self.set_points_to(1, 5)
         else: 
@@ -559,7 +569,6 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
 
 
     async def show_scoreboard(self, leaderboard, last):
-
         leaderboard = sorted(leaderboard, key=lambda x:x['score'], reverse=True) #sort based on wins
         await asyncio.sleep(1) #wait for all players to be connected
         serialized_leaderboard = []
