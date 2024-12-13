@@ -128,7 +128,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
                         self.close()
                         return
             
-        if self.GAME == 'pong':
+        elif self.GAME == 'pong':
             if self.MODE == '1v1':
                 url = f"http://{self.DOMAIN}:8000/api/game/1v1/add/"
                 data = {
