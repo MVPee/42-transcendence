@@ -15,7 +15,7 @@
 	<a href="#-running-the-project">Running</a>
 	<span> · </span>
 	<a href="#-key-features">Key features</a>
-  <span> · </span>
+  	<span> · </span>
 	<a href="#-tech-stack">Tech stack</a>
 </h3>
 
