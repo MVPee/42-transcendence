@@ -114,23 +114,28 @@ function puissance4Websocket(link) {
   ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
 
-    if (data.type === "info") {
-      const infoDisplay = document.getElementById("info");
-      infoDisplay.textContent = data.info;
-    } else if (data.type === "turn") {
-      const infoDisplay = document.getElementById("turn");
-      infoDisplay.textContent = data.turn;
-    } else if (data.type === "color") {
-      row = data.row;
-      column = data.column;
-      color = data.color;
-      const td = document.getElementById(`${row}-${column}`);
-      td.style.backgroundColor = data.color;
-    } else if (data.type === "redirect") {
-      loadContent(event, `profile`);
-      disconnectWebSocket();
-    }
-  };
+        if (data.type === "info") {
+            const infoDisplay = document.getElementById("info");
+            if (infoDisplay)
+                infoDisplay.textContent = data.info;
+        }
+        else if (data.type === "turn") {
+            const infoDisplay = document.getElementById("turn");
+            if (infoDisplay)
+                infoDisplay.textContent = data.turn;
+        }
+        else if (data.type === "color") {
+            row = data.row;
+            column = data.column;
+            color = data.color;
+            const td = document.getElementById(`${row}-${column}`);
+            td.style.backgroundColor = data.color;
+        }
+        else if (data.type === "redirect") {
+            loadContent(event, `profile`);
+            disconnectWebSocket();
+        }
+    };
 
   ws.onclose = () => {
     console.log("WebSocket connection closed.");
@@ -157,60 +162,68 @@ function pongWebsocket(link, mode) {
     const windowWidth = window.outerWidth || screen.width;
     if (windowWidth < 700) multi = windowWidth / 700;
 
-    if (data.type === "player_movement") {
-      const paddle1 = document.getElementById("paddle1");
-      const paddle2 = document.getElementById("paddle2");
-      if (mode === "2v2") {
-        const paddle3 = document.getElementById("paddle3");
-        const paddle4 = document.getElementById("paddle4");
-        paddle3.style.top = `${data.player3PaddleY * multi}px`;
-        paddle4.style.top = `${data.player4PaddleY * multi}px`;
-      }
-      paddle1.style.top = `${data.player1PaddleY * multi}px`;
-      paddle2.style.top = `${data.player2PaddleY * multi}px`;
-    } else if (data.type === "update_ball_position") {
-      const ball = document.getElementById("ball");
-      ball.style.left = `${data.ball_x * multi}px`;
-      ball.style.top = `${data.ball_y * multi}px`;
-    } else if (data.type === "update_score") {
-      const score1 = document.getElementById("score-1");
-      const score2 = document.getElementById("score-2");
-      score1.textContent = `${data.player1_score}`;
-      score2.textContent = `${data.player2_score}`;
-    } else if (data.type === "info") {
-      const infoDisplay = document.getElementById("info");
-      infoDisplay.textContent = data.info;
-      setTimeout(() => {
-        infoDisplay.style.opacity = "0";
-        setTimeout(() => infoDisplay.remove(), 500);
-      }, 5000);
-    } else if (data.type === "countdown") {
-      const infoDisplay = document.getElementById("countdown");
-      infoDisplay.textContent = data.message;
-    } else if (data.type === "redirect") {
-      loadContent(event, `profile`);
-      disconnectWebSocket();
-    } else if (data.type === "update_game_header") {
-      const header = document.getElementById(`game-header`);
-      const game = document.getElementById(`game`);
-      header.style.visibility = "visible";
-      game.style.visibility = "visible";
-      const player1Image = document.getElementById(`player1-image`);
-      const player1Name = document.getElementById(`player1-name`);
-      player1Image.src = data.player1Image;
-      player1Name.textContent = data.player1Name;
-      const player2Image = document.getElementById(`player2-image`);
-      const player2Name = document.getElementById(`player2-name`);
-      player2Image.src = data.player2Image;
-      player2Name.textContent = data.player2Name;
-      retriggerAnimation(player1Name);
-      retriggerAnimation(player2Name);
-      retriggerAnimation(player1Image);
-      retriggerAnimation(player2Image);
-    } else if (data.type === "announcement") {
-      const game = document.getElementById(`game`);
-      const announcements = document.getElementById(`announcements_div`);
-      const header = document.getElementById(`game-header`);
+        if (data.type === "player_movement") {
+            const paddle1 = document.getElementById("paddle1");
+            const paddle2 = document.getElementById("paddle2");
+            if (mode === '2v2') {
+                const paddle3 = document.getElementById("paddle3");
+                const paddle4 = document.getElementById("paddle4");
+                paddle3.style.top = `${data.player3PaddleY * multi}px`;
+                paddle4.style.top = `${data.player4PaddleY * multi}px`;
+            }
+            paddle1.style.top = `${data.player1PaddleY * multi}px`;
+            paddle2.style.top = `${data.player2PaddleY * multi}px`;
+        }
+        else if (data.type === "update_ball_position") {
+            const ball = document.getElementById("ball");
+            ball.style.left = `${data.ball_x * multi}px`;
+            ball.style.top = `${data.ball_y * multi}px`;
+        }
+        else if (data.type === "update_score") {
+            const score1 = document.getElementById("score-1");
+            const score2 = document.getElementById("score-2");
+            score1.textContent = `${data.player1_score}`;
+            score2.textContent = `${data.player2_score}`;
+        }
+        else if (data.type === "info") {
+            const infoDisplay = document.getElementById("info");
+            infoDisplay.textContent = data.info;
+            setTimeout(() => {
+                infoDisplay.style.opacity = '0';
+                setTimeout(() => infoDisplay.remove(), 500);
+            }, 5000);
+        }
+        else if (data.type === "countdown") {
+            const infoDisplay = document.getElementById("countdown");
+            infoDisplay.textContent = data.message;
+        }
+        else if (data.type === "redirect") {
+            loadContent(event, `profile`);
+            disconnectWebSocket();
+        }
+        else if (data.type === "update_game_header")
+        {
+            const header = document.getElementById(`game-header`);
+			const game = document.getElementById(`game`);
+            header.style.visibility = 'visible'
+			game.style.visibility = 'visible'
+            const player1Image = document.getElementById(`player1-image`);
+            const player1Name = document.getElementById(`player1-name`);
+            player1Image.src = data.player1Image;
+            player1Name.textContent = data.player1Name;
+            const player2Image = document.getElementById(`player2-image`);
+            const player2Name = document.getElementById(`player2-name`);
+            player2Image.src = data.player2Image;
+            player2Name.textContent = data.player2Name;
+			retriggerAnimation(player1Name);
+			retriggerAnimation(player2Name);
+			retriggerAnimation(player1Image);
+			retriggerAnimation(player2Image);
+        }
+        else if (data.type === "announcement") {
+            const game = document.getElementById(`game`);
+            const announcements = document.getElementById(`announcements_div`);
+            const header = document.getElementById(`game-header`);
 
       removeAllChildNodes(announcements);
       if (data.message === "") {
