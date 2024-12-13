@@ -42,7 +42,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
         self.user = self.scope['user']
         self.room_group_name = f"game_{self.game_id}_ai"
 
-        url = f"https://{self.DOMAIN}/api/game/1v1/{self.game_id}/"
+        url = f"http://{self.DOMAIN}:8000/api/game/1v1/{self.game_id}/"
 
         connector = aiohttp.TCPConnector(ssl=self.ssl_context)
         async with aiohttp.ClientSession(connector=connector) as session:
@@ -457,7 +457,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
         if player == 1: id = self.player1['id']
         elif player == 2: id = self.player2['id']
 
-        url = f"https://{self.DOMAIN}/api/game/1v1/score/set/"
+        url = f"http://{self.DOMAIN}:8000/api/game/1v1/score/set/"
 
         data = {
             "id": self.game_id,
@@ -478,7 +478,7 @@ class GameAIConsumer(AsyncWebsocketConsumer):
         if player == 1: id = self.player1['id']
         elif player == 2: id = self.player2['id']
 
-        url = f"https://{self.DOMAIN}/api/game/1v1/score/set/"
+        url = f"http://{self.DOMAIN}:8000/api/game/1v1/score/set/"
 
         data = {
             "id": self.game_id,
@@ -518,8 +518,8 @@ class GameAIConsumer(AsyncWebsocketConsumer):
             win_id = self.player2['id']
             lose_id = self.player1['id']
 
-        url_add = f"https://{self.DOMAIN}/api/users/{win_id}/elo/add/50/"
-        url_rm = f"https://{self.DOMAIN}/api/users/{lose_id}/elo/remove/25/"
+        url_add = f"http://{self.DOMAIN}:8000/api/users/{win_id}/elo/add/50/"
+        url_rm = f"http://{self.DOMAIN}:8000/api/users/{lose_id}/elo/remove/25/"
         
         connector = aiohttp.TCPConnector(ssl=self.ssl_context)
         async with aiohttp.ClientSession(connector=connector) as session:

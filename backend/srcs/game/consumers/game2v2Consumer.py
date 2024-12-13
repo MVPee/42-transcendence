@@ -41,7 +41,7 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
         self.user = self.scope['user']
         self.room_group_name = f"game_{self.game_id}_2v2"
 
-        url = f"https://{self.DOMAIN}/api/game/2v2/{self.game_id}/"
+        url = f"http://{self.DOMAIN}:8000/api/game/2v2/{self.game_id}/"
 
         connector = aiohttp.TCPConnector(ssl=self.ssl_context)
         async with aiohttp.ClientSession(connector=connector) as session:
@@ -382,7 +382,7 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
 
     async def add_point_to(self, team):
 
-        url = f"https://{self.DOMAIN}/api/game/2v2/score/set/"
+        url = f"http://{self.DOMAIN}:8000/api/game/2v2/score/set/"
 
         data = {
             "id": self.game_id,
@@ -400,7 +400,7 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
         if game_state['finish'] == True:
             return
 
-        url = f"https://{self.DOMAIN}/api/game/2v2/score/set/"
+        url = f"http://{self.DOMAIN}:8000/api/game/2v2/score/set/"
 
         data = {
             "id": self.game_id,
@@ -443,10 +443,10 @@ class Game2v2Consumer(AsyncWebsocketConsumer):
             lose_id1 = self.player1['id']
             lose_id2 = self.player2['id']
 
-        url_add1 = f"https://{self.DOMAIN}/api/users/{win_id1}/elo/add/50/"
-        url_add2 = f"https://{self.DOMAIN}/api/users/{win_id2}/elo/add/50/"
-        url_rm1 = f"https://{self.DOMAIN}/api/users/{lose_id1}/elo/remove/25/"
-        url_rm2 = f"https://{self.DOMAIN}/api/users/{lose_id2}/elo/remove/25/"
+        url_add1 = f"http://{self.DOMAIN}:8000/api/users/{win_id1}/elo/add/50/"
+        url_add2 = f"http://{self.DOMAIN}:8000/api/users/{win_id2}/elo/add/50/"
+        url_rm1 = f"http://{self.DOMAIN}:8000/api/users/{lose_id1}/elo/remove/25/"
+        url_rm2 = f"http://{self.DOMAIN}:8000/api/users/{lose_id2}/elo/remove/25/"
         
         connector = aiohttp.TCPConnector(ssl=self.ssl_context)
         async with aiohttp.ClientSession(connector=connector) as session:

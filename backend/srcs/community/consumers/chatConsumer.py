@@ -94,7 +94,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def add_chatdb(self, message):
         if len(message) <= 100:
-            url = f"https://{self.DOMAIN}/api/message/add/"
+            url = f"http://{self.DOMAIN}:8000/api/message/add/"
             payload = {
                 "friendship": self.friendship['id'],
                 "sender": self.user.id,
@@ -112,7 +112,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def get_friendship(self):
         connector = aiohttp.TCPConnector(ssl=self.ssl_context)
-        url = f"https://{self.DOMAIN}/api/friendship/{self.id}/"
+        url = f"http://{self.DOMAIN}:8000/api/friendship/{self.id}/"
 
         async with aiohttp.ClientSession(connector=connector) as session:
             async with session.get(url) as response:

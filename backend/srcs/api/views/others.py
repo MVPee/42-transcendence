@@ -12,7 +12,7 @@ API_KEY = os.getenv('API_KEY', '')
 def check_api_key(request):
     """
     This api is an exemple function for how can we create private api via api key in .env
-    curl -k -X GET "https://42.mvpee.be/api/check_api_key/" -H "X-Api-Key: $API_KEY"
+    curl -k -X GET "https://localhost/api/check_api_key/" -H "X-Api-Key: $API_KEY"
     
     A api function who check if the request has the correct api key in the header
 

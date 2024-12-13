@@ -115,7 +115,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
         if self.GAME == 'private':
             self.GAME = 'pong'
             self.MODE = '1v1'
-            url = f"https://{self.DOMAIN}/api/game/1v1/add/"
+            url = f"http://{self.DOMAIN}:8000/api/game/1v1/add/"
             data = {
                 "title": 'private_1v1',
                 "user1_username": player_usernames[0],
@@ -130,7 +130,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
             
         if self.GAME == 'pong':
             if self.MODE == '1v1':
-                url = f"https://{self.DOMAIN}/api/game/1v1/add/"
+                url = f"http://{self.DOMAIN}:8000/api/game/1v1/add/"
                 data = {
                     "title": 'pong_1v1',
                     "user1_username": player_usernames[0],
@@ -143,7 +143,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
                             self.close()
                             return
             elif self.MODE == '2v2':
-                url = f"https://{self.DOMAIN}/api/game/2v2/add/"
+                url = f"http://{self.DOMAIN}:8000/api/game/2v2/add/"
 
                 data = {
                     "title": 'pong_2v2',
@@ -159,7 +159,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
                             self.close()
                             return
             elif self.MODE == 'AI':
-                url = f"https://{self.DOMAIN}/api/game/1v1/add/"
+                url = f"http://{self.DOMAIN}:8000/api/game/1v1/add/"
                 data = {
                     "title": 'pong_ai',
                     "user1_username": player_usernames[0],
@@ -172,7 +172,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
                             self.close()
                             return
             elif self.MODE == 'tournament':
-                url = f"https://{self.DOMAIN}/api/game/2v2/add/"
+                url = f"http://{self.DOMAIN}:8000/api/game/2v2/add/"
                 data = {
                     "title": 'tournament',
                     "user1_username": player_usernames[0],
@@ -192,7 +192,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
 
         elif self.GAME == 'puissance4':
             if self.MODE == '1v1':
-                url = f"https://{self.DOMAIN}/api/game/1v1/add/"
+                url = f"http://{self.DOMAIN}:8000/api/game/1v1/add/"
                 data = {
                     "title": 'puissance4_1v1',
                     "user1_username": player_usernames[0],
@@ -234,7 +234,7 @@ class WaitingConsumer(AsyncWebsocketConsumer):
 
     async def get_friendship(self):
         connector = aiohttp.TCPConnector(ssl=self.ssl_context)
-        url = f"https://{self.DOMAIN}/api/friendship/{self.MODE}/"
+        url = f"http://{self.DOMAIN}:8000/api/friendship/{self.MODE}/"
 
         async with aiohttp.ClientSession(connector=connector) as session:
             async with session.get(url) as response:
