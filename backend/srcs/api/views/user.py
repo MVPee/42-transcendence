@@ -171,6 +171,8 @@ def settings(request):
                 return Response({'error_message': 'Username already taken.'}, status=status.HTTP_400_BAD_REQUEST)
             elif user.username == value:
                 return Response({'error_message': 'You need to use your keyboard to change your username.'}, status=status.HTTP_400_BAD_REQUEST)
+            elif len(value) < 5 or len(value) > 20:
+                return Response({'error_message': 'Your username need to be between 5 and 20 characters.'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 user.username = value
                 user.save()
@@ -182,6 +184,8 @@ def settings(request):
                 return Response({'error_message': 'Email already taken.'}, status=status.HTTP_400_BAD_REQUEST)
             elif user.email == value:
                 return Response({'error_message': 'You need to use your keyboard to change your email.'}, status=status.HTTP_400_BAD_REQUEST)
+            elif len(value) < 6 or len(value) > 32:
+                return Response({'error_message': 'Your email need to be between 6 and 32 characters.'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 user.email = value
                 user.save()
