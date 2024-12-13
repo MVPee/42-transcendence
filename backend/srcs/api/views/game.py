@@ -115,6 +115,9 @@ def create_1v1_game(request):
     user1_instance = User.objects.filter(username=user1_username).first()
     user2_instance = User.objects.filter(username=user2_username).first()
 
+    if user1_instance is None or user2_instance is None:
+        return Response(status=400)
+
     match = Match.objects.create(game=title, user1=user1_instance, user2=user2_instance)
     print(match)
     if match is not None:
