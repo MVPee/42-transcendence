@@ -16,7 +16,7 @@
 	<span> · </span>
 	<a href="#-key-features">Key features</a>
   	<span> · </span>
-	<a href="#-tech-stack">Tech stack</a>
+	<a href="#%EF%B8%8F-tech-stack">Tech stack</a>
 </h3>
 
 # 💡 About the project
