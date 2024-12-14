@@ -20,7 +20,7 @@
 </h3>
 
 # 💡 About the project
-> This project is about developping a dynamic Single Page Application (SPA) and Server Side Rendering (SSR) using Django and JavaScript.
+> This project is about developping a dynamic Single Page Application (SPA) and Server Side Rendering (SSR) using Django and pure vanilla JavaScript.
 
 ---
 ## 🏄 Running the project
