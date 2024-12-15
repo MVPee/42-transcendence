@@ -61,6 +61,8 @@
 
 - Backend: Django (restframework, channels, ...)
 - Frontend: Javascript (XHR, fetch)
+- Database: PostreSQL
+- Cache: Redis
 
 ---
 This group project was done by [MVPee (mvan-pee)](https://github.com/MVPee) and [Dan (dspilleb)](https://github.com/dspilleb)
