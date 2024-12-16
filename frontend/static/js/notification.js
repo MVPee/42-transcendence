@@ -12,11 +12,22 @@ function showCustomNotification(username, message) {
     notification.style.opacity = '1';
     notification.style.transition = 'opacity 0.5s ease';
 
-    notification.innerHTML= `${username}: ${message}`;
-    notificationsContainer.appendChild(notification);
+    if (username === 'System') {
+        notification.innerHTML = `${username}: ${message}`;
+        notificationsContainer.appendChild(notification);
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 500);
+        }, 25000);
+    }
+    else {
+        notification.innerText = `${username}: ${message}`;
+        notificationsContainer.appendChild(notification);
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 500);
+        }, 5000);
+    }
 
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 500);
-    }, 5000);
+    
 }
