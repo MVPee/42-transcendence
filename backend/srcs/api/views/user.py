@@ -96,6 +96,12 @@ def register(request):
     password = request.data.get('password')
     confirm_password = request.data.get('confirm_password')
 
+    if username == "System":
+        return Response({
+            'register': False,
+            'error_message': 'Are you a hacker??'
+        }, status=status.HTTP_401_UNAUTHORIZED)
+
     if len(username) < 5 or len(username) > 20:
         return Response({
             'register': False,
