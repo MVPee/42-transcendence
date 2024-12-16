@@ -561,7 +561,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                     room_group_name,
                     {
                         'type': 'notification',
-                        'username': 'system',
+                        'username': 'System',
                         'message': f"<a class='btn btn-info' href='https://{os.getenv('DOMAIN', 'localhost')}/game/pong/tournament/{self.tournament.id}'> You must play now, join !</a>"
                     })
             except:
