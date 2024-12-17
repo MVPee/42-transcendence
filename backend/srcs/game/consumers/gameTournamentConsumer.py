@@ -116,7 +116,7 @@ class GameTournamentConsumer(AsyncWebsocketConsumer):
                 )
 
 
-        game_process_key = f"game_{self.game_id}_process_started"
+        game_process_key = f"game_{self.game_id}_process_started_tournament"
         if not cache.get(game_process_key):
             cache.set(game_process_key, True)
             asyncio.create_task(self.tournamentProcess())

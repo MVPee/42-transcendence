@@ -173,6 +173,10 @@ def settings(request):
 
         # Handle username update
         elif action == 'username' and value:
+
+            if value == 'AI.' or value == 'System':
+                return Response({'error_message': 'No robots allowed...'}, status=status.HTTP_400_BAD_REQUEST)
+
             if User.objects.filter(username=value).exclude(id=user.id).exists():
                 return Response({'error_message': 'Username already taken.'}, status=status.HTTP_400_BAD_REQUEST)
             elif user.username == value:

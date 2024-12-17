@@ -113,7 +113,7 @@ class Game1v1Consumer(AsyncWebsocketConsumer):
                 )
                 cache.set(f"game_{self.game_id}_1v1_state", game_state)
 
-        game_process_key = f"game_{self.game_id}_process_started"
+        game_process_key = f"game_{self.game_id}_process_started_1v1"
         if not cache.get(game_process_key):
             cache.set(game_process_key, True)
             asyncio.create_task(self.gameProcess())

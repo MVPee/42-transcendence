@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.core.files.images import get_image_dimensions
 from django.core.validators import EmailValidator
+import re
 
 class SettingsSerializer(serializers.Serializer):
     action = serializers.CharField(required=True)
@@ -37,4 +38,9 @@ class SettingsSerializer(serializers.Serializer):
                 email_validator(value)
             except Exception as e:
                 raise serializers.ValidationError("Only valid email allowed.")
+        if action == 'username':
+            if not value.strip():
+                raise serializers.ValidationError("Username cannot be empty.")
+            if re.search(r'[<>/#"\'\\]', value):
+                raise serializers.ValidationError("Username contains invalid characters.")
         return value
