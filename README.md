@@ -61,7 +61,7 @@
 
 - Backend: Django (restframework, channels, ...)
 - Frontend: Javascript (XHR, fetch)
-- Database: PostreSQL
+- Database: PostgreSQL
 - Cache: Redis
 
 ---
